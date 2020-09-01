@@ -327,11 +327,11 @@ void parseCSS_V2(std::string css)
 
 int main()
 {
-    std::string css = fileLoad("/home/tim/HTMLRenderer/HTML/stress.css");
-    //std::string css = fileLoad("/home/tim/HTMLRenderer/HTML/Wikipedia - Wikipedia_files/load.css");
-    //std::string css = fileLoad("/home/tim/HTMLRenderer/HTML/es64f4.html");// Garbage
-    //std::string css = fileLoad("/home/tim/HTMLRenderer/HTML/Home - MangaDex_files/all.css");
-    //std::string css = fileLoad("/home/tim/HTMLRenderer/HTML/Home - MangaDex_files/theme.css");
+    std::string css = fileLoad("/home/tim/Documents/Development/WebBrowserData/HTML/stress.css");
+    //std::string css = fileLoad("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia - Wikipedia_files/load.css");
+    //std::string css = fileLoad("/home/tim/Documents/Development/WebBrowserData/HTML/es64f4.html");// Garbage
+    //std::string css = fileLoad("/home/tim/Documents/Development/WebBrowserData/HTML/Home - MangaDex_files/all.css");
+    //std::string css = fileLoad("/home/tim/Documents/Development/WebBrowserData/HTML/Home - MangaDex_files/theme.css");
 
     css::parseFromString(css);
 

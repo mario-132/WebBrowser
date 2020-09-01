@@ -377,11 +377,11 @@ int main()
     fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", FONTSIZE);
     fte::makeBold(inst, false);
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/HTMLRenderer/HTML/simple_text.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/HTMLRenderer/HTML/Wikipedia.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/HTMLRenderer/HTML/Wikipedia - Wikipedia.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/HTMLRenderer/HTML/Google.html");
-    std::string htmlFile = htmlFileLoader("/home/tim/HTMLRenderer/HTML/GoogleOnChrome.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/simple_text.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia - Wikipedia.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/HTML/Google.html");
+    std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/GoogleOnChrome.html");
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
     //GumboOutput* output = gumbo_parse("<body><h1>Hello, World!</h1></body><br><p>");
