@@ -32,6 +32,8 @@ namespace css
     {
         std::string name;
         CSSAdditionalSelectorOperand selectorOp;
+        std::vector<std::string> matchingIDs;
+        std::vector<std::string> matchingClasses;
     };
 
     struct CSSItem
@@ -51,7 +53,7 @@ namespace css
 
     bool isNum(char c);
 
-    bool isValidSelectorName(char c);
+    bool isValidSelectorNameStart(char c);
 
     bool isValidAttributeName(char c);
 

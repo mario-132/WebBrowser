@@ -126,7 +126,7 @@ namespace css
 
     bool getSelector(std::string css, int cssLength, bool &isFinal, int &curChr, std::string &selector)// Returns wether to break
     {
-        while (!isValidSelectorName(css[curChr]) && curChr < cssLength)
+        while (!isValidSelectorNameStart(css[curChr]) && curChr < cssLength)
         {
             if (css[curChr] == '{')
             {
@@ -185,7 +185,7 @@ namespace css
         return isChr(c) || isNum(c) || c == '-';
     }
 
-    bool isValidSelectorName(char c)
+    bool isValidSelectorNameStart(char c)
     {
         return isChr(c) || isNum(c) || c == '@' || c == '*' || c == '.' || c == ':' || c == '-' || c == '#' || c == '[' || c == ']' || c == '<' || c == '>';
     }
@@ -229,31 +229,82 @@ namespace css
             std::string selector;
             std::vector<CSSAdditionalSelector> additionalOperands;
 
-            while (!isValidSelectorName(css[i].selectorCombo[numChr]) && numChr < cssSize)
+            while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)
             {
                 numChr++;
             }
-            if (css[i].selectorCombo[numChr] == '#')
+            std::cout << "Original: " << css[i].selectorCombo << ":";
+            bool isFirstSelector = true;
+            while(1)
             {
-                selector+= css[i].selectorCombo[numChr];
-                numChr++;
+                selector = "";
+                CSSAdditionalSelector addSel;
+                if (isFirstSelector)
+                {
+                    addSel.selectorOp = CSS_NONE;
+                }
+
+                if (numChr < cssSize)
+                {
+                    if (css[i].selectorCombo[numChr] != ' ')
+                    {
+                        selector+= css[i].selectorCombo[numChr];
+                    }
+                    numChr++;
+                }
                 while (!isSelectorEnding(css[i].selectorCombo[numChr]) && numChr < cssSize)
                 {
                     selector+= css[i].selectorCombo[numChr];
                     numChr++;
                 }
-            }
-            else
-            {
-                selector+= css[i].selectorCombo[numChr];
-                numChr++;
-                while (!isSelectorEnding(css[i].selectorCombo[numChr]) && css[i].selectorCombo[numChr] != '#' && numChr < cssSize)
+                if (css[i].selectorCombo[numChr] == '.')
                 {
-                    selector+= css[i].selectorCombo[numChr];
+                    addSel.matchingClasses.push_back(".");
                     numChr++;
+                    while (!isSelectorEnding(css[i].selectorCombo[numChr]) && numChr < cssSize)
+                    {
+                        addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                        numChr++;
+                    }
+                }
+                if (css[i].selectorCombo[numChr] == '#')
+                {
+                    addSel.matchingIDs.push_back("#");
+                    numChr++;
+                    while (!isSelectorEnding(css[i].selectorCombo[numChr]) && numChr < cssSize)
+                    {
+                        addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                        numChr++;
+                    }
+                }
+
+                if (selector != "")
+                {
+                    std::cout << " |" << selector << "| ";
+                }
+                if (numChr >= cssSize)
+                {
+                    break;
+                }
+
+                addSel.name = selector;
+
+                additionalOperands.push_back(addSel);
+                isFirstSelector = false;
+            }
+            std::cout << std::endl;
+            for (int j = 0; j < additionalOperands.size(); j++)
+            {
+                std::cout << "New Selector: " << additionalOperands[j].name << std::endl;
+                for (int k = 0; k < additionalOperands[j].matchingClasses.size(); k++)
+                {
+                    std::cout << "Matching class: " << additionalOperands[j].matchingClasses[k] << std::endl;
+                }
+                for (int k = 0; k < additionalOperands[j].matchingIDs.size(); k++)
+                {
+                    std::cout << "Matching ID: " << additionalOperands[j].matchingIDs[k] << std::endl;
                 }
             }
-            std::cout << "Original: " << css[i].selectorCombo << " New: " << selector << std::endl;
         }
     }
 
