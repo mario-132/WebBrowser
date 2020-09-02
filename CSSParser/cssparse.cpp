@@ -187,7 +187,7 @@ namespace css
 
     bool isValidSelectorNameStart(char c)
     {
-        return isChr(c) || isNum(c) || c == '@' || c == '*' || c == '.' || c == ':' || c == '-' || c == '#' || c == '[' || c == ']' || c == '<' || c == '>';
+        return isChr(c) || isNum(c) || c == '@' || c == '*' || c == '.' || c == ':' || c == '-' || c == '#' || c == '[' || c == ']';
     }
 
     bool isNum(char c)
@@ -239,10 +239,7 @@ namespace css
             {
                 selector = "";
                 CSSAdditionalSelector addSel;
-                if (isFirstSelector)
-                {
-                    addSel.selectorOp = CSS_NONE;
-                }
+                addSel.selectorOp = CSS_NONE;
 
                 if (numChr < cssSize)
                 {
@@ -277,25 +274,74 @@ namespace css
                         numChr++;
                     }
                 }
+                while(css[i].selectorCombo[numChr] == ' ' && numChr < cssSize)
+                {
+                    numChr++;
+                }
+                if (css[i].selectorCombo[numChr] == '>')
+                {
+                    addSel.selectorOp = CSS_DIRECT_CHILD_OF;
+                    numChr++;
+                }
+                else if (css[i].selectorCombo[numChr] == '+')
+                {
+                    addSel.selectorOp = CSS_DIRECTLY_ADJECENT_TO;
+                    numChr++;
+                }
+                else if (css[i].selectorCombo[numChr] == '~')
+                {
+                    addSel.selectorOp = CSS_ADJECENT_TO;
+                    numChr++;
+                }
+                else if (numChr < cssSize)
+                {
+                    if (isValidSelectorNameStart(css[i].selectorCombo[numChr]))
+                    {
+                        addSel.selectorOp = CSS_INSIDE_OF;
+                    }
+                }
 
                 if (selector != "")
                 {
                     std::cout << " |" << selector << "| ";
-                }
-                if (numChr >= cssSize)
-                {
-                    break;
                 }
 
                 addSel.name = selector;
 
                 additionalOperands.push_back(addSel);
                 isFirstSelector = false;
+
+                if (numChr >= cssSize)
+                {
+                    break;
+                }
             }
             std::cout << std::endl;
             for (int j = 0; j < additionalOperands.size(); j++)
             {
-                std::cout << "New Selector: " << additionalOperands[j].name << std::endl;
+                std::cout << "New Selector: " << additionalOperands[j].name;
+
+                if (additionalOperands[j].selectorOp == CSS_NONE)
+                {
+                    std::cout << " selectorOP: CSS_NONE" << std::endl;
+                }
+                if (additionalOperands[j].selectorOp == CSS_DIRECT_CHILD_OF)
+                {
+                    std::cout << " selectorOP: CSS_DIRECT_CHILD_OF" << std::endl;
+                }
+                if (additionalOperands[j].selectorOp == CSS_DIRECTLY_ADJECENT_TO)
+                {
+                    std::cout << " selectorOP: CSS_DIRECTLY_ADJECENT_TO" << std::endl;
+                }
+                if (additionalOperands[j].selectorOp == CSS_ADJECENT_TO)
+                {
+                    std::cout << " selectorOP: CSS_ADJECENT_TO" << std::endl;
+                }
+                if (additionalOperands[j].selectorOp == CSS_INSIDE_OF)
+                {
+                    std::cout << " selectorOP: CSS_INSIDE_OF" << std::endl;
+                }
+
                 for (int k = 0; k < additionalOperands[j].matchingClasses.size(); k++)
                 {
                     std::cout << "Matching class: " << additionalOperands[j].matchingClasses[k] << std::endl;
