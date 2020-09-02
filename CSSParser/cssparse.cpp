@@ -13,7 +13,7 @@ namespace css
         int curChr = 0;
         int curSelectorIndex = 0;
         bool isFinal = false;
-        while (!isFinal)
+        while (!isFinal)// Keep looping till all selectors and their contents have been found
         {
             selector = "";
 
@@ -25,7 +25,7 @@ namespace css
             sel.selectorCombo = selector;
             selectors.push_back(sel);
             curSelectorIndex = selectors.size()-1;
-            bool isFinalAttribute = false;
+            bool isFinalAttribute = false;// End the while if the final attribute has been found(meaning } has been found).
             //std::cout << "<" << selector << ">" << std::endl;
             while(!isFinalAttribute)
             {
@@ -50,23 +50,23 @@ namespace css
                 //std::cout << "  " << attribute << ":" << value << ";" << std::endl;
             }
         }
-        return selectors;
+        return selectors;// Return the results for further parsing by another function
     }
 
     bool getValue(std::string css, int cssLength, bool &isFinal, bool &isFinalAttribute, int &curChr, std::string &value)// Returns wether to break
     {
-        while (!isValidValueStart(css[curChr]) && curChr < cssLength)
+        while (!isValidValueStart(css[curChr]) && curChr < cssLength)// Read and discard till we reach the value's start.(skipping spaces and stuff)
         {
             curChr++;
         }
-        while (css[curChr] != ';' && curChr < cssLength)
+        while (css[curChr] != ';' && curChr < cssLength)// From the start of the value, read everything till the ;.
         {
-            if (css[curChr] == '}')
+            if (css[curChr] == '}')// End of selector block, break.
             {
                 isFinalAttribute = true;
                 break;
             }
-            if (css[curChr] == '\n')
+            if (css[curChr] == '\n')// Replace newline with space for convenience later.
             {
                 value+=" ";
             }
@@ -86,7 +86,7 @@ namespace css
 
     bool getAttribute(std::string css, int cssLength, bool &isFinal, bool &isFinalAttribute, int &curChr, std::string &attribute, bool &attribContinue)// Returns wether to break
     {
-        while (!isValidAttributeName(css[curChr]) && curChr < cssLength)
+        while (!isValidAttributeName(css[curChr]) && curChr < cssLength)// Read and discard all character till value start has been found.
         {
             if (css[curChr] == '}')
             {
@@ -126,7 +126,7 @@ namespace css
 
     bool getSelector(std::string css, int cssLength, bool &isFinal, int &curChr, std::string &selector)// Returns wether to break
     {
-        while (!isValidSelectorNameStart(css[curChr]) && curChr < cssLength)
+        while (!isValidSelectorNameStart(css[curChr]) && curChr < cssLength)// Read and discard till selector name start.
         {
             if (css[curChr] == '{')
             {
@@ -134,7 +134,7 @@ namespace css
             }
             curChr++;
         }
-        while (css[curChr] != '{' && curChr < cssLength)
+        while (css[curChr] != '{' && curChr < cssLength)// Then read everything till the open bracket for later parsing.
         {
             selector+=css[curChr];
             curChr++;
@@ -151,8 +151,10 @@ namespace css
         return false;
     }
 
-    std::string removeExcessSpaces(std::string str)
+    std::string removeExcessSpaces(std::string str)// Simply removes all unnecesery spaces.
     {
+        // Removes all spaces at the beginning of the string, replaces a row of
+        //  2 spaces or more with a single space, leaves max one space at the end.
         std::string newStr;
         char lastC = 0;
         bool removingBeginSpaces = true;
@@ -224,12 +226,12 @@ namespace css
     {
         for (int i = 0; i < css.size(); i++)
         {
-            int numChr = 0;
+            int numChr = 0;// To remember at which character we're at.
             int cssSize = css[i].selectorCombo.size();
-            std::string selector;
-            std::vector<CSSAdditionalSelector> additionalOperands;
+            std::string selector;// Temporarily stores the selector name as it is parsed.
+            std::vector<CSSAdditionalSelector> additionalOperands;// Stores parsed selectors in reverse order, has to be reversed later.
 
-            while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)
+            while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)// Get rid of useless tabs/spaces at the beginning
             {
                 numChr++;
             }
@@ -249,12 +251,23 @@ namespace css
                     }
                     numChr++;
                 }
-                while (!isSelectorEnding(css[i].selectorCombo[numChr]) && numChr < cssSize)
+                bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
+                                               // (And made part of the selector name string to avoid conflicts with actual supported selectors
+                while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
                 {
+                    if (css[i].selectorCombo[numChr] == '[')
+                    {
+                        continueAndIgnore = true;
+                    }
+                    if (css[i].selectorCombo[numChr] == ']')
+                    {
+                        continueAndIgnore = false;
+                    }
                     selector+= css[i].selectorCombo[numChr];
                     numChr++;
                 }
-                if (css[i].selectorCombo[numChr] == '.')
+                /// Todo: Fixme: @mario-132 make it so I don't have to copy-paste above selectorEnging finding part and it's [] ignorance to below as it's redundant.
+                if (css[i].selectorCombo[numChr] == '.')///Todo: Fixme: @mario-132 Bug: doesn't work with more than 1 additional class or ID (this is the combining part e.g.: ".classa.classb.classc {}"
                 {
                     addSel.matchingClasses.push_back(".");
                     numChr++;
@@ -291,6 +304,10 @@ namespace css
                 else if (css[i].selectorCombo[numChr] == '~')
                 {
                     addSel.selectorOp = CSS_ADJECENT_TO;
+                    numChr++;
+                }
+                else if (css[i].selectorCombo[numChr] == ',')/// FIXME: TODO: @mario-132 Currently, ',' is ignored and is added as a additionalselector with CSS_NONE.
+                {
                     numChr++;
                 }
                 else if (numChr < cssSize)
