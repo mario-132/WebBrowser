@@ -145,5 +145,28 @@ void traverseDOM(fte::freetypeInst *inst, unsigned char* framebuffer, GumboNode*
         htmlTextCursorX = 0;
         htmlTextCursorY += FONTLINE;
     }
-}
+}\
+
+    RStyle docStyle;
+    docStyle.display = "inline";
+    docStyle.visible = false;
+    docStyle.font_size = 16;
+    docStyle.line_height = 1.2;
+    docStyle.bold = false;
+    docStyle.isLink = false;
+
+    RTextInfoBox textInfoBox;
+    textInfoBox.x = 0;
+    textInfoBox.y = 0;//window.height/3;
+    textInfoBox.w = 1920;
+    textInfoBox.h = 1080;
+    textInfoBox.textStartX = 0;
+    textInfoBox.textStartY = 0;//window.height/3;
+    docStyle.bold = false;
+
+    renderRenderList(inst, assembleRenderList(output->root, inst, docStyle, &textInfoBox));
+
+    //drawString(inst, "Are you still there?", 10, 32, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+
+    stbi_write_png("out.png", FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 3, framebuffer, FRAMEBUFFER_WIDTH*3);
 */
