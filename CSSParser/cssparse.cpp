@@ -231,10 +231,7 @@ namespace css
             std::string selector;// Temporarily stores the selector name as it is parsed.
             std::vector<CSSAdditionalSelector> additionalOperands;// Stores parsed selectors in reverse order, has to be reversed later.
 
-            while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)// Get rid of useless tabs/spaces at the beginning
-            {
-                numChr++;
-            }
+
             std::cout << "Original: " << css[i].selectorCombo << ":";
             bool isFirstSelector = true;
             while(1)
@@ -243,48 +240,76 @@ namespace css
                 CSSAdditionalSelector addSel;
                 addSel.selectorOp = CSS_NONE;
 
-                if (numChr < cssSize)
+                while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)// Get rid of useless tabs/spaces at the beginning
                 {
-                    if (css[i].selectorCombo[numChr] != ' ')
-                    {
-                        selector+= css[i].selectorCombo[numChr];
-                    }
                     numChr++;
                 }
-                bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
-                                               // (And made part of the selector name string to avoid conflicts with actual supported selectors
-                while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
+
+                // These are for identifying weather the while loop below should be writing to the selector string or a matchin* element/string.
+                bool writingToMatchingClass = false;
+                bool writingToMatchingID = false;
+                while(1)
                 {
-                    if (css[i].selectorCombo[numChr] == '[')
+                    if (numChr < cssSize)
                     {
-                        continueAndIgnore = true;
-                    }
-                    if (css[i].selectorCombo[numChr] == ']')
-                    {
-                        continueAndIgnore = false;
-                    }
-                    selector+= css[i].selectorCombo[numChr];
-                    numChr++;
-                }
-                /// Todo: Fixme: @mario-132 make it so I don't have to copy-paste above selectorEnging finding part and it's [] ignorance to below as it's redundant.
-                if (css[i].selectorCombo[numChr] == '.')///Todo: Fixme: @mario-132 Bug: doesn't work with more than 1 additional class or ID (this is the combining part e.g.: ".classa.classb.classc {}"
-                {
-                    addSel.matchingClasses.push_back(".");
-                    numChr++;
-                    while (!isSelectorEnding(css[i].selectorCombo[numChr]) && numChr < cssSize)
-                    {
-                        addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                        if (writingToMatchingID)
+                        {
+                            addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                        }
+                        else if (writingToMatchingClass)
+                        {
+                            addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                        }
+                        else
+                        {
+                            selector+= css[i].selectorCombo[numChr];
+                        }
                         numChr++;
                     }
-                }
-                if (css[i].selectorCombo[numChr] == '#')
-                {
-                    addSel.matchingIDs.push_back("#");
-                    numChr++;
-                    while (!isSelectorEnding(css[i].selectorCombo[numChr]) && numChr < cssSize)
+                    bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
+                                                   // (And made part of the selector name string to avoid conflicts with actual supported selectors
+                    while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
                     {
-                        addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                        if (css[i].selectorCombo[numChr] == '[')
+                        {
+                            continueAndIgnore = true;
+                        }
+                        if (css[i].selectorCombo[numChr] == ']')
+                        {
+                            continueAndIgnore = false;
+                        }
+                        if (writingToMatchingID)
+                        {
+                            addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                        }
+                        else if (writingToMatchingClass)
+                        {
+                            addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                        }
+                        else
+                        {
+                            selector+= css[i].selectorCombo[numChr];
+                        }
+
                         numChr++;
+                    }
+                    if (css[i].selectorCombo[numChr] == '.')///Todo: Fixme: @mario-132 Bug: doesn't work with more than 1 additional class or ID (this is the combining part e.g.: ".classa.classb.classc {}"
+                    {
+                        writingToMatchingClass = true;
+                        writingToMatchingID = false;
+                        addSel.matchingClasses.push_back(".");
+                        numChr++;
+                    }
+                    else if (css[i].selectorCombo[numChr] == '#')
+                    {
+                        writingToMatchingClass = false;
+                        writingToMatchingID = true;
+                        addSel.matchingIDs.push_back("#");
+                        numChr++;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 while(css[i].selectorCombo[numChr] == ' ' && numChr < cssSize)
