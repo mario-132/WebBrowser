@@ -62,6 +62,11 @@ namespace css
         std::vector<CSSItem> items;
     };
 
+    struct CSSSelectorBlock
+    {
+        std::vector<CSSSelector> selectors;
+    };
+
     bool isChr(char c);/// Checks if c is a a-z or A-Z ascii character
 
     bool isNum(char c);/// Checks if c is a 0-9 number

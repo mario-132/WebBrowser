@@ -222,6 +222,141 @@ namespace css
         return (!isChr(c) && !isNum(c) && c != ':');
     }
 
+    bool parseSingleSelector(std::string &selector, int &numChr, int &cssSize, std::vector<CSSBasicSelector> &css, int &i, bool &isFirstSelector, std::vector<CSSAdditionalSelector> &additionalOperands, CSSSelectorBlock &cssSelBlock)
+    {
+        selector = "";
+        CSSAdditionalSelector addSel;
+        addSel.selectorOp = CSS_NONE;
+
+        while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)// Get rid of useless tabs/spaces at the beginning
+        {
+            numChr++;
+        }
+
+        // These are for identifying weather the while loop below should be writing to the selector string or a matchin* element/string.
+        bool writingToMatchingClass = false;
+        bool writingToMatchingID = false;
+        while(numChr < cssSize)
+        {
+            if (numChr < cssSize)
+            {
+                if (writingToMatchingID)
+                {
+                    addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                }
+                else if (writingToMatchingClass)
+                {
+                    addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                }
+                else
+                {
+                    selector+= css[i].selectorCombo[numChr];
+                }
+                numChr++;
+            }
+            bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
+                                           // (And made part of the selector name string to avoid conflicts with actual supported selectors
+            while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
+            {
+                if (css[i].selectorCombo[numChr] == '[')
+                {
+                    continueAndIgnore = true;
+                }
+                if (css[i].selectorCombo[numChr] == ']')
+                {
+                    continueAndIgnore = false;
+                }
+                if (writingToMatchingID)
+                {
+                    addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                }
+                else if (writingToMatchingClass)
+                {
+                    addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                }
+                else
+                {
+                    selector+= css[i].selectorCombo[numChr];
+                }
+
+                numChr++;
+            }
+            if (css[i].selectorCombo[numChr] == '.')///Todo: Fixme: @mario-132 Bug: doesn't work with more than 1 additional class or ID (this is the combining part e.g.: ".classa.classb.classc {}"
+            {
+                writingToMatchingClass = true;
+                writingToMatchingID = false;
+                addSel.matchingClasses.push_back(".");
+                numChr++;
+            }
+            else if (css[i].selectorCombo[numChr] == '#')
+            {
+                writingToMatchingClass = false;
+                writingToMatchingID = true;
+                addSel.matchingIDs.push_back("#");
+                numChr++;
+            }
+            else
+            {
+                break;
+            }
+        }
+        while(css[i].selectorCombo[numChr] == ' ' && numChr < cssSize)
+        {
+            numChr++;
+        }
+        bool pushbackSelector = false;
+        if (css[i].selectorCombo[numChr] == '>')
+        {
+            addSel.selectorOp = CSS_DIRECT_CHILD_OF;
+            numChr++;
+        }
+        else if (css[i].selectorCombo[numChr] == '+')
+        {
+            addSel.selectorOp = CSS_DIRECTLY_ADJECENT_TO;
+            numChr++;
+        }
+        else if (css[i].selectorCombo[numChr] == '~')
+        {
+            addSel.selectorOp = CSS_ADJECENT_TO;
+            numChr++;
+        }
+        else if (css[i].selectorCombo[numChr] == ',')/// FIXME: TODO: @mario-132 Currently, ',' is ignored and is added as a additionalselector with CSS_NONE.
+        {
+
+            pushbackSelector = true;
+            numChr++;
+        }
+        else if (numChr < cssSize)
+        {
+            if (isValidSelectorNameStart(css[i].selectorCombo[numChr]))
+            {
+                addSel.selectorOp = CSS_INSIDE_OF;
+            }
+        }
+
+        if (selector != "")
+        {
+            std::cout << " |" << selector << "| ";
+        }
+
+        addSel.name = selector;
+        additionalOperands.push_back(addSel);
+        if (pushbackSelector)
+        {
+            cssSelBlock.selectors.push_back(CSSSelector());
+            cssSelBlock.selectors.back().selector = "INVALID";
+            cssSelBlock.selectors.back().additionals = additionalOperands;
+            additionalOperands.clear();
+        }
+        isFirstSelector = false;
+
+        if (numChr >= cssSize)
+        {
+            return true;
+        }
+        return false;
+    }
+
     void parseFromBasic(std::vector<CSSBasicSelector> css)
     {
         for (int i = 0; i < css.size(); i++)
@@ -231,167 +366,61 @@ namespace css
             std::string selector;// Temporarily stores the selector name as it is parsed.
             std::vector<CSSAdditionalSelector> additionalOperands;// Stores parsed selectors in reverse order, has to be reversed later.
 
+            CSSSelectorBlock cssSelBlock;
 
             std::cout << "Original: " << css[i].selectorCombo << ":";
             bool isFirstSelector = true;
-            while(1)
+            while(numChr < cssSize)
             {
-                selector = "";
-                CSSAdditionalSelector addSel;
-                addSel.selectorOp = CSS_NONE;
 
-                while (!isValidSelectorNameStart(css[i].selectorCombo[numChr]) && numChr < cssSize)// Get rid of useless tabs/spaces at the beginning
-                {
-                    numChr++;
-                }
-
-                // These are for identifying weather the while loop below should be writing to the selector string or a matchin* element/string.
-                bool writingToMatchingClass = false;
-                bool writingToMatchingID = false;
-                while(1)
-                {
-                    if (numChr < cssSize)
-                    {
-                        if (writingToMatchingID)
-                        {
-                            addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
-                        }
-                        else if (writingToMatchingClass)
-                        {
-                            addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
-                        }
-                        else
-                        {
-                            selector+= css[i].selectorCombo[numChr];
-                        }
-                        numChr++;
-                    }
-                    bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
-                                                   // (And made part of the selector name string to avoid conflicts with actual supported selectors
-                    while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
-                    {
-                        if (css[i].selectorCombo[numChr] == '[')
-                        {
-                            continueAndIgnore = true;
-                        }
-                        if (css[i].selectorCombo[numChr] == ']')
-                        {
-                            continueAndIgnore = false;
-                        }
-                        if (writingToMatchingID)
-                        {
-                            addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
-                        }
-                        else if (writingToMatchingClass)
-                        {
-                            addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
-                        }
-                        else
-                        {
-                            selector+= css[i].selectorCombo[numChr];
-                        }
-
-                        numChr++;
-                    }
-                    if (css[i].selectorCombo[numChr] == '.')///Todo: Fixme: @mario-132 Bug: doesn't work with more than 1 additional class or ID (this is the combining part e.g.: ".classa.classb.classc {}"
-                    {
-                        writingToMatchingClass = true;
-                        writingToMatchingID = false;
-                        addSel.matchingClasses.push_back(".");
-                        numChr++;
-                    }
-                    else if (css[i].selectorCombo[numChr] == '#')
-                    {
-                        writingToMatchingClass = false;
-                        writingToMatchingID = true;
-                        addSel.matchingIDs.push_back("#");
-                        numChr++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                while(css[i].selectorCombo[numChr] == ' ' && numChr < cssSize)
-                {
-                    numChr++;
-                }
-                if (css[i].selectorCombo[numChr] == '>')
-                {
-                    addSel.selectorOp = CSS_DIRECT_CHILD_OF;
-                    numChr++;
-                }
-                else if (css[i].selectorCombo[numChr] == '+')
-                {
-                    addSel.selectorOp = CSS_DIRECTLY_ADJECENT_TO;
-                    numChr++;
-                }
-                else if (css[i].selectorCombo[numChr] == '~')
-                {
-                    addSel.selectorOp = CSS_ADJECENT_TO;
-                    numChr++;
-                }
-                else if (css[i].selectorCombo[numChr] == ',')/// FIXME: TODO: @mario-132 Currently, ',' is ignored and is added as a additionalselector with CSS_NONE.
-                {
-                    numChr++;
-                }
-                else if (numChr < cssSize)
-                {
-                    if (isValidSelectorNameStart(css[i].selectorCombo[numChr]))
-                    {
-                        addSel.selectorOp = CSS_INSIDE_OF;
-                    }
-                }
-
-                if (selector != "")
-                {
-                    std::cout << " |" << selector << "| ";
-                }
-
-                addSel.name = selector;
-
-                additionalOperands.push_back(addSel);
-                isFirstSelector = false;
-
-                if (numChr >= cssSize)
+                if (parseSingleSelector(selector, numChr, cssSize, css, i, isFirstSelector, additionalOperands, cssSelBlock))
                 {
                     break;
                 }
             }
+            cssSelBlock.selectors.push_back(CSSSelector());
+            cssSelBlock.selectors.back().selector = "INVALID";
+            cssSelBlock.selectors.back().additionals = additionalOperands;
+
             std::cout << std::endl;
-            for (int j = 0; j < additionalOperands.size(); j++)
+            for (int a = 0; a < cssSelBlock.selectors.size(); a++)
             {
-                std::cout << "New Selector: " << additionalOperands[j].name;
+                std::cout << "new css selectorblock item;" << std::endl;
+                for (int j = 0; j < cssSelBlock.selectors[a].additionals.size(); j++)
+                {
+                    std::cout << "New Selector: " << cssSelBlock.selectors[a].additionals[j].name;
 
-                if (additionalOperands[j].selectorOp == CSS_NONE)
-                {
-                    std::cout << " selectorOP: CSS_NONE" << std::endl;
-                }
-                if (additionalOperands[j].selectorOp == CSS_DIRECT_CHILD_OF)
-                {
-                    std::cout << " selectorOP: CSS_DIRECT_CHILD_OF" << std::endl;
-                }
-                if (additionalOperands[j].selectorOp == CSS_DIRECTLY_ADJECENT_TO)
-                {
-                    std::cout << " selectorOP: CSS_DIRECTLY_ADJECENT_TO" << std::endl;
-                }
-                if (additionalOperands[j].selectorOp == CSS_ADJECENT_TO)
-                {
-                    std::cout << " selectorOP: CSS_ADJECENT_TO" << std::endl;
-                }
-                if (additionalOperands[j].selectorOp == CSS_INSIDE_OF)
-                {
-                    std::cout << " selectorOP: CSS_INSIDE_OF" << std::endl;
-                }
+                    if (cssSelBlock.selectors[a].additionals[j].selectorOp == CSS_NONE)
+                    {
+                        std::cout << " selectorOP: CSS_NONE" << std::endl;
+                    }
+                    if (cssSelBlock.selectors[a].additionals[j].selectorOp == CSS_DIRECT_CHILD_OF)
+                    {
+                        std::cout << " selectorOP: CSS_DIRECT_CHILD_OF" << std::endl;
+                    }
+                    if (cssSelBlock.selectors[a].additionals[j].selectorOp == CSS_DIRECTLY_ADJECENT_TO)
+                    {
+                        std::cout << " selectorOP: CSS_DIRECTLY_ADJECENT_TO" << std::endl;
+                    }
+                    if (cssSelBlock.selectors[a].additionals[j].selectorOp == CSS_ADJECENT_TO)
+                    {
+                        std::cout << " selectorOP: CSS_ADJECENT_TO" << std::endl;
+                    }
+                    if (cssSelBlock.selectors[a].additionals[j].selectorOp == CSS_INSIDE_OF)
+                    {
+                        std::cout << " selectorOP: CSS_INSIDE_OF" << std::endl;
+                    }
 
-                for (int k = 0; k < additionalOperands[j].matchingClasses.size(); k++)
-                {
-                    std::cout << "Matching class: " << additionalOperands[j].matchingClasses[k] << std::endl;
+                    for (int k = 0; k < cssSelBlock.selectors[a].additionals[j].matchingClasses.size(); k++)
+                    {
+                        std::cout << "Matching class: " << cssSelBlock.selectors[a].additionals[j].matchingClasses[k] << std::endl;
+                    }
+                    for (int k = 0; k < cssSelBlock.selectors[a].additionals[j].matchingIDs.size(); k++)
+                    {
+                        std::cout << "Matching ID: " << cssSelBlock.selectors[a].additionals[j].matchingIDs[k] << std::endl;
+                    }
                 }
-                for (int k = 0; k < additionalOperands[j].matchingIDs.size(); k++)
-                {
-                    std::cout << "Matching ID: " << additionalOperands[j].matchingIDs[k] << std::endl;
-                }
+                std::cout << std::endl;
             }
         }
     }
