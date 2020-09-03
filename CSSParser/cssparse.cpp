@@ -372,7 +372,6 @@ namespace css
             bool isFirstSelector = true;
             while(numChr < cssSize)
             {
-
                 if (parseSingleSelector(selector, numChr, cssSize, css, i, isFirstSelector, additionalOperands, cssSelBlock))
                 {
                     break;

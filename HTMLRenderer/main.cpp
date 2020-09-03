@@ -78,10 +78,26 @@ struct RPosition
     int h;
 };
 
+struct RImage
+{
+
+};
+
+enum RType
+{
+    RITEM_UNKNOWN,
+    RITEM_NONE,
+    RITEM_TEXT,
+    RITEM_IMAGE
+};
+
 struct RItem
 {
     RText text;
+    RImage img;
     RPosition position;
+
+    RType type;
 };
 
 struct RStyle
@@ -138,6 +154,8 @@ void applyStyle(GumboNode* node, RStyle &style)
         style.font_size = 16*0.83;
     if (node->v.element.tag == GUMBO_TAG_H6)
         style.font_size = 16*0.67;
+    if (node->v.element.tag == GUMBO_TAG_P)
+        style.font_size = 16;
 
     if ((node->v.element.tag == GUMBO_TAG_H1 ||
          node->v.element.tag == GUMBO_TAG_H2 ||
@@ -172,10 +190,6 @@ std::vector<RItem> assembleRenderList(GumboNode* node, fte::freetypeInst *inst, 
     std::vector<RItem> RenderItems;
     if (node->type == GUMBO_NODE_ELEMENT)
     {
-        for (int i = 0; i < node->v.element.attributes.length; i++)
-        {
-            std::cout << ((GumboAttribute*)node->v.element.attributes.data[i])->name << " = " << ((GumboAttribute*)node->v.element.attributes.data[i])->value << std::endl;
-        }
 
         style.display = "inline";
         applyStyle(node, style);
@@ -192,6 +206,35 @@ std::vector<RItem> assembleRenderList(GumboNode* node, fte::freetypeInst *inst, 
                 activeTextBox->textStartX = activeTextBox->x;
                 activeTextBox->textStartY += style.font_size*style.line_height;
             }
+        }
+
+        if (node->v.element.tag == GUMBO_TAG_IMG)
+        {
+            int w = 100;
+            int h = 100;
+            for (int i = 0; i < node->v.element.attributes.length; i++)
+            {
+                if (std::string("width") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
+                {
+                    w = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
+                    //std::cout << "width: " << w << std::endl;
+                }
+                if (std::string("height") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
+                {
+                    h = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
+                    //std::cout << "height: " << h << std::endl;
+                }
+                //std::cout << ((GumboAttribute*)node->v.element.attributes.data[i])->name << " = " << ((GumboAttribute*)node->v.element.attributes.data[i])->value << std::endl;
+            }
+            RItem item;
+            item.type = RITEM_IMAGE;
+            item.position.x = activeTextBox->textStartX;
+            item.position.y = activeTextBox->textStartY;
+            item.position.w = w;
+            item.position.h = h;
+            activeTextBox->textStartY += h;
+            activeTextBox->textStartX += w;
+            RenderItems.push_back(item);
         }
 
         for (int i = 0; i < node->v.element.children.length; i++)
@@ -251,6 +294,7 @@ std::vector<RItem> assembleRenderList(GumboNode* node, fte::freetypeInst *inst, 
 
                     //std::cout << "a" << std::endl;
                     RItem item;
+                    item.type = RITEM_TEXT;
                     item.text.text = std::string(node->v.text.text+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = tX;
                     item.position.y = tY+(style.font_size*0.85)+((style.font_size*(style.line_height-1))/2);// font is scaled by 0.85 to better center the text
@@ -286,6 +330,7 @@ std::vector<RItem> assembleRenderList(GumboNode* node, fte::freetypeInst *inst, 
 
                     //std::cout << "b" << std::endl;
                     RItem item;
+                    item.type = RITEM_TEXT;
                     item.text.text = std::string(node->v.text.text+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = tX;
                     item.position.y = tY+(style.font_size*0.85)+((style.font_size*(style.line_height-1))/2);// font is scaled by 0.85 to better center the text
@@ -323,31 +368,52 @@ void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items)
 {
     for (int i = 0; i < items.size(); i++)
     {
-        fte::makeBold(inst, items[i].text.bold);
-        fte::setFontSize(inst, items[i].text.textSize);
-        if (items[i].text.isLink)
-            fte::setTextColor(inst, (255-26)/255.0f, (255-13)/255.0f, (255-171)/255.0f);
-        else
-            fte::setTextColor(inst, 1, 1, 1);
-        int x = 0;
-        if (items[i].position.y < FRAMEBUFFER_HEIGHT)
+        if (items[i].type == RITEM_TEXT)
         {
-            for (int j = 0; j < items[i].text.text.size(); j++)
+            fte::makeBold(inst, items[i].text.bold);
+            fte::setFontSize(inst, items[i].text.textSize);
+            if (items[i].text.isLink)
+                fte::setTextColor(inst, (255-26)/255.0f, (255-13)/255.0f, (255-171)/255.0f);
+            else
+                fte::setTextColor(inst, 1, 1, 1);
+            int x = 0;
+            if (items[i].position.y < FRAMEBUFFER_HEIGHT)
             {
-                auto inf = fte::drawCharacter(inst, items[i].text.text[j], items[i].position.x + x, items[i].position.y, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, false);
-                x += inf.advanceX/64;
-                /*if (items[i].text.textSize == 128)
+                for (int j = 0; j < items[i].text.text.size(); j++)
                 {
-                    std::cout << items[i].text.textSize << ": " << inf.height << std::endl;
-                }*/
+                    auto inf = fte::drawCharacter(inst, items[i].text.text[j], items[i].position.x + x, items[i].position.y, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, false);
+                    x += inf.advanceX/64;
+                    /*if (items[i].text.textSize == 128)
+                    {
+                        std::cout << items[i].text.textSize << ": " << inf.height << std::endl;
+                    }*/
+                }
+            }
+            /*for (int xx = 0; xx < FRAMEBUFFER_HEIGHT; xx++)
+            {
+                framebuffer[(items[i].position.y*FRAMEBUFFER_WIDTH*3)+((xx)*3)] = 255;
+                framebuffer[(items[i].position.y*FRAMEBUFFER_WIDTH*3)+((xx)*3)+1] = 0;
+                framebuffer[(items[i].position.y*FRAMEBUFFER_WIDTH*3)+((xx)*3)+2] = 0;
+            }*/
+        }
+        else if (items[i].type == RITEM_IMAGE)
+        {
+            for (int x = items[i].position.x; x < items[i].position.x+items[i].position.w; x++)
+            {
+                for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
+                {
+                    int xp = x;
+                    int yp = y;
+                    if (xp < 0 || yp < 0 || xp > FRAMEBUFFER_WIDTH || yp > FRAMEBUFFER_HEIGHT)
+                    {
+                        continue;
+                    }
+                    framebuffer[(y*FRAMEBUFFER_WIDTH*3)+((x)*3)] = 128;
+                    framebuffer[(y*FRAMEBUFFER_WIDTH*3)+((x)*3)+1] = 128;
+                    framebuffer[(y*FRAMEBUFFER_WIDTH*3)+((x)*3)+2] = 128;
+                }
             }
         }
-        /*for (int xx = 0; xx < FRAMEBUFFER_HEIGHT; xx++)
-        {
-            framebuffer[(items[i].position.y*FRAMEBUFFER_WIDTH*3)+((xx)*3)] = 255;
-            framebuffer[(items[i].position.y*FRAMEBUFFER_WIDTH*3)+((xx)*3)+1] = 0;
-            framebuffer[(items[i].position.y*FRAMEBUFFER_WIDTH*3)+((xx)*3)+2] = 0;
-        }*/
     }
 }
 
@@ -376,12 +442,12 @@ int main()
 
     fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", FONTSIZE);
     fte::makeBold(inst, false);
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
+    std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/simple_text.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia - Wikipedia.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/HTML/Google.html");
-    std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/GoogleOnChrome.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/GoogleOnChrome.html");
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
     //GumboOutput* output = gumbo_parse("<body><h1>Hello, World!</h1></body><br><p>");
