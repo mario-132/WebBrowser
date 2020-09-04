@@ -50,6 +50,7 @@ void X11Window::createWindow(std::string title, int width, int height)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 X11Window::X11Window()
 {
@@ -92,18 +93,29 @@ void X11Window::createWindow(std::string title, int width, int height, int frame
 
 void X11Window::processWindowEvents()
 {
+    XWindowAttributes attribs;
+    XGetWindowAttributes(display, window, &attribs);
+    width = attribs.width;
+    height = attribs.height;
     XNextEvent(display, &e);
-    if (e.type == Expose) {
+    if (e.type == Expose)
+    {
         XPutImage(display, window, DefaultGC(display, 0),
             ximage, 0, 0, 0, 0, width, height);
         //XFillRectangle(display, window, DefaultGC(display, s), 20, 20, 10, 10);
         //XDrawString(display, window, DefaultGC(display, s), 10, 50, msg, strlen(msg));
     }
+    if (e.type == ButtonPress){
+    switch (e.xbutton.button){
+        case Button4:
+            std::cout << "scroll up" << std::endl;
+            break;
+        case Button5:
+            std::cout << "scroll down" << std::endl;
+            break;
+    }
+    }
     //if (e.type == KeyPress)
-    XWindowAttributes attribs;
-    XGetWindowAttributes(display, window, &attribs);
-    width = attribs.width;
-    height = attribs.height;
 }
 
 void X11Window::closeWindow()

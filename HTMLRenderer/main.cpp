@@ -16,7 +16,7 @@ std::string htmlFileLoader(std::string path)
     std::streamsize size = htmlFile.tellg();
     htmlFile.seekg(0, std::ios::beg);
 
-    char *fileString = (char*)malloc(size);
+    char *fileString = (char*)malloc(size+1);
     htmlFile.read(fileString, size);
 
     return std::string(fileString);
@@ -339,7 +339,7 @@ void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items)
                 {
                     int xp = x;
                     int yp = y;
-                    if (xp < 0 || yp < 0 || xp > FRAMEBUFFER_WIDTH || yp > FRAMEBUFFER_HEIGHT)
+                    if (xp < 0 || yp < 0 || xp > FRAMEBUFFER_WIDTH-1 || yp > FRAMEBUFFER_HEIGHT-1)
                     {
                         continue;
                     }
@@ -390,7 +390,7 @@ int main()
     //while(1){;}
     while (1)
     {
-        window.processWindowEvents();
+
 
         // This is the base style that is applied on all html elements, this will be copied and modified as more elements
         // are parsed. This should ofc come from a default css stylesheet at some point as that's what they are made for and
@@ -421,6 +421,10 @@ int main()
                 window.displayBuffer[(y*1920*4)+(x*4)+1] = framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+1];
                 window.displayBuffer[(y*1920*4)+(x*4)+0] = framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+2];
             }
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            window.processWindowEvents();
         }
     }
 

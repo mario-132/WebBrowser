@@ -94,14 +94,16 @@ namespace freetypeeasy
         if (!preloaded)
         {
             int glyph_index = FT_Get_Char_Index( (inst->bold?inst->faceB:inst->face), character );
-
             FT_Load_Glyph(
                       (inst->bold?inst->faceB:inst->face),          /* handle to face object */
                       glyph_index,   /* glyph index           */
                       0 );  /* load flags, see below */
         }
+
         FT_Render_Glyph((inst->bold?inst->faceB:inst->face)->glyph,   /* glyph slot  */
-                        FT_RENDER_MODE_NORMAL ); /* render mode */
+                    FT_RENDER_MODE_NORMAL ); /* render mode */
+
+
         if ((inst->bold?inst->faceB:inst->face)->glyph->format == FT_GLYPH_FORMAT_BITMAP)
         {
             for (int x = 0; x < (inst->bold?inst->faceB:inst->face)->glyph->bitmap.width; x++)
