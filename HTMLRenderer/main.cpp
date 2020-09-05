@@ -93,7 +93,8 @@ int main()
         documentBox.textStartX = 0;
         documentBox.textStartY = 0;//window.height/3;
         memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
-        htmlrenderer.renderRenderList(inst, htmlrenderer.assembleRenderList(output->root, inst, docStyle, &documentBox));
+        auto renderlist = htmlrenderer.assembleRenderList(output->root, inst, docStyle, &documentBox);
+        htmlrenderer.renderRenderList(inst, renderlist);
         int scrpos = window.scrollPos*10;
         std::cout << scrpos << std::endl;
         for (int x = 0; x < 3840; x++)

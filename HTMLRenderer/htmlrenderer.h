@@ -27,6 +27,7 @@ struct RPosition
 
 struct RImage
 {
+    bool isValid;
     unsigned char* imageData;
     int w;
     int h;

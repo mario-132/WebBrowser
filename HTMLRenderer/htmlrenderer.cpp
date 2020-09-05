@@ -1,4 +1,6 @@
 #include "htmlrenderer.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 HTMLRenderer::HTMLRenderer()
 {
@@ -90,10 +92,17 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
 
         if (node->v.element.tag == GUMBO_TAG_IMG)
         {
-            int w = 100;
-            int h = 100;
+            RItem item;
+            item.img.isValid = false;
+            int w = 0;
+            int h = 0;
+            std::string imgSource;
             for (int i = 0; i < node->v.element.attributes.length; i++)
             {
+                if (std::string("src") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
+                {
+                    imgSource = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
+                }
                 if (std::string("width") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
                 {
                     w = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
@@ -103,7 +112,26 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
                     h = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
                 }
             }
-            RItem item;
+            int imgW, imgH, comp;
+            unsigned char* data = stbi_load(("/home/tim/Documents/Development/WebBrowserData/HTML/" + imgSource).c_str(), &imgW, &imgH, &comp, 0);
+            if (data != 0)
+            {
+                item.img.isValid = true;
+                item.img.w = imgW;
+                item.img.h = imgH;
+                //if (w == 0 || h == 0)
+                {
+                    w = imgW;
+                    h = imgH;
+                }
+                item.img.comp = comp;
+                item.img.imageData = data;
+            }
+            if (w == 0 || h == 0)
+            {
+                w = 100;
+                h = 100;
+            }
             item.type = RITEM_IMAGE;
             item.position.x = documentBox->textStartX;
             item.position.y = documentBox->textStartY;
@@ -214,19 +242,52 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
         }
         else if (items[i].type == RITEM_IMAGE)
         {
-            for (int x = items[i].position.x; x < items[i].position.x+items[i].position.w; x++)
+            if (items[i].img.isValid)
             {
-                for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
+                for (int x = 0; x < items[i].img.w; x++)
                 {
-                    int xp = x;
-                    int yp = y;
-                    if (xp < 0 || yp < 0 || xp > framebufferWidth-1 || yp > framebufferHeight-1)
+                    for (int y = 0; y < items[i].img.h; y++)
                     {
-                        continue;
+                        int xp = x+items[i].position.x;
+                        int yp = y+items[i].position.y;
+                        if (xp < 0 || yp < 0 || xp > framebufferWidth-1 || yp > framebufferHeight-1)
+                        {
+                            continue;
+                        }
+                        if (items[i].img.comp == 3)
+                        {
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)] =   items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)];
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)+1];
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)+2];
+                        }
+                        if (items[i].img.comp == 4)
+                        {
+                            if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] > 10)
+                            {
+                                framebuffer[(yp*framebufferWidth*3)+((xp)*3)] =   items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)];
+                                framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1];
+                                framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2];
+                            }
+                        }
                     }
-                    framebuffer[(y*framebufferWidth*3)+((x)*3)] = 128;
-                    framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = 128;
-                    framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = 128;
+                }
+            }
+            else
+            {
+                for (int x = items[i].position.x; x < items[i].position.x+items[i].position.w; x++)
+                {
+                    for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
+                    {
+                        int xp = x;
+                        int yp = y;
+                        if (xp < 0 || yp < 0 || xp > framebufferWidth-1 || yp > framebufferHeight-1)
+                        {
+                            continue;
+                        }
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)] = 128;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = 128;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = 128;
+                    }
                 }
             }
         }
