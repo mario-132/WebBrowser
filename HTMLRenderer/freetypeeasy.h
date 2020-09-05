@@ -5,20 +5,11 @@
 #include FT_GLYPH_H
 #include <string>
 #include <fstream>
+#include <map>
 
 #define fte freetypeeasy
 
 namespace freetypeeasy{
-
-    struct freetypeInst
-    {
-        FT_Library library;
-        FT_Face face;
-        FT_Face faceB;
-        bool bold;
-
-        float r, g, b;
-    };
 
     struct glyphInfo
     {
@@ -28,6 +19,28 @@ namespace freetypeeasy{
         int bearingY;
         int advanceX;
         int advanceY;
+
+        int bleft;
+        int btop;
+    };
+
+    /// Store glyph pixels and glyph size
+    struct cachedGlyph
+    {
+        unsigned char* glyphData;// Must be manually deleted
+        glyphInfo info;
+    };
+
+    struct freetypeInst
+    {
+        FT_Library library;
+        FT_Face face;
+        FT_Face faceB;
+        bool bold;
+        int fontsize;
+
+        float r, g, b;
+        std::map<bool, std::map<int, std::map<char, cachedGlyph>>> glyphCache;
     };
 
     freetypeInst* initFreetype(std::string fontF, std::string fontFBold, int fontHeight);
