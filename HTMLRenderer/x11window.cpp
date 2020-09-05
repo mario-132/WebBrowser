@@ -59,6 +59,7 @@ X11Window::X11Window()
 
 void X11Window::createWindow(std::string title, int width, int height, int framebufferWidth, int framebufferHeight)
 {
+    scrollPos = 0;
     this->width = width;
     this->height = height;
     int s = 0;
@@ -97,23 +98,21 @@ void X11Window::processWindowEvents()
     XGetWindowAttributes(display, window, &attribs);
     width = attribs.width;
     height = attribs.height;
-    XNextEvent(display, &e);
-    if (e.type == Expose)
+    XPutImage(display, window, DefaultGC(display, 0),
+        ximage, 0, 0, 0, 0, width, height);
+    while(XPending(display))
     {
-        XPutImage(display, window, DefaultGC(display, 0),
-            ximage, 0, 0, 0, 0, width, height);
-        //XFillRectangle(display, window, DefaultGC(display, s), 20, 20, 10, 10);
-        //XDrawString(display, window, DefaultGC(display, s), 10, 50, msg, strlen(msg));
-    }
-    if (e.type == ButtonPress){
-    switch (e.xbutton.button){
-        case Button4:
-            std::cout << "scroll up" << std::endl;
-            break;
-        case Button5:
-            std::cout << "scroll down" << std::endl;
-            break;
-    }
+        XNextEvent(display, &e);
+        if (e.type == ButtonPress){
+        switch (e.xbutton.button){
+            case Button4:
+                scrollPos+=1;
+                break;
+            case Button5:
+                scrollPos-=1;
+                break;
+        }
+        }
     }
     //if (e.type == KeyPress)
 }

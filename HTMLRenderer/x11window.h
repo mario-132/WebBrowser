@@ -17,6 +17,8 @@ public:
     int width;
     int height;
 
+    int scrollPos;
+
     char *displayBuffer;
     void createWindow(std::string title, int width, int height, int framebufferWidth, int framebufferHeight);
     void processWindowEvents();
