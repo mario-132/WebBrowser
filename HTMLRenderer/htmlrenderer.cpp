@@ -1,6 +1,9 @@
 #include "htmlrenderer.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "webservice.h"
+#include <iostream>
+#include <fstream>
 
 HTMLRenderer::HTMLRenderer()
 {
@@ -126,8 +129,27 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
                 }
             }
             //findAndReplaceAll(imgSource, "%20", " ");
+
+            std::string newsrc;
+            if (imgSource.find("http") != imgSource.npos)
+            {
+                newsrc = imgSource;
+            }
+            else
+            {
+                if (imgSource.size() > 1)
+                {
+                    newsrc = "https://github.com/" + imgSource;
+                }
+            }
+
             int imgW, imgH, comp;
-            unsigned char* data = stbi_load(("/home/tim/Documents/Development/WebBrowserData/HTML/" + imgSource).c_str(), &imgW, &imgH, &comp, 0);
+            std::string out;
+            if (newsrc.size() > 1)
+            {
+                //out = WebService::htmlFileDownloader(newsrc);
+            }
+            unsigned char* data = stbi_load_from_memory((unsigned char*)&out[0], out.size(), &imgW, &imgH, &comp, 0);
             if (data != 0)
             {
                 item.img.isValid = true;
@@ -140,6 +162,10 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
                 }
                 item.img.comp = comp;
                 item.img.imageData = data;
+            }
+            else
+            {
+                std::cout << "Failed to load: " << newsrc << std::endl;
             }
             if (w == 0 || h == 0)
             {
