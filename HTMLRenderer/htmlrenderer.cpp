@@ -72,6 +72,19 @@ void HTMLRenderer::applyStyle(GumboNode *node, RStyle &style)
     }
 }
 
+/*void findAndReplaceAll(std::string& data, const std::string& match, const std::string& replace)
+{
+   // Get the first occurrence
+   size_t pos = data.find(match);
+   // Repeat till end is reached
+   while( pos != std::string::npos)
+    {
+        data.replace(pos, match.size(), replace);
+       // Get the next occurrence from the current position
+        pos = data.find(match, pos+replace.size());
+    }
+}*/
+
 std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeasy::freetypeInst *inst, RStyle style, RDocumentBox *documentBox)
 {
     std::vector<RItem> RenderItems;
@@ -112,6 +125,7 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
                     h = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
                 }
             }
+            //findAndReplaceAll(imgSource, "%20", " ");
             int imgW, imgH, comp;
             unsigned char* data = stbi_load(("/home/tim/Documents/Development/WebBrowserData/HTML/" + imgSource).c_str(), &imgW, &imgH, &comp, 0);
             if (data != 0)

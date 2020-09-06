@@ -7,6 +7,7 @@
 #include "freetypeeasy.h"
 #include "x11window.h"
 #include "htmlrenderer.h"
+#include <curl/curl.h>
 
 #define FRAMEBUFFER_WIDTH 3840
 #define FRAMEBUFFER_HEIGHT 12690
@@ -23,9 +24,41 @@ std::string htmlFileLoader(std::string path)
     return std::string(fileString);
 }
 
+static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+    *((std::string*)stream) += (char*)ptr;
+    return nmemb;
+}
+
 std::string htmlFileDownloader(std::string path)
 {
-    return std::string();
+    std::string result;
+    curl_global_init(CURL_GLOBAL_ALL);
+    CURL *curl_handle = curl_easy_init();
+    curl_easy_setopt(curl_handle, CURLOPT_URL, path.c_str());
+
+    /* Switch on full protocol/debug output while testing */
+    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+
+    /* disable progress meter, set to 0L to enable it */
+    curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+
+    /* send all data to this function  */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &result);
+
+    /* get it! */
+    CURLcode res = curl_easy_perform(curl_handle);
+    if(res != CURLE_OK)
+          fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                  curl_easy_strerror(res));
+
+    curl_easy_cleanup(curl_handle);
+
+    curl_global_cleanup();
+    std::cout << "done" << std::endl;
+    return result;
 }
 
 unsigned char *framebuffer;
@@ -45,6 +78,8 @@ void findAndReplaceAll(std::string& data, const std::string& match, const std::s
 
 int main()
 {
+
+
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
@@ -57,7 +92,10 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/HTML/Google.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/es64f4.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Home - MangaDex.html");
-    std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
+    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
+    std::string htmlFile = htmlFileDownloader("https://www.google.com");
+
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
 
