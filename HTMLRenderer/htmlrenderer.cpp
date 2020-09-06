@@ -88,15 +88,12 @@ void HTMLRenderer::applyStyle(GumboNode *node, RStyle &style)
     }
 }*/
 
-std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeasy::freetypeInst *inst, RStyle style, RDocumentBox *documentBox)
+std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style)
 {
     std::vector<RItem> RenderItems;
-    if (node->type == GUMBO_NODE_ELEMENT)
+    if (root.type == RENDERDOM_ELEMENT)
     {
-
-        style.display = "inline";
-        applyStyle(node, style);
-
+        style = root.element.style;
         if (style.display == "block")
         {
             if (documentBox->textStartX != documentBox->x)
@@ -106,72 +103,37 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
             }
         }
 
-        if (node->v.element.tag == GUMBO_TAG_IMG)
+        if (root.element.tag == GUMBO_TAG_IMG)
         {
             RItem item;
             item.img.isValid = false;
-            int w = 0;
-            int h = 0;
-            std::string imgSource;
-            for (int i = 0; i < node->v.element.attributes.length; i++)
-            {
-                if (std::string("src") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
-                {
-                    imgSource = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
-                }
-                if (std::string("width") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
-                {
-                    w = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
-                }
-                if (std::string("height") == std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name))
-                {
-                    h = std::stoi(((GumboAttribute*)node->v.element.attributes.data[i])->value);
-                }
-            }
-            //findAndReplaceAll(imgSource, "%20", " ");
 
-            std::string newsrc;
-            if (imgSource.find("http") != imgSource.npos)
+            int w = 10;
+            int h = 10;
+
+            for (int i = 0; i < root.element.attributes.size(); i++)
             {
-                newsrc = imgSource;
-            }
-            else
-            {
-                if (imgSource.size() > 1)
+                if (std::string("width") == root.element.attributes[i].name)
                 {
-                    newsrc = "https://github.com/" + imgSource;
+                    w = std::stoi(root.element.attributes[i].value);
+                }
+                if (std::string("height") == root.element.attributes[i].name)
+                {
+                    h = std::stoi(root.element.attributes[i].value);
                 }
             }
 
-            int imgW, imgH, comp;
-            std::string out;
-            if (newsrc.size() > 1)
+            if (root.element.image.decoded)
             {
-                //out = WebService::htmlFileDownloader(newsrc);
-            }
-            unsigned char* data = stbi_load_from_memory((unsigned char*)&out[0], out.size(), &imgW, &imgH, &comp, 0);
-            if (data != 0)
-            {
+                w = root.element.image.imgW;
+                h = root.element.image.imgH;
                 item.img.isValid = true;
-                item.img.w = imgW;
-                item.img.h = imgH;
-                //if (w == 0 || h == 0)
-                {
-                    w = imgW;
-                    h = imgH;
-                }
-                item.img.comp = comp;
-                item.img.imageData = data;
+                item.img.w = w;
+                item.img.h = h;
+                item.img.comp = root.element.image.comp;
+                item.img.imageData = root.element.image.imageData;
             }
-            else
-            {
-                std::cout << "Failed to load: " << newsrc << std::endl;
-            }
-            if (w == 0 || h == 0)
-            {
-                w = 100;
-                h = 100;
-            }
+
             item.type = RITEM_IMAGE;
             item.position.x = documentBox->textStartX;
             item.position.y = documentBox->textStartY;
@@ -183,9 +145,9 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
         }
 
         // Parse the child elements.
-        for (int i = 0; i < node->v.element.children.length; i++)
+        for (int i = 0; i < root.children.size(); i++)
         {
-            std::vector<RItem> returnRenderList = assembleRenderList((GumboNode*)node->v.element.children.data[i], inst, style, documentBox);
+            std::vector<RItem> returnRenderList = assembleRenderList(root.children[i], inst, documentBox, style);
             for (int j = 0; j < returnRenderList.size(); j++)
             {
                 RenderItems.push_back(returnRenderList[j]);
@@ -201,7 +163,7 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
             }
         }
     }
-    else if (node->type == GUMBO_NODE_TEXT)
+    else if (root.type == RENDERDOM_TEXT)
     {
         if (style.visible)// Only draw it if it's visible at all.
         {
@@ -213,16 +175,16 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(GumboNode *node, freetypeeas
             int temptY = tY;
 
             int charactersPreWritten = 0;
-            for (int i = 0; i < strlen(node->v.text.text); i++)
+            for (int i = 0; i < root.text.size(); i++)
             {
                 fte::makeBold(inst, style.bold);
-                fte::glyphInfo inf = fte::getCharacterBounds(inst, node->v.text.text[i]);
+                fte::glyphInfo inf = fte::getCharacterBounds(inst, root.text[i]);
                 temptX += inf.advanceX/64;
-                if (temptX > documentBox->w || i == strlen(node->v.text.text)-1)
+                if (temptX > documentBox->w || i == root.text.size()-1)
                 {
                     RItem item;
                     item.type = RITEM_TEXT;
-                    item.text.text = std::string(node->v.text.text+charactersPreWritten, (i+1)-charactersPreWritten);
+                    item.text.text = std::string((&root.text[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = tX;
                     item.position.y = tY+(style.font_size*0.85)+((style.font_size*(style.line_height-1))/2);// font is scaled by 0.85 to better center the text
                     item.text.textSize = style.font_size;
@@ -302,7 +264,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         }
                         if (items[i].img.comp == 4)
                         {
-                            if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] > 10)
+                            if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] > 50)
                             {
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)] =   items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)];
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1];
