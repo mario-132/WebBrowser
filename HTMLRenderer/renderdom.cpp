@@ -145,7 +145,8 @@ void RenderDOM::applyStyle(RenderDOMItem &item, RenderDOMStyle &style)
          item.element.tag == GUMBO_TAG_H4 ||
          item.element.tag == GUMBO_TAG_H5 ||
          item.element.tag == GUMBO_TAG_H6 ||
-         item.element.tag == GUMBO_TAG_B))
+         item.element.tag == GUMBO_TAG_B  ||
+         item.element.tag == GUMBO_TAG_STRONG))
     {
         style.bold = true;
     }
@@ -162,7 +163,8 @@ void RenderDOM::applyStyle(RenderDOMItem &item, RenderDOMStyle &style)
          item.element.tag == GUMBO_TAG_H6 ||
          item.element.tag == GUMBO_TAG_P  ||
          item.element.tag == GUMBO_TAG_DIV||
-         item.element.tag == GUMBO_TAG_LI))
+         item.element.tag == GUMBO_TAG_LI ||
+         item.element.tag == GUMBO_TAG_BR))
     {
         style.display = "block";
     }
