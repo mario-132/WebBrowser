@@ -97,7 +97,7 @@ int main()
         htmlrenderer.renderRenderList(inst, out);
         std::cout << "b" << std::endl;
 
-        int scrpos = window.scrollPos*10;
+        int scrpos = window.scrollPos*-10;
         std::cout << scrpos << std::endl;
         for (int x = 0; x < 3840; x++)
         {

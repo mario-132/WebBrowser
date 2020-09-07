@@ -49,6 +49,7 @@ namespace freetypeeasy
                   inst->face,   /* handle to face object */
                   0,      /* pixel_width           */
                   fontHeight );   /* pixel_height          */
+        FT_Select_Charmap(inst->face , ft_encoding_unicode);
         ///Bold
         if (FT_New_Memory_Face( inst->library,
                          fontbufferB,
@@ -63,6 +64,7 @@ namespace freetypeeasy
                   inst->faceB,   /* handle to face object */
                   0,      /* pixel_width           */
                   fontHeight );   /* pixel_height          */
+        FT_Select_Charmap(inst->faceB , ft_encoding_unicode);
         inst->bold = false;
         inst->r = 1;
         inst->g = 1;
@@ -79,6 +81,7 @@ namespace freetypeeasy
         {
             return inst->glyphCache[inst->bold][inst->fontsize][character].info;
         }
+
         int glyph_index = FT_Get_Char_Index( (inst->bold?inst->faceB:inst->face), character );
 
         FT_Load_Glyph(
