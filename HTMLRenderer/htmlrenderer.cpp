@@ -79,6 +79,33 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
             documentBox->textStartY += h;
             documentBox->textStartX += w;
             RenderItems.push_back(item);
+            if (documentBox->itemLines.size() != 0)
+            {
+                //if (documentBox->itemLines.back().lineX + documentBox->itemLines.back().lineW + w < documentBox->x + documentBox->w)
+                {
+
+                    if (documentBox->itemLines.back().lineH < h)
+                    {
+                        for (int j = 0; j < documentBox->itemLines.back().items.size(); j++)
+                        {
+                            //documentBox->itemLines.back().items[j]->position.y += (h - documentBox->itemLines.back().lineH);
+                            //std::cout << "moved down by: " << (h - documentBox->itemLines.back().lineH) << std::endl;
+                        }
+                        documentBox->itemLines.back().lineH = h;
+                    }
+                    documentBox->itemLines.back().items.push_back(&RenderItems[RenderItems.size() - 1]);
+                }
+            }
+            else
+            {
+                RItemLine line;
+                line.items.push_back(&RenderItems[RenderItems.size() - 1]);
+                line.lineH = h;
+                line.lineW = w;
+                line.lineX = item.position.x;
+                line.lineY = item.position.y;
+                documentBox->itemLines.push_back(line);
+            }
         }
 
         // Parse the child elements.
@@ -125,13 +152,40 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
                     item.type = RITEM_TEXT;
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = tX;
-                    item.position.y = tY+(style.font_size*0.85)+((style.font_size*(style.line_height-1))/2);// font is scaled by 0.85 to better center the text
+                    item.position.y = tY+(style.font_size*0.85)+((style.font_size*(style.line_height-1))/2);// font size is scaled by 0.85 to better center the text
                     item.text.textSize = style.font_size;
 
                     item.text.bold = style.bold;
                     item.text.isLink = style.isLink;
 
                     RenderItems.push_back(item);
+
+                    if (documentBox->itemLines.size() != 0)
+                    {
+                        //if (/*documentBox->itemLines.back().lineX + documentBox->itemLines.back().lineW +*/ temptX < documentBox->x + documentBox->w)
+                        {
+
+                            if (documentBox->itemLines.back().lineH < style.font_size)
+                            {
+                                for (int j = 0; j < documentBox->itemLines.back().items.size(); j++)
+                                {
+                                    //documentBox->itemLines.back().items[j]->position.y += (style.font_size - documentBox->itemLines.back().lineH);
+                                }
+                                documentBox->itemLines.back().lineH = style.font_size;
+                            }
+                            documentBox->itemLines.back().items.push_back(&RenderItems[RenderItems.size() - 1]);
+                        }
+                    }
+                    else
+                    {
+                        RItemLine line;
+                        line.items.push_back(&RenderItems[RenderItems.size() - 1]);
+                        line.lineH = style.font_size;
+                        line.lineW = temptX;
+                        line.lineX = item.position.x;
+                        line.lineY = item.position.y;
+                        documentBox->itemLines.push_back(line);
+                    }
 
                     if (temptX > documentBox->w)
                     {
@@ -187,9 +241,9 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
         {
             if (items[i].img.isValid)
             {
-                for (int x = 0; x < items[i].img.w; x++)
+                for (int y = 0; y < items[i].img.h; y++)
                 {
-                    for (int y = 0; y < items[i].img.h; y++)
+                    for (int x = 0; x < items[i].img.w; x++)
                     {
                         int xp = x+items[i].position.x;
                         int yp = y+items[i].position.y;
@@ -212,14 +266,20 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2];
                             }
                         }
+                        if (x == 0 || y == 0 || x == items[i].img.w-1 || y == items[i].img.h-1)
+                        {
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)] = 255;
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = 128;
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = 128;
+                        }
                     }
                 }
             }
             else
             {
-                for (int x = items[i].position.x; x < items[i].position.x+items[i].position.w; x++)
+                for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
                 {
-                    for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
+                    for (int x = items[i].position.x; x < items[i].position.x+items[i].position.w; x++)
                     {
                         int xp = x;
                         int yp = y;

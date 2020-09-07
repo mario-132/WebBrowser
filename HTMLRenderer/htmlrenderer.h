@@ -9,7 +9,7 @@
 /// Container for the text in a RItem, includes info like lineID and textSize.
 struct RText
 {
-    int lineID;
+    //int lineID;
     int textSize;
     std::wstring text;
 
@@ -67,6 +67,15 @@ struct RStyle
     bool isLink;
 };
 
+struct RItemLine
+{
+    int lineX;
+    int lineY;
+    int lineH;
+    int lineW;
+    std::vector<RItem*> items;
+};
+
 /// Stores the dimensions of the current working box, this box will be the size of the window at program start, but
 /// might shrink when parsing a div with e.g. width: 50%; It also contains the current document cursor, so the
 /// render generator know where to put the elements.
@@ -79,6 +88,8 @@ struct RDocumentBox
 
     int textStartX;
     int textStartY;
+
+    std::vector<RItemLine> itemLines;
 };
 
 class HTMLRenderer

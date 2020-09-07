@@ -6,6 +6,7 @@
 #include "htmlrenderer.h"
 #include "webservice.h"
 #include "renderdom.h"
+#include <chrono>
 
 #define FRAMEBUFFER_WIDTH 3840
 #define FRAMEBUFFER_HEIGHT 12690
@@ -37,6 +38,22 @@ void findAndReplaceAll(std::string& data, const std::string& match, const std::s
     }
 }
 
+void printFps()
+{
+    static std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+    static float fps;
+
+    std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
+    fps+=1.0f;
+    if(std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count() > 1000*1000)
+    {
+        std::cout << "FPS: " << fps << std::endl;
+        //Gfps = fps;
+        fps = 0;
+        lastTime = std::chrono::high_resolution_clock::now();
+    }
+}
+
 int main()
 {
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
@@ -54,7 +71,7 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
-    std::string htmlFile = WebService::htmlFileDownloader("http://htmlyoutube.lightboxengine.com/");
+    std::string htmlFile = WebService::htmlFileDownloader("http://lightboxengine.com/imgtext.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
@@ -70,7 +87,7 @@ int main()
     style.isLink = false;
 
     RenderDOM dom;
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style);
+    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://lightboxengine.com");
 
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
@@ -79,10 +96,18 @@ int main()
     htmlrenderer.framebuffer = framebuffer;
     htmlrenderer.framebufferWidth = FRAMEBUFFER_WIDTH;
     htmlrenderer.framebufferHeight = FRAMEBUFFER_HEIGHT;
-
+    int a = 2;
     while(1)
     {
-        memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
+        int scrpos = window.scrollPos*-20;
+        printFps();
+
+        int memsetPos = scrpos;
+        if (memsetPos < 0)
+        {
+            memsetPos = 0;
+        }
+        memset(framebuffer+(memsetPos*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
         RDocumentBox documentBox;
         documentBox.x = 0;
@@ -95,11 +120,10 @@ int main()
         auto out = htmlrenderer.assembleRenderList(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, out);
 
-        int scrpos = window.scrollPos*-20;
         //std::cout << scrpos << std::endl;
-        for (int x = 0; x < 3840; x++)
+        for (int y = 0; y < window.height; y++)
         {
-            for (int y = 0; y < 2160; y++)
+            for (int x = 0; x < window.width; x++)
             {
                 int ys = y+scrpos;
                 window.displayBuffer[(y*3840*4)+(x*4)+2] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+0];

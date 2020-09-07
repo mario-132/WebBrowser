@@ -63,7 +63,7 @@ class RenderDOM
 {
 public:
     RenderDOM();
-    RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style);
+    RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL);
     void applyStyle(RenderDOMItem &item, RenderDOMStyle &style);
 };
 

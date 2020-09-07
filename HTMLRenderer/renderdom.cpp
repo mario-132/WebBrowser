@@ -7,7 +7,7 @@ RenderDOM::RenderDOM()
 
 }
 
-RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style)
+RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL)
 {
     RenderDOMItem item;
     item.type = RENDERDOM_NONE;
@@ -49,7 +49,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style)
                 }
             }
             std::string newsrc;
-            if (imgSource.find("http") != imgSource.npos)
+            if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
             {
                 newsrc = imgSource;
             }
@@ -57,7 +57,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style)
             {
                 if (imgSource.size() > 1)
                 {
-                    newsrc = "https://github.com/" + imgSource;
+                    newsrc = baseURL + imgSource;
                 }
             }
 
@@ -91,7 +91,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style)
 
         for (int i = 0; i < node->v.element.children.length; i++)
         {
-            item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style));
+            item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, baseURL));
         }
     }
     else if (node->type == GUMBO_NODE_TEXT)
