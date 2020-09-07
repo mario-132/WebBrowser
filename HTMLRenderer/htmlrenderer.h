@@ -2,6 +2,7 @@
 #define HTMLRENDERER_H
 #include <string>
 #include <vector>
+#include <deque>
 #include "freetypeeasy.h"
 #include "renderdom.h"
 
@@ -10,7 +11,7 @@ struct RText
 {
     int lineID;
     int textSize;
-    std::string text;
+    std::wstring text;
 
     bool bold;
     bool isLink;
@@ -93,7 +94,6 @@ public:
 
     // Make stylebox more like a textbox and make it a reference so they can all access it, then when a div occurs you make a new stylebox/textbox and give it that.
     std::vector<RItem> assembleRenderList(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
-
     void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items);
 };
 

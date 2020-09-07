@@ -57,7 +57,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style)
             {
                 if (imgSource.size() > 1)
                 {
-                    newsrc = "https://github.com" + imgSource;
+                    newsrc = "https://github.com/" + imgSource;
                 }
             }
 

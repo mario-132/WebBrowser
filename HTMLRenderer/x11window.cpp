@@ -104,14 +104,14 @@ void X11Window::processWindowEvents()
     {
         XNextEvent(display, &e);
         if (e.type == ButtonPress){
-        switch (e.xbutton.button){
-            case Button4:
-                scrollPos+=1;
-                break;
-            case Button5:
-                scrollPos-=1;
-                break;
-        }
+            switch (e.xbutton.button){
+                case Button4:
+                    scrollPos+=1;
+                    break;
+                case Button5:
+                    scrollPos-=1;
+                    break;
+            }
         }
     }
     //if (e.type == KeyPress)

@@ -1,5 +1,6 @@
 #include "freetypeeasy.h"
 #include <iostream>
+#include <deque>
 #include FT_SIZES_H
 
 namespace freetypeeasy
@@ -73,7 +74,7 @@ namespace freetypeeasy
         return inst;
     }
 
-    glyphInfo getCharacterBounds(freetypeInst* inst, char character)
+    glyphInfo getCharacterBounds(freetypeInst* inst, int character)
     {
         if (inst->glyphCache.find(inst->bold) != inst->glyphCache.end() &&
             inst->glyphCache[inst->bold].find(inst->fontsize) != inst->glyphCache[inst->bold].end() &&
@@ -101,7 +102,7 @@ namespace freetypeeasy
         return glInf;
     }
 
-    glyphInfo drawCharacter(freetypeInst* inst, char character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight, bool preloaded)
+    glyphInfo drawCharacter(freetypeInst* inst, int character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight, bool preloaded)
     {
         if (inst->glyphCache.find(inst->bold) != inst->glyphCache.end() &&
             inst->glyphCache[inst->bold].find(inst->fontsize) != inst->glyphCache[inst->bold].end() &&

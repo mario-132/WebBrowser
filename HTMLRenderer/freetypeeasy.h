@@ -40,13 +40,13 @@ namespace freetypeeasy{
         int fontsize;
 
         float r, g, b;
-        std::map<bool, std::map<int, std::map<char, cachedGlyph>>> glyphCache;
+        std::map<bool, std::map<int, std::map<int, cachedGlyph>>> glyphCache;
     };
 
     freetypeInst* initFreetype(std::string fontF, std::string fontFBold, int fontHeight);
-    glyphInfo getCharacterBounds(freetypeInst* inst, char character);
-    glyphInfo drawCharacter(freetypeInst* inst, char character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight);
-    glyphInfo drawCharacter(freetypeInst* inst, char character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight, bool preloaded);
+    glyphInfo getCharacterBounds(freetypeInst* inst, int character);
+    glyphInfo drawCharacter(freetypeInst* inst, int character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight);
+    glyphInfo drawCharacter(freetypeInst* inst, int character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight, bool preloaded);
     void drawString(freetypeInst* inst, char* str, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight);
     void setFontSize(freetypeInst* inst, int size);
     void makeBold(freetypeInst* inst, bool bold);

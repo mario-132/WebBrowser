@@ -4,6 +4,8 @@
 #include "webservice.h"
 #include <iostream>
 #include <fstream>
+#include <locale>
+#include <codecvt>
 
 HTMLRenderer::HTMLRenderer()
 {
@@ -110,16 +112,18 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
             int temptY = tY;
 
             int charactersPreWritten = 0;
-            for (int i = 0; i < root.text.size(); i++)
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            std::wstring wide = converter.from_bytes(root.text);
+            for (int i = 0; i < wide.size(); i++)
             {
                 fte::makeBold(inst, style.bold);
-                fte::glyphInfo inf = fte::getCharacterBounds(inst, root.text[i]);
+                fte::glyphInfo inf = fte::getCharacterBounds(inst, wide[i]);
                 temptX += inf.advanceX/64;
-                if (temptX > documentBox->w || i == root.text.size()-1)
+                if (temptX > documentBox->w || i == wide.size()-1)
                 {
                     RItem item;
                     item.type = RITEM_TEXT;
-                    item.text.text = std::string((&root.text[0])+charactersPreWritten, (i+1)-charactersPreWritten);
+                    item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = tX;
                     item.position.y = tY+(style.font_size*0.85)+((style.font_size*(style.line_height-1))/2);// font is scaled by 0.85 to better center the text
                     item.text.textSize = style.font_size;
@@ -170,6 +174,8 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             int x = 0;
             if (items[i].position.y < framebufferHeight)// Make sure we are not trying to write a character off screen
             {
+                //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                //std::wstring wide = converter.from_bytes(items[i].text.text);
                 for (int j = 0; j < items[i].text.text.size(); j++)
                 {
                     auto inf = fte::drawCharacter(inst, items[i].text.text[j], items[i].position.x + x, items[i].position.y, framebuffer, framebufferWidth, framebufferHeight, false);// Draw character, saving info about it
