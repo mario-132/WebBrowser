@@ -25,9 +25,9 @@ HTMLRenderer::HTMLRenderer()
     }
 }*/
 
-std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style)
+void HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style)
 {
-    std::vector<RItem> RenderItems;
+
     if (root.type == RENDERDOM_ELEMENT)
     {
         style = root.element.style;
@@ -88,7 +88,7 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
                     {
                         for (int j = 0; j < documentBox->itemLines.back().items.size(); j++)
                         {
-                            //documentBox->itemLines.back().items[j]->position.y += (h - documentBox->itemLines.back().lineH);
+                            documentBox->itemLines.back().items[j]->position.y += (h - documentBox->itemLines.back().lineH);
                             //std::cout << "moved down by: " << (h - documentBox->itemLines.back().lineH) << std::endl;
                         }
                         documentBox->itemLines.back().lineH = h;
@@ -111,11 +111,7 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
         // Parse the child elements.
         for (int i = 0; i < root.children.size(); i++)
         {
-            std::vector<RItem> returnRenderList = assembleRenderList(root.children[i], inst, documentBox, style);
-            for (int j = 0; j < returnRenderList.size(); j++)
-            {
-                RenderItems.push_back(returnRenderList[j]);
-            }
+            assembleRenderList(root.children[i], inst, documentBox, style);
         }
 
         if (style.display == "block")
@@ -169,7 +165,7 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
                             {
                                 for (int j = 0; j < documentBox->itemLines.back().items.size(); j++)
                                 {
-                                    //documentBox->itemLines.back().items[j]->position.y += (style.font_size - documentBox->itemLines.back().lineH);
+                                    documentBox->itemLines.back().items[j]->position.y += (style.font_size - documentBox->itemLines.back().lineH);
                                 }
                                 documentBox->itemLines.back().lineH = style.font_size;
                             }
@@ -208,7 +204,7 @@ std::vector<RItem> HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetyp
             documentBox->textStartY = tY;
         }
     }
-    return RenderItems;
+    //return RenderItems;
 }
 
 void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vector<RItem> items)

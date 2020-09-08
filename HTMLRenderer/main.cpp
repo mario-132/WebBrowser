@@ -117,8 +117,9 @@ int main()
         documentBox.textStartX = 0;
         documentBox.textStartY = 0;//window.height/3;
 
-        auto out = htmlrenderer.assembleRenderList(rootDomItem, inst, &documentBox, RenderDOMStyle());
-        htmlrenderer.renderRenderList(inst, out);
+        htmlrenderer.RenderItems.clear();
+        htmlrenderer.assembleRenderList(rootDomItem, inst, &documentBox, RenderDOMStyle());
+        htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
 
         //std::cout << scrpos << std::endl;
         for (int y = 0; y < window.height; y++)
