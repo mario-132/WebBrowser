@@ -207,6 +207,65 @@ void HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetyp
     //return RenderItems;
 }
 
+void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle activeStyle)
+{
+    if (root.type == RENDERDOM_ELEMENT)
+    {
+        activeStyle = root.element.style;
+
+        // Parse the child elements.
+        for (int i = 0; i < root.children.size(); i++)
+        {
+            assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
+        }
+    }
+    else if (root.type == RENDERDOM_TEXT)
+    {
+        if (activeStyle.visible)
+        {
+            int fontsize = activeStyle.font_size;
+            fte::setFontSize(inst, fontsize);
+
+            int cX = tX;
+            int cY = tY;
+
+            int charactersPreWritten = 0;
+
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            std::wstring wide = converter.from_bytes(root.text);
+            for (int i = 0; i < wide.size(); i++)
+            {
+                fte::makeBold(inst, activeStyle.bold);
+                fte::glyphInfo inf = fte::getCharacterBounds(inst, wide[i]);
+                cX += inf.advanceX/64;
+                if (cX > documentBox->w || i == wide.size()-1)
+                {
+                    RItem item;
+                    item.type = RITEM_TEXT;
+                    item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
+                    item.position.x = tX;
+                    item.position.y = tY;
+                    item.text.textSize = activeStyle.font_size;
+                    item.text.bold = activeStyle.bold;
+                    item.text.isLink = activeStyle.isLink;
+
+                    RenderItems.push_back(item);
+
+                    if (cX > documentBox->w)
+                    {
+                        cX = 0;
+                        cY += activeStyle.font_size*activeStyle.line_height;
+                    }
+
+                    charactersPreWritten = i+1;
+                    tX = cX;
+                    tY = cY;
+                }
+            }
+        }
+    }
+}
+
 void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vector<RItem> items)
 {
     for (int i = 0; i < items.size(); i++)
@@ -224,8 +283,6 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             int x = 0;
             if (items[i].position.y < framebufferHeight)// Make sure we are not trying to write a character off screen
             {
-                //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-                //std::wstring wide = converter.from_bytes(items[i].text.text);
                 for (int j = 0; j < items[i].text.text.size(); j++)
                 {
                     auto inf = fte::drawCharacter(inst, items[i].text.text[j], items[i].position.x + x, items[i].position.y, framebuffer, framebufferWidth, framebufferHeight, false);// Draw character, saving info about it

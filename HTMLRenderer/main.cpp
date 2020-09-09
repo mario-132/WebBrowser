@@ -60,6 +60,8 @@ int main()
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
     fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+
     fte::makeBold(inst, false);
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/simple_text.html");
@@ -71,7 +73,7 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
-    std::string htmlFile = WebService::htmlFileDownloader("http://lightboxengine.com/imgtext.html");
+    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
@@ -118,7 +120,9 @@ int main()
         documentBox.textStartY = 0;//window.height/3;
 
         htmlrenderer.RenderItems.clear();
-        htmlrenderer.assembleRenderList(rootDomItem, inst, &documentBox, RenderDOMStyle());
+        htmlrenderer.tX = 0;
+        htmlrenderer.tY = 100;
+        htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
 
         //std::cout << scrpos << std::endl;

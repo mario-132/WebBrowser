@@ -172,6 +172,10 @@ namespace freetypeeasy
             else
             {
                 std::cout << "glyph is not a bitmap!" << std::endl;
+                glyphInfo glInf;
+                glInf.width = 0;
+                glInf.height = 0;
+                return glInf;
             }
             glyphInfo glInf;
             glInf.width = (inst->bold?inst->faceB:inst->face)->glyph->bitmap.width;

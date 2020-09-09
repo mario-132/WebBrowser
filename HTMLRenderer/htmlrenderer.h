@@ -101,10 +101,14 @@ public:
     int framebufferHeight;
     unsigned char* framebuffer;
 
+    int tX = 0;
+    int tY = 100;
+
     //void applyStyle(GumboNode* node, RStyle &style);
 
     // Make stylebox more like a textbox and make it a reference so they can all access it, then when a div occurs you make a new stylebox/textbox and give it that.
     void assembleRenderList(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
+    void assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
     void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items);
     std::vector<RItem> RenderItems;
 };
