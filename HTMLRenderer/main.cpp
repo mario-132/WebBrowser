@@ -75,7 +75,8 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
+    std::string htmlFile = WebService::htmlFileDownloader("https://old.reddit.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
@@ -92,7 +93,7 @@ int main()
     style.isLink = false;
 
     RenderDOM dom;
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://lightboxengine.com");
+    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://old.reddit.com");
 
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);

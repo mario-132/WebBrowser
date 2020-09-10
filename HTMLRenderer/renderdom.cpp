@@ -81,6 +81,8 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             else
             {
                 std::cout << "Failed to load: " << newsrc << std::endl;
+                item.element.image.downloaded = false;
+                item.element.image.decoded = false;
             }
             if (w == 0 || h == 0)
             {
