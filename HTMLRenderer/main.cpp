@@ -59,8 +59,9 @@ int main()
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
-    fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    //fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
     //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Regular.otf", "/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Bold.otf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
 
     fte::makeBold(inst, false);
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
@@ -116,12 +117,12 @@ int main()
         documentBox.y = 0;//window.height/3;
         documentBox.w = window.width;
         documentBox.h = window.height;
-        documentBox.textStartX = 0;
-        documentBox.textStartY = 0;//window.height/3;
+        //documentBox.textStartX = 0;
+        //documentBox.textStartY = 0;//window.height/3;
 
         htmlrenderer.RenderItems.clear();
-        htmlrenderer.tX = 0;
-        htmlrenderer.tY = 100;
+        //htmlrenderer.tX = 0;
+        //htmlrenderer.tY = 100;
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
 

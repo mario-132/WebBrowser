@@ -86,8 +86,8 @@ struct RDocumentBox
     int w;
     int h;
 
-    int textStartX;
-    int textStartY;
+    //int textStartX;
+    //int textStartY;
 
     std::vector<RItemLine> itemLines;
 };
@@ -100,9 +100,6 @@ public:
     int framebufferWidth;
     int framebufferHeight;
     unsigned char* framebuffer;
-
-    int tX = 0;
-    int tY = 100;
 
     //void applyStyle(GumboNode* node, RStyle &style);
 

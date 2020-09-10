@@ -25,7 +25,7 @@ HTMLRenderer::HTMLRenderer()
     }
 }*/
 
-void HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style)
+/*void HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style)
 {
 
     if (root.type == RENDERDOM_ELEMENT)
@@ -158,7 +158,7 @@ void HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetyp
 
                     if (documentBox->itemLines.size() != 0)
                     {
-                        //if (/*documentBox->itemLines.back().lineX + documentBox->itemLines.back().lineW +*/ temptX < documentBox->x + documentBox->w)
+                        //if ( temptX < documentBox->x + documentBox->w)
                         {
 
                             if (documentBox->itemLines.back().lineH < style.font_size)
@@ -205,14 +205,23 @@ void HTMLRenderer::assembleRenderList(RenderDOMItem &root, freetypeeasy::freetyp
         }
     }
     //return RenderItems;
-}
+}*/
 
 void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle activeStyle)
 {
+    if (documentBox->itemLines.size() == 0)
+    {
+        RItemLine line;
+        line.lineH = 0;
+        line.lineW = 0;
+        line.lineX = documentBox->x;
+        line.lineY = documentBox->y;
+        documentBox->itemLines.push_back(line);
+    }
+
     if (root.type == RENDERDOM_ELEMENT)
     {
         activeStyle = root.element.style;
-
         // Parse the child elements.
         for (int i = 0; i < root.children.size(); i++)
         {
@@ -226,8 +235,8 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
             int fontsize = activeStyle.font_size;
             fte::setFontSize(inst, fontsize);
 
-            int cX = tX;
-            int cY = tY;
+            int cX = documentBox->itemLines.back().lineX + documentBox->itemLines.back().lineW;
+            //int cY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
 
             int charactersPreWritten = 0;
 
@@ -240,26 +249,38 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                 cX += inf.advanceX/64;
                 if (cX > documentBox->w || i == wide.size()-1)
                 {
+                    RItemLine &line = documentBox->itemLines.back();
+                    if (line.lineH < activeStyle.font_size)
+                    {
+                        line.lineH = activeStyle.font_size;
+                        /// Todo: update location of previous text on this line.
+                    }
                     RItem item;
                     item.type = RITEM_TEXT;
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
-                    item.position.x = tX;
-                    item.position.y = tY;
+                    item.position.x = line.lineX + line.lineW;
+                    item.position.y = line.lineY + line.lineH;
                     item.text.textSize = activeStyle.font_size;
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
 
                     RenderItems.push_back(item);
+                    line.lineW += cX-(line.lineX + line.lineW);
+
+                    line.items.push_back(&RenderItems.back());
 
                     if (cX > documentBox->w)
                     {
-                        cX = 0;
-                        cY += activeStyle.font_size*activeStyle.line_height;
+                        RItemLine nline;
+                        nline.lineH = 0;
+                        nline.lineW = 0;
+                        nline.lineX = documentBox->x;
+                        nline.lineY = line.lineY + line.lineH;
+                        documentBox->itemLines.push_back(nline);
+                        cX = nline.lineX;
                     }
 
                     charactersPreWritten = i+1;
-                    tX = cX;
-                    tY = cY;
                 }
             }
         }
