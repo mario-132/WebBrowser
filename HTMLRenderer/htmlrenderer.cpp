@@ -222,10 +222,81 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
     if (root.type == RENDERDOM_ELEMENT)
     {
         activeStyle = root.element.style;
+
+        if (activeStyle.display == "block")
+        {
+            RItemLine nline;
+            nline.lineH = 0;
+            nline.lineW = 0;
+            nline.lineX = documentBox->x;
+            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
+            documentBox->itemLines.push_back(nline);
+        }
+
+        if (root.element.tag == GUMBO_TAG_IMG || root.element.tag == GUMBO_TAG_IMAGE)
+        {
+            RItem item;
+            item.type = RITEM_IMAGE;// Item is an image
+            item.img.isValid = false;// Mark invalid, will be marked valid later if it is.
+
+            // Store image dimenstions
+            int imgW = 50;
+            int imgH = 50;
+
+            // Find img dimensions in html
+            for (int i = 0; i < root.element.attributes.size(); i++)
+            {
+                if (std::string("width") == root.element.attributes[i].name)
+                {
+                    imgW = std::stoi(root.element.attributes[i].value);
+                }
+                if (std::string("height") == root.element.attributes[i].name)
+                {
+                    imgH = std::stoi(root.element.attributes[i].value);
+                }
+            }
+
+            if (root.element.image.decoded)// If image has been downloaded and decoded
+            {
+                imgW = root.element.image.imgW;
+                imgH = root.element.image.imgH;
+                item.img.isValid = true;
+                item.img.w = imgW;
+                item.img.h = imgH;
+                item.img.comp = root.element.image.comp;
+                item.img.imageData = root.element.image.imageData;
+            }
+
+            item.position.w = imgW;
+            item.position.h = imgH;
+
+            RItemLine &line = documentBox->itemLines.back();
+            if (line.lineH < imgH)
+            {
+                line.lineH = imgH;
+            }
+
+            item.position.x = line.lineX + line.lineW;
+            item.position.y = (line.lineY + line.lineH)-imgH;
+
+            line.lineW += imgW;
+            RenderItems.push_back(item);
+        }
+
         // Parse the child elements.
         for (int i = 0; i < root.children.size(); i++)
         {
             assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
+        }
+
+        if (activeStyle.display == "block")
+        {
+            RItemLine nline;
+            nline.lineH = 0;
+            nline.lineW = 0;
+            nline.lineX = documentBox->x;
+            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
+            documentBox->itemLines.push_back(nline);
         }
     }
     else if (root.type == RENDERDOM_TEXT)

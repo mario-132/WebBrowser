@@ -74,7 +74,9 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
-    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
+    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
