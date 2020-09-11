@@ -108,6 +108,9 @@ public:
     void assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
     void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items);
     std::vector<RItem> RenderItems;
+
+private:
+    void changeLineHeight(int newHeight, RItemLine &line);
 };
 
 #endif // HTMLRENDERER_H

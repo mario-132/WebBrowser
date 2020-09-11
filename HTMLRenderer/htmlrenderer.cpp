@@ -273,7 +273,8 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
             RItemLine &line = documentBox->itemLines.back();
             if (line.lineH < imgH)
             {
-                line.lineH = imgH;
+                changeLineHeight(imgH, line);
+                //line.lineH = imgH;
             }
 
             item.position.x = line.lineX + line.lineW;
@@ -323,8 +324,9 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     RItemLine &line = documentBox->itemLines.back();
                     if (line.lineH < activeStyle.font_size)
                     {
-                        line.lineH = activeStyle.font_size;
-                        /// Todo: update location of previous text on this line.
+                        changeLineHeight(activeStyle.font_size, line);
+                        //line.lineH = activeStyle.font_size;
+                        /// Todo: update location of previous text on this line. //DONE
                     }
                     RItem item;
                     item.type = RITEM_TEXT;
@@ -440,4 +442,13 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             }
         }
     }
+}
+
+void HTMLRenderer::changeLineHeight(int newHeight, RItemLine &line)
+{
+    for (int i = 0; i < line.items.size(); i++)
+    {
+        line.items[i]->position.y += (newHeight - line.lineH);
+    }
+    line.lineH = newHeight;
 }
