@@ -49,9 +49,31 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                 }
             }
             std::string newsrc;
+
+            std::string newImgSrc;
+            bool findingSlash = true;
+            for (int i = 0; i < imgSource.size(); i++)
+            {
+                if (findingSlash && imgSource[i] == '/')
+                {
+
+                }
+                else
+                {
+                    newImgSrc.push_back(imgSource[i]);
+                    findingSlash = false;
+                }
+            }
+            imgSource = newImgSrc;
+
             if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
             {
+
                 newsrc = imgSource;
+                if (imgSource.find("http") == imgSource.npos)
+                {
+                    newsrc = "http://" + imgSource;
+                }
             }
             else
             {
