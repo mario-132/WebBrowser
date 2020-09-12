@@ -55,20 +55,20 @@ void printFps()
     }
 }
 
-void getStyleFromDOM(RenderDOMItem &dom, std::string &style, bool _isInStyle = false)
+void getStyleFromDOM(GumboNode *dom, std::string &style, bool _isInStyle = false)
 {
-    if (dom.type == RENDERDOM_ELEMENT)
+    if (dom->type == GUMBO_NODE_ELEMENT)
     {
-        for (int i = 0; i < dom.children.size(); i++)
+        for (int i = 0; i < dom->v.element.children.length; i++)
         {
-            getStyleFromDOM(dom.children[i], style, dom.element.tag == GUMBO_TAG_STYLE);
+            getStyleFromDOM((GumboNode*)dom->v.element.children.data[i], style, dom->v.element.tag == GUMBO_TAG_STYLE);
         }
     }
-    else if (dom.type == RENDERDOM_TEXT)
+    else if (dom->type == GUMBO_NODE_TEXT)
     {
         if (_isInStyle)
         {
-            style += dom.text;
+            style += dom->v.text.text;
         }
     }
 }
@@ -113,12 +113,13 @@ int main()
     style.bold = false;
     style.isLink = false;
 
-    RenderDOM dom;
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://old.reddit.com");
-
     std::string css;
-    getStyleFromDOM(rootDomItem, css);
-    auto cssOut = css::parseFromString(css);
+    getStyleFromDOM(output->root, css);
+    std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
+
+    RenderDOM dom;
+    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://old.reddit.com", cssOut);
+
     for (int i = 0; i < cssOut.size(); i++)
     {
         for (int j = 0; j < cssOut[i].items.size(); j++)

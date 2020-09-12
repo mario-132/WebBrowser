@@ -7,7 +7,75 @@ RenderDOM::RenderDOM()
 
 }
 
-RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL)
+std::string gumboTagToString(GumboTag tag)
+{
+    std::string name;
+
+    if (tag == GUMBO_TAG_P)
+    {
+        name = "p";
+    }
+    else if (tag == GUMBO_TAG_IMG)
+    {
+        name = "img";
+    }
+    else if (tag == GUMBO_TAG_H1)
+    {
+        name = "h1";
+    }
+    else if (tag == GUMBO_TAG_H2)
+    {
+        name = "h2";
+    }
+    else if (tag == GUMBO_TAG_H3)
+    {
+        name = "h3";
+    }
+    else if (tag == GUMBO_TAG_H4)
+    {
+        name = "h4";
+    }
+    else if (tag == GUMBO_TAG_H5)
+    {
+        name = "h5";
+    }
+    else if (tag == GUMBO_TAG_H6)
+    {
+        name = "h6";
+    }
+    else if (tag == GUMBO_TAG_BODY)
+    {
+        name = "body";
+    }
+    else if (tag == GUMBO_TAG_HTML)
+    {
+        name = "p";
+    }
+    else if (tag == GUMBO_TAG_B)
+    {
+        name = "b";
+    }
+    else if (tag == GUMBO_TAG_BR)
+    {
+        name = "br";
+    }
+    else if (tag == GUMBO_TAG_DIV)
+    {
+        name = "div";
+    }
+    else if (tag == GUMBO_TAG_SPAN)
+    {
+        name = "span";
+    }
+    else if (tag == GUMBO_TAG_A)
+    {
+        name = "a";
+    }
+
+    return name;
+}
+
+RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css)
 {
     RenderDOMItem item;
     item.type = RENDERDOM_NONE;
@@ -26,6 +94,51 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
 
         style.display = "inline";
         applyStyle(item, style);
+
+        for (int i = 0; i < css.size(); i++)
+        {
+            for (int j = 0; j < css[i].selectors.size(); j++)
+            {
+                if (css[i].selectors[j].additionals.back().name == gumboTagToString(node->v.element.tag))
+                {
+                    for (int k = 0; k < css[i].items.size(); k++)
+                    {
+                        if (css[i].items[k].attribute.attributeAsString == "font-size")
+                        {
+                            if (css[i].items[k].value.type == css::CSS_TYPE_PX)
+                            {
+                                style.font_size = css[i].items[k].value.numberValue;
+                            }
+                            if (css[i].items[k].value.type == css::CSS_TYPE_EM)///Todo: @mario-132 Make sure this is actually correct
+                            {
+                                style.font_size = style.font_size*css[i].items[k].value.numberValue;
+                            }
+                        }
+                        if (css[i].items[k].attribute.attributeAsString == "display")
+                        {
+                            if (css[i].items[k].value.valueAsString == "block")
+                            {
+                                style.display = "block";
+                            }
+                            if (css[i].items[k].value.valueAsString == "inline")
+                            {
+                                style.display = "inline";
+                            }
+                            if (css[i].items[k].value.valueAsString == "inline-block")
+                            {
+                                style.display = "inline";
+                            }
+                            if (css[i].items[k].value.valueAsString == "none")
+                            {
+                                style.display = "none";
+                                style.visible = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         item.element.style = style;
 
         if (item.element.tag == GUMBO_TAG_IMG)
@@ -115,7 +228,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
 
         for (int i = 0; i < node->v.element.children.length; i++)
         {
-            item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, baseURL));
+            item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, baseURL, css));
         }
     }
     else if (node->type == GUMBO_NODE_TEXT)

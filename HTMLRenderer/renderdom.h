@@ -3,6 +3,7 @@
 #include <gumbo.h>
 #include <vector>
 #include <iostream>
+#include "cssparse.h"
 
 struct RenderDOMStyle
 {
@@ -63,7 +64,7 @@ class RenderDOM
 {
 public:
     RenderDOM();
-    RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL);
+    RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css);
     void applyStyle(RenderDOMItem &item, RenderDOMStyle &style);
 };
 
