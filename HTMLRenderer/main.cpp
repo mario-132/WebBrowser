@@ -6,6 +6,7 @@
 #include "htmlrenderer.h"
 #include "webservice.h"
 #include "renderdom.h"
+#include "cssparse.h"
 #include <chrono>
 
 #define FRAMEBUFFER_WIDTH 3840
@@ -56,6 +57,24 @@ void printFps()
 
 int main()
 {
+    std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/stress.css");
+    auto cssOut = css::parseFromString(css);
+    for (int i = 0; i < cssOut.size(); i++)
+    {
+        for (int j = 0; j < cssOut[i].items.size(); j++)
+        {
+            std::cout << cssOut[i].items[j].attribute.attributeAsString;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
+                std::cout << " UNKNOWN" << std::endl;
+        }
+    }
+
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
@@ -88,7 +107,7 @@ int main()
     style.display = "inline";
     style.visible = false;
     style.font_size = 16;
-    style.line_height = 10;
+    style.line_height = 1.2;
     style.bold = false;
     style.isLink = false;
 
