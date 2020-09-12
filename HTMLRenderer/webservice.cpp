@@ -21,7 +21,7 @@ std::string WebService::htmlFileDownloader(std::string path)
     curl_easy_setopt(curl_handle, CURLOPT_URL, path.c_str());
 
     /* Switch on full protocol/debug output while testing */
-    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+    //curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
     /* disable progress meter, set to 0L to enable it */
     curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);

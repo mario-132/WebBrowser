@@ -55,25 +55,27 @@ void printFps()
     }
 }
 
-int main()
+void getStyleFromDOM(RenderDOMItem &dom, std::string &style, bool _isInStyle = false)
 {
-    std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/stress.css");
-    auto cssOut = css::parseFromString(css);
-    for (int i = 0; i < cssOut.size(); i++)
+    if (dom.type == RENDERDOM_ELEMENT)
     {
-        for (int j = 0; j < cssOut[i].items.size(); j++)
+        for (int i = 0; i < dom.children.size(); i++)
         {
-            std::cout << cssOut[i].items[j].attribute.attributeAsString;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
-                std::cout << " UNKNOWN" << std::endl;
+            getStyleFromDOM(dom.children[i], style, dom.element.tag == GUMBO_TAG_STYLE);
         }
     }
+    else if (dom.type == RENDERDOM_TEXT)
+    {
+        if (_isInStyle)
+        {
+            style += dom.text;
+        }
+    }
+}
+
+int main()
+{
+
 
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
@@ -94,8 +96,8 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://www.google.com/search?channel=fs&client=ubuntu&q=firefox+change+user+agent");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
+    std::string htmlFile = WebService::htmlFileDownloader("http://lightboxengine.com/simplestyle.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
@@ -113,6 +115,25 @@ int main()
 
     RenderDOM dom;
     RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://old.reddit.com");
+
+    std::string css;
+    getStyleFromDOM(rootDomItem, css);
+    auto cssOut = css::parseFromString(css);
+    for (int i = 0; i < cssOut.size(); i++)
+    {
+        for (int j = 0; j < cssOut[i].items.size(); j++)
+        {
+            std::cout << cssOut[i].items[j].attribute.attributeAsString;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
+            if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
+                std::cout << " UNKNOWN" << std::endl;
+        }
+    }
 
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
