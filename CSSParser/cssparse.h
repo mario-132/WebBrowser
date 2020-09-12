@@ -43,11 +43,42 @@ namespace css
         std::vector<std::string> matchingClasses;
     };
 
+    struct CSSColor
+    {
+        char r;
+        char g;
+        char b;
+    };
+
+    struct CSSAttribute
+    {
+        std::string attributeAsString;
+    };
+
+    enum CSSValueType
+    {
+        CSS_TYPE_UNKNOWN,
+        CSS_TYPE_PX,
+        CSS_TYPE_EM,
+        CSS_TYPE_PERCENT,
+        CSS_TYPE_COLOR
+    };
+
+    struct CSSValue
+    {
+        std::string valueAsString;
+
+        CSSValueType type;
+        float numberValue;// Only use when type is known.
+
+        CSSColor color;
+    };
+
     /// Contains the attribute and value. The value is in multiple forms to allow for easy access.
     struct CSSItem
     {
-        std::string attribute;
-        std::string valueAsString;
+        CSSAttribute attribute;
+        CSSValue value;
     };
 
     /// CSSSelector contains the base selector(the most right one in the css stylesheet) and it's associated
@@ -67,9 +98,9 @@ namespace css
         std::vector<CSSSelector> selectors;
     };
 
-    bool isChr(char c);/// Checks if c is a a-z or A-Z ascii character
+    bool isChr(char c);///< Checks if c is a a-z or A-Z ascii character
 
-    bool isNum(char c);/// Checks if c is a 0-9 number
+    bool isNum(char c);///< Checks if c is a 0-9 number
 
     bool isValidSelectorNameStart(char c);
 
@@ -87,9 +118,12 @@ namespace css
 
     std::vector<CSSBasicSelector> basicParseFromString(std::string css);/// Takes a stylesheet and spits it up, it does not fully parse.
 
-    void parseFromBasic(std::vector<CSSBasicSelector> css);/// Parses the basicParse contents.
+    std::vector<CSSSelectorBlock> parseFromBasic(std::vector<CSSBasicSelector> css);/// Parses the basicParse contents.
 
     void parseFromString(std::string css);/// Takes a stylesheet as a string and parses it.
+
+    CSSAttribute parseSingleAttribute(std::string attrib);
+    CSSValue parseSingleValue(std::string value);
 }
 
 #endif // CSSPARSE_H

@@ -104,7 +104,7 @@ namespace css
             attribute+=css[curChr];
             curChr++;
         }*/
-        while (css[curChr] != ':' && css[curChr] != ';' && curChr < cssLength)
+        while (css[curChr] != ':' && css[curChr] != ';' && css[curChr] != '}' && curChr < cssLength)
         {
             if (css[curChr] != '\n')
             {
@@ -334,10 +334,10 @@ namespace css
             }
         }
 
-        if (selector != "")
-        {
-            std::cout << " |" << selector << "| ";
-        }
+        //if (selector != "")
+        //{
+        //    std::cout << " |" << selector << "| ";
+        //}
 
         addSel.name = selector;
         additionalOperands.push_back(addSel);
@@ -357,8 +357,9 @@ namespace css
         return false;
     }
 
-    void parseFromBasic(std::vector<CSSBasicSelector> css)
+    std::vector<CSSSelectorBlock> parseFromBasic(std::vector<CSSBasicSelector> css)
     {
+        std::vector<CSSSelectorBlock> CSSSelectorBlocks;
         for (int i = 0; i < css.size(); i++)
         {
             int numChr = 0;// To remember at which character we're at.
@@ -366,7 +367,7 @@ namespace css
             std::string selector;// Temporarily stores the selector name as it is parsed.
             std::vector<CSSAdditionalSelector> additionalOperands;// Stores parsed selectors in reverse order, has to be reversed later.
 
-            CSSSelectorBlock cssSelBlock;
+            CSSSelectorBlock cssSelBlock;// Stores all selectors for a css block
 
             std::cout << "Original: " << css[i].selectorCombo << ":";
             bool isFirstSelector = true;
@@ -380,6 +381,12 @@ namespace css
             cssSelBlock.selectors.push_back(CSSSelector());
             cssSelBlock.selectors.back().selector = "INVALID";
             cssSelBlock.selectors.back().additionals = additionalOperands;
+            std::cout << std::endl;
+            for (int j = 0; j < css[i].items.size(); j++)
+            {
+                parseSingleAttribute(css[i].items[j].name);
+                parseSingleValue(css[i].items[j].value);
+            }
 
             std::cout << std::endl;
             for (int a = 0; a < cssSelBlock.selectors.size(); a++)
@@ -421,7 +428,118 @@ namespace css
                 }
                 std::cout << std::endl;
             }
+            CSSSelectorBlocks.push_back(cssSelBlock);
         }
+        return CSSSelectorBlocks;
+    }
+
+    CSSAttribute parseSingleAttribute(std::string attrib)
+    {
+        CSSAttribute attribute;
+        std::cout << "<" << attrib << ">";
+        for (int i = attrib.size()-1; i >= 0; i--)
+        {
+            if (attrib[i] == ' ' || attrib[i] == '\t')// Remove tabs and spaces at the end
+            {
+                attrib.erase(i, 1);
+            }
+            else
+            {
+                break;
+            }
+        }
+        std::cout << " <" << attrib << ">" << std::endl;
+        attribute.attributeAsString = attrib;
+        return attribute;
+    }
+
+    CSSValue parseSingleValue(std::string value)
+    {
+        CSSValue val;
+        val.type = CSS_TYPE_UNKNOWN;
+        std::cout << "<>" << value << "<>";
+        for (int i = value.size()-1; i >= 0; i--)
+        {
+            if (value[i] == ' ' || value[i] == '\t')// Remove tabs and spaces at the end
+            {
+                value.erase(i, 1);
+            }
+            else
+            {
+                break;
+            }
+        }
+        std::cout << " <>" << value << "<>" << std::endl;
+        val.valueAsString = value;
+
+        bool isFunction = false;
+        {
+            std::string parsedValue;
+            int i = 0;
+            for (i = 0; i < value.size(); i++)
+            {
+                if (value[i] != '(')
+                {
+                    parsedValue += value[i];
+                }
+                else
+                {
+                    isFunction = true;// It has opening bracket so it's a function.
+                    break;
+                }
+            }
+
+            if (isFunction)
+            {
+                std::cout << "css function unhandled!" << std::endl;
+                if (parsedValue == "rgb")// rgb function
+                {
+
+                }
+            }
+        }
+
+        std::string number;
+        std::string unit;
+        int chrI = 0;
+
+        if (!isFunction)
+        {
+            while((isNum(value[chrI]) || value[chrI] == '.') && chrI < value.size())
+            {
+                number += value[chrI];
+                chrI++;
+            }
+            /*while(value[chrI] == ' ' && chrI < value.size())
+            {
+                chrI++;
+            }*/
+            while(value[chrI] != ' ' && chrI < value.size())
+            {
+                unit += value[chrI];
+                chrI++;
+            }
+            if (unit == "px")
+            {
+                std::cout << "Value: " << stof(number) << " unit: px" << std::endl;
+                val.type = CSS_TYPE_PX;
+                val.numberValue = stof(number);
+            }
+            else if (unit == "em")
+            {
+                std::cout << "Value: " << stof(number) << " unit: em" << std::endl;
+                val.type = CSS_TYPE_EM;
+                val.numberValue = stof(number);
+            }
+            else if (unit == "%")
+            {
+                std::cout << "Value: " << stof(number) << " unit: %" << std::endl;
+                val.type = CSS_TYPE_PERCENT;
+                val.numberValue = stof(number);
+            }
+        }
+
+        return val;
     }
 
 }
