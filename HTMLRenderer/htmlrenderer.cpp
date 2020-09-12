@@ -212,7 +212,8 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
     if (documentBox->itemLines.size() == 0)
     {
         RItemLine line;
-        line.lineH = 0;
+        line.lineHTop = 0;
+        line.lineHBottom = 0;
         line.lineW = 0;
         line.lineX = documentBox->x;
         line.lineY = documentBox->y;
@@ -226,10 +227,11 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
         if (activeStyle.display == "block")
         {
             RItemLine nline;
-            nline.lineH = 0;
+            nline.lineHTop = 0;
+            nline.lineHBottom = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
-            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
+            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineHTop + documentBox->itemLines.back().lineHBottom;
             documentBox->itemLines.push_back(nline);
         }
 
@@ -271,14 +273,14 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
             item.position.h = imgH;
 
             RItemLine &line = documentBox->itemLines.back();
-            if (line.lineH < imgH)
+            if (line.lineHTop < imgH)
             {
-                changeLineHeight(imgH, line);
+                changeLineHeightTop(imgH, line);
                 //line.lineH = imgH;
             }
 
             item.position.x = line.lineX + line.lineW;
-            item.position.y = (line.lineY + line.lineH)-imgH;
+            item.position.y = (line.lineY + line.lineHTop)-imgH;
 
             line.lineW += imgW;
             RenderItems.push_back(item);
@@ -293,10 +295,11 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
         if (activeStyle.display == "block")
         {
             RItemLine nline;
-            nline.lineH = 0;
+            nline.lineHTop = 0;
+            nline.lineHBottom = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
-            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
+            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineHTop + documentBox->itemLines.back().lineHBottom;
             documentBox->itemLines.push_back(nline);
         }
     }
@@ -322,17 +325,22 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                 if (cX > documentBox->w || i == wide.size()-1)
                 {
                     RItemLine &line = documentBox->itemLines.back();
-                    if (line.lineH < activeStyle.font_size)
+                    int lineHeightSpacing = ((activeStyle.font_size*activeStyle.line_height)-activeStyle.font_size)/2;
+                    if (line.lineHTop < activeStyle.font_size+lineHeightSpacing)
                     {
-                        changeLineHeight(activeStyle.font_size, line);
+                        changeLineHeightTop(activeStyle.font_size+lineHeightSpacing, line);
                         //line.lineH = activeStyle.font_size;
-                        /// Todo: update location of previous text on this line. //DONE
+                    }
+                    if (line.lineHBottom < lineHeightSpacing)
+                    {
+                        changeLineHeightBottom(lineHeightSpacing, line);
+                        //line.lineH = activeStyle.font_size;
                     }
                     RItem item;
                     item.type = RITEM_TEXT;
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = line.lineX + line.lineW;
-                    item.position.y = line.lineY + line.lineH;
+                    item.position.y = line.lineY + line.lineHTop;
                     item.text.textSize = activeStyle.font_size;
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
@@ -345,10 +353,11 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     if (cX > documentBox->w)
                     {
                         RItemLine nline;
-                        nline.lineH = 0;
+                        nline.lineHTop = 0;
+                        nline.lineHBottom = 0;
                         nline.lineW = 0;
                         nline.lineX = documentBox->x;
-                        nline.lineY = line.lineY + line.lineH;
+                        nline.lineY = line.lineY + line.lineHTop + line.lineHBottom;
                         documentBox->itemLines.push_back(nline);
                         cX = nline.lineX;
                     }
@@ -444,11 +453,16 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
     }
 }
 
-void HTMLRenderer::changeLineHeight(int newHeight, RItemLine &line)
+void HTMLRenderer::changeLineHeightTop(int newHeight, RItemLine &line)
 {
     for (int i = 0; i < line.items.size(); i++)
     {
-        line.items[i]->position.y += (newHeight - line.lineH);
+        line.items[i]->position.y += (newHeight - line.lineHTop);
     }
-    line.lineH = newHeight;
+    line.lineHTop = newHeight;
+}
+
+void HTMLRenderer::changeLineHeightBottom(int newHeight, RItemLine &line)
+{
+    line.lineHBottom = newHeight;
 }

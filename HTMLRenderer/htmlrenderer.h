@@ -71,7 +71,8 @@ struct RItemLine
 {
     int lineX;
     int lineY;
-    int lineH;
+    int lineHTop;
+    int lineHBottom;
     int lineW;
     std::vector<RItem*> items;
 };
@@ -110,7 +111,8 @@ public:
     std::vector<RItem> RenderItems;
 
 private:
-    void changeLineHeight(int newHeight, RItemLine &line);
+    void changeLineHeightTop(int newHeight, RItemLine &line);
+    void changeLineHeightBottom(int newHeight, RItemLine &line);
 };
 
 #endif // HTMLRENDERER_H

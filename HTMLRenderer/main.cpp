@@ -88,7 +88,7 @@ int main()
     style.display = "inline";
     style.visible = false;
     style.font_size = 16;
-    style.line_height = 1.2;
+    style.line_height = 10;
     style.bold = false;
     style.isLink = false;
 
