@@ -61,6 +61,7 @@ namespace css
         CSS_TYPE_PX,
         CSS_TYPE_EM,
         CSS_TYPE_PERCENT,
+        CSS_TYPE_NUMBER,
         CSS_TYPE_COLOR
     };
 

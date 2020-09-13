@@ -49,7 +49,7 @@ std::string gumboTagToString(GumboTag tag)
     }
     else if (tag == GUMBO_TAG_HTML)
     {
-        name = "p";
+        name = "html";
     }
     else if (tag == GUMBO_TAG_B)
     {
@@ -71,6 +71,26 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "a";
     }
+    else if (tag == GUMBO_TAG_HEAD)
+    {
+        name = "head";
+    }
+    else if (tag == GUMBO_TAG_STYLE)
+    {
+        name = "style";
+    }
+    else if (tag == GUMBO_TAG_CENTER)
+    {
+        name = "center";
+    }
+    else if (tag == GUMBO_TAG_BIG)
+    {
+        name = "big";
+    }
+    else if (tag == GUMBO_TAG_STRONG)
+    {
+        name = "strong";
+    }
 
     return name;
 }
@@ -91,9 +111,11 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             attr.value = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
             item.element.attributes.push_back(attr);
         }
-
-        style.display = "inline";
-        applyStyle(item, style);
+        if (style.display != "none")
+        {
+            style.display = "inline";
+        }
+        //applyStyle(item, style);
 
         for (int i = 0; i < css.size(); i++)
         {
@@ -131,7 +153,44 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             if (css[i].items[k].value.valueAsString == "none")
                             {
                                 style.display = "none";
-                                style.visible = false;
+                            }
+                        }
+                        if (css[i].items[k].attribute.attributeAsString == "font-weight")
+                        {
+                            if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
+                            {
+                                style.bold = (css[i].items[k].value.numberValue > 550);
+                            }
+                            if (css[i].items[k].value.valueAsString == "bold")
+                            {
+                                style.bold = true;
+                            }
+                            if (css[i].items[k].value.valueAsString == "bolder")
+                            {
+                                style.bold = true;
+                            }
+                            if (css[i].items[k].value.valueAsString == "normal")
+                            {
+                                style.bold = false;
+                            }
+                            if (css[i].items[k].value.valueAsString == "lighter")
+                            {
+                                style.bold = false;
+                            }
+                        }
+                        if (css[i].items[k].attribute.attributeAsString == "text-align")
+                        {
+                            style.text_align = css[i].items[k].value.valueAsString;
+                        }
+                        if (css[i].items[k].attribute.attributeAsString == "--wb-islink")
+                        {
+                            style.isLink = (css[i].items[k].value.valueAsString == "link");
+                        }
+                        if (css[i].items[k].attribute.attributeAsString == "line-height")
+                        {
+                            if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
+                            {
+                                style.line_height = css[i].items[k].value.numberValue;
                             }
                         }
                     }
@@ -200,6 +259,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             std::string out;
             if (newsrc.size() > 1)
             {
+                std::cout << "Downloading: " << newsrc << std::endl;
                 out = WebService::htmlFileDownloader(newsrc);
             }
             unsigned char* data = stbi_load_from_memory((unsigned char*)&out[0], out.size(), &imgW, &imgH, &comp, 0);
@@ -245,19 +305,19 @@ void RenderDOM::applyStyle(RenderDOMItem &item, RenderDOMStyle &style)
     // Hide certain elements so the scripts and such don't appear as text.
     if (item.element.tag == GUMBO_TAG_BODY)
     {
-        style.visible = true;
+        style.display = "block";
     }
     if (item.element.tag == GUMBO_TAG_HEAD)
     {
-        style.visible = false;
+        style.display = "none";
     }
     if (item.element.tag == GUMBO_TAG_SCRIPT)
     {
-        style.visible = false;
+        style.display = "none";
     }
     if (item.element.tag == GUMBO_TAG_STYLE)
     {
-        style.visible = false;
+        style.display = "none";
     }
 
     // Default font sizes

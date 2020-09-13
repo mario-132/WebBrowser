@@ -8,10 +8,11 @@
 struct RenderDOMStyle
 {
     std::string display;
-    bool visible;
+    //bool visible;
     //bool blockOrInline;// 0 = inline 1 = bloc
     int font_size;
     float line_height;
+    std::string text_align;
 
     bool bold;
     bool isLink;

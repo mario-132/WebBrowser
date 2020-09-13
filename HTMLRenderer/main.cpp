@@ -97,7 +97,7 @@ int main()
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
-    std::string htmlFile = WebService::htmlFileDownloader("http://lightboxengine.com/simplestyle.html");
+    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/simplestyle.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
@@ -107,32 +107,63 @@ int main()
 
     RenderDOMStyle style;
     style.display = "inline";
-    style.visible = false;
     style.font_size = 16;
     style.line_height = 1.2;
     style.bold = false;
     style.isLink = false;
 
-    std::string css;
+    std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
     getStyleFromDOM(output->root, css);
     std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
 
     RenderDOM dom;
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "http://old.reddit.com", cssOut);
+    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "https://old.reddit.com", cssOut);
 
     for (int i = 0; i < cssOut.size(); i++)
     {
+        std::cout << "<";
+        for (int j = 0; j < cssOut[i].selectors.size(); j++)
+        {
+            std::cout << cssOut[i].selectors[j].additionals.back().name << ", ";
+        }
+        std::cout << ">\n";
         for (int j = 0; j < cssOut[i].items.size(); j++)
         {
-            std::cout << cssOut[i].items[j].attribute.attributeAsString;
+            std::cout << "  " << cssOut[i].items[j].attribute.attributeAsString;
             if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
                 std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
+            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
                 std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
+            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
                 std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
+
+            else if (cssOut[i].items[j].attribute.attributeAsString == "display")
+            {
+                if (cssOut[i].items[j].value.valueAsString == "block")
+                {
+                    std::cout << " block" << std::endl;
+                }
+                else if (cssOut[i].items[j].value.valueAsString == "inline")
+                {
+                    std::cout << " inline" << std::endl;
+                }
+                else if (cssOut[i].items[j].value.valueAsString == "inline-block")
+                {
+                    std::cout << " inline-block" << std::endl;
+                }
+                else if (cssOut[i].items[j].value.valueAsString == "none")
+                {
+                    std::cout << " none" << std::endl;
+                }
+                else
+                {
+                    std::cout << " UNKNOWN" << std::endl;
+                }
+            }
+            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
                 std::cout << " UNKNOWN" << std::endl;
+            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_NUMBER)
+                std::cout << " " << cssOut[i].items[j].value.numberValue << std::endl;
         }
     }
 

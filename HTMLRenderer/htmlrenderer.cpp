@@ -305,7 +305,7 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
     }
     else if (root.type == RENDERDOM_TEXT)
     {
-        if (activeStyle.visible)
+        if (activeStyle.display != "none")
         {
             int fontsize = activeStyle.font_size;
             fte::setFontSize(inst, fontsize);
@@ -331,7 +331,7 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                         changeLineHeightTop(activeStyle.font_size+lineHeightSpacing, line);
                         //line.lineH = activeStyle.font_size;
                     }
-                    if (line.lineHBottom < lineHeightSpacing)
+                    if (line.lineHBottom < lineHeightSpacing || line.items.size() == 0)
                     {
                         changeLineHeightBottom(lineHeightSpacing, line);
                         //line.lineH = activeStyle.font_size;

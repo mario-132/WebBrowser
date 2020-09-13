@@ -519,27 +519,35 @@ namespace css
             {
                 chrI++;
             }*/
-            while(value[chrI] != ' ' && chrI < value.size())
+            if (chrI < value.size())
             {
-                unit += value[chrI];
-                chrI++;
+                while(value[chrI] != ' ' && chrI < value.size())
+                {
+                    unit += value[chrI];
+                    chrI++;
+                }
+                if (unit == "px")
+                {
+                    //std::cout << "Value: " << stof(number) << " unit: px" << std::endl;
+                    val.type = CSS_TYPE_PX;
+                    val.numberValue = stof(number);
+                }
+                else if (unit == "em")
+                {
+                    //std::cout << "Value: " << stof(number) << " unit: em" << std::endl;
+                    val.type = CSS_TYPE_EM;
+                    val.numberValue = stof(number);
+                }
+                else if (unit == "%")
+                {
+                    //std::cout << "Value: " << stof(number) << " unit: %" << std::endl;
+                    val.type = CSS_TYPE_PERCENT;
+                    val.numberValue = stof(number);
+                }
             }
-            if (unit == "px")
+            else
             {
-                //std::cout << "Value: " << stof(number) << " unit: px" << std::endl;
-                val.type = CSS_TYPE_PX;
-                val.numberValue = stof(number);
-            }
-            else if (unit == "em")
-            {
-                //std::cout << "Value: " << stof(number) << " unit: em" << std::endl;
-                val.type = CSS_TYPE_EM;
-                val.numberValue = stof(number);
-            }
-            else if (unit == "%")
-            {
-                //std::cout << "Value: " << stof(number) << " unit: %" << std::endl;
-                val.type = CSS_TYPE_PERCENT;
+                val.type = CSS_TYPE_NUMBER;
                 val.numberValue = stof(number);
             }
         }
