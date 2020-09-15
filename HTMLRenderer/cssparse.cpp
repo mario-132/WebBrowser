@@ -521,28 +521,39 @@ namespace css
             }*/
             if (chrI < value.size())
             {
-                while(value[chrI] != ' ' && chrI < value.size())
+                if (value[chrI] == '#')
                 {
-                    unit += value[chrI];
                     chrI++;
+                    val.color.r = strtol(value.c_str() + chrI, NULL, 2);
+                    val.color.g = strtol(value.c_str() + chrI + 2, NULL, 2);
+                    val.color.b = strtol(value.c_str() + chrI + 4, NULL, 2);
+                    val.type = CSS_TYPE_COLOR;
                 }
-                if (unit == "px")
+                else
                 {
-                    //std::cout << "Value: " << stof(number) << " unit: px" << std::endl;
-                    val.type = CSS_TYPE_PX;
-                    val.numberValue = stof(number);
-                }
-                else if (unit == "em")
-                {
-                    //std::cout << "Value: " << stof(number) << " unit: em" << std::endl;
-                    val.type = CSS_TYPE_EM;
-                    val.numberValue = stof(number);
-                }
-                else if (unit == "%")
-                {
-                    //std::cout << "Value: " << stof(number) << " unit: %" << std::endl;
-                    val.type = CSS_TYPE_PERCENT;
-                    val.numberValue = stof(number);
+                    while(value[chrI] != ' ' && chrI < value.size())
+                    {
+                        unit += value[chrI];
+                        chrI++;
+                    }
+                    if (unit == "px")
+                    {
+                        //std::cout << "Value: " << stof(number) << " unit: px" << std::endl;
+                        val.type = CSS_TYPE_PX;
+                        val.numberValue = stof(number);
+                    }
+                    else if (unit == "em")
+                    {
+                        //std::cout << "Value: " << stof(number) << " unit: em" << std::endl;
+                        val.type = CSS_TYPE_EM;
+                        val.numberValue = stof(number);
+                    }
+                    else if (unit == "%")
+                    {
+                        //std::cout << "Value: " << stof(number) << " unit: %" << std::endl;
+                        val.type = CSS_TYPE_PERCENT;
+                        val.numberValue = stof(number);
+                    }
                 }
             }
             else

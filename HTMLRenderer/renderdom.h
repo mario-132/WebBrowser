@@ -14,6 +14,10 @@ struct RenderDOMStyle
     float line_height;
     std::string text_align;
 
+    unsigned char cR;
+    unsigned char cG;
+    unsigned char cB;
+
     bool bold;
     bool isLink;
 };
