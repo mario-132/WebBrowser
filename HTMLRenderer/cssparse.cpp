@@ -524,9 +524,11 @@ namespace css
                 if (value[chrI] == '#')
                 {
                     chrI++;
-                    val.color.r = strtol(value.c_str() + chrI, NULL, 2);
-                    val.color.g = strtol(value.c_str() + chrI + 2, NULL, 2);
-                    val.color.b = strtol(value.c_str() + chrI + 4, NULL, 2);
+                    unsigned long c = strtol(value.c_str() + chrI, NULL, 16);
+                    std::cout << value.c_str() + chrI << ": " << c << std::endl;
+                    val.color.r = (c >> 16) & 0xFF;
+                    val.color.g = (c >> 8) & 0xFF;
+                    val.color.b = (c) & 0xFF;
                     val.type = CSS_TYPE_COLOR;
                 }
                 else

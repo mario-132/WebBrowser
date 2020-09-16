@@ -13,6 +13,10 @@ struct RText
     int textSize;
     std::wstring text;
 
+    unsigned char cR;
+    unsigned char cG;
+    unsigned char cB;
+
     bool bold;
     bool isLink;
 };

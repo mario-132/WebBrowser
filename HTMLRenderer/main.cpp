@@ -97,7 +97,7 @@ int main()
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/simplestyle.html");
+    std::string htmlFile = WebService::htmlFileDownloader("https://www.reddit.com/");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
@@ -111,15 +111,18 @@ int main()
     style.line_height = 1.2;
     style.bold = false;
     style.isLink = false;
+    style.cR = 0;
+    style.cG = 0;
+    style.cB = 0;
 
     std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
     getStyleFromDOM(output->root, css);
     std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
 
     RenderDOM dom;
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "https://old.reddit.com", cssOut);
+    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "https://reddit.com/", cssOut);
 
-    for (int i = 0; i < cssOut.size(); i++)
+    for (int i = 0; i < cssOut.size() && false; i++)
     {
         std::cout << "<";
         for (int j = 0; j < cssOut[i].selectors.size(); j++)

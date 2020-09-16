@@ -91,6 +91,10 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "strong";
     }
+    else if (tag == GUMBO_TAG_SCRIPT)
+    {
+        name = "script";
+    }
 
     return name;
 }
@@ -125,6 +129,16 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                 {
                     for (int k = 0; k < css[i].items.size(); k++)
                     {
+                        if (css[i].items[k].attribute.attributeAsString == "color")
+                        {
+                            if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                            {
+                                style.cR = css[i].items[k].value.color.r;
+                                style.cG = css[i].items[k].value.color.g;
+                                style.cB = css[i].items[k].value.color.b;
+                                std::cout << (int)style.cR << ", " << (int)style.cG << ", " << (int)style.cB << std::endl;
+                            }
+                        }
                         if (css[i].items[k].attribute.attributeAsString == "font-size")
                         {
                             if (css[i].items[k].value.type == css::CSS_TYPE_PX)

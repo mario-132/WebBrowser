@@ -345,6 +345,10 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
 
+                    item.text.cR = activeStyle.cR;
+                    item.text.cG = activeStyle.cG;
+                    item.text.cB = activeStyle.cB;
+
                     RenderItems.push_back(item);
                     line.lineW += cX-(line.lineX + line.lineW);
 
@@ -378,10 +382,12 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             fte::makeBold(inst, items[i].text.bold);
             fte::setFontSize(inst, items[i].text.textSize);
 
-            if (items[i].text.isLink)
-                fte::setTextColor(inst, (255-26)/255.0f, (255-13)/255.0f, (255-171)/255.0f);
-            else
-                fte::setTextColor(inst, 1, 1, 1);
+            fte::setTextColor(inst, (255-items[i].text.cR)/255.0f, (255-items[i].text.cG)/255.0f, (255-items[i].text.cB)/255.0f);
+
+            //if (items[i].text.isLink)
+            //    fte::setTextColor(inst, (255-26)/255.0f, (255-13)/255.0f, (255-171)/255.0f);
+            //else
+                //fte::setTextColor(inst, 1, 1, 1);
 
             int x = 0;
             if (items[i].position.y < framebufferHeight)// Make sure we are not trying to write a character off screen

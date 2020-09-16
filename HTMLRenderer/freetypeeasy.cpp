@@ -162,9 +162,9 @@ namespace freetypeeasy
                             {
                                 continue;
                             }
-                            framebuffer[(yp*bufferWidth*3)+(xp*3)+0] = (255-(inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x]*inst->r);
-                            framebuffer[(yp*bufferWidth*3)+(xp*3)+1] = (255-(inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x]*inst->g);
-                            framebuffer[(yp*bufferWidth*3)+(xp*3)+2] = (255-(inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x]*inst->b);
+                            framebuffer[(yp*bufferWidth*3)+(xp*3)+0] = 255-((inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x]*inst->r);
+                            framebuffer[(yp*bufferWidth*3)+(xp*3)+1] = 255-((inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x]*inst->g);
+                            framebuffer[(yp*bufferWidth*3)+(xp*3)+2] = 255-((inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x]*inst->b);
                         }
                     }
                 }
