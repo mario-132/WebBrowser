@@ -127,92 +127,131 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             {
                 if (css[i].selectors[j].additionals.back().name == gumboTagToString(node->v.element.tag))
                 {
-                    for (int k = 0; k < css[i].items.size(); k++)
+                    bool match = true;
+                    int selectorOffset = domCallStack.size()-1;
+                    for (int k = css[i].selectors[j].additionals.size()-1; k >= 0; k--)
                     {
-                        if (css[i].items[k].attribute.attributeAsString == "color")
+                        if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
                         {
-                            if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                            if (css[i].selectors[j].additionals[k].name != domCallStack[selectorOffset])
                             {
-                                style.color.r = css[i].items[k].value.color.r;
-                                style.color.g = css[i].items[k].value.color.g;
-                                style.color.b = css[i].items[k].value.color.b;
+                                match = false;
+                            }
+                            else
+                            {
+                                selectorOffset -= 1;
                             }
                         }
-                        if (css[i].items[k].attribute.attributeAsString == "background-color")
+                        if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_INSIDE_OF)
                         {
-                            if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                            bool found = false;
+                            for ( int s = domCallStack.size()-1; s >= 0; s--)
                             {
-                                style.background_color.r = css[i].items[k].value.color.r;
-                                style.background_color.g = css[i].items[k].value.color.g;
-                                style.background_color.b = css[i].items[k].value.color.b;
+                                if (css[i].selectors[j].additionals[k].name == domCallStack[selectorOffset])
+                                {
+                                    found = true;
+                                    selectorOffset -= 1;
+                                    break;
+                                }
+                                else
+                                {
+                                    selectorOffset -= 1;
+                                    //break;
+                                }
+
                             }
+                            match = found;
                         }
-                        if (css[i].items[k].attribute.attributeAsString == "font-size")
+                    }
+                    if (match)
+                    {
+                        for (int k = 0; k < css[i].items.size(); k++)
                         {
-                            if (css[i].items[k].value.type == css::CSS_TYPE_PX)
+                            if (css[i].items[k].attribute.attributeAsString == "color")
                             {
-                                style.font_size = css[i].items[k].value.numberValue;
+                                if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                                {
+                                    style.color.r = css[i].items[k].value.color.r;
+                                    style.color.g = css[i].items[k].value.color.g;
+                                    style.color.b = css[i].items[k].value.color.b;
+                                }
                             }
-                            if (css[i].items[k].value.type == css::CSS_TYPE_EM)///Todo: @mario-132 Make sure this is actually correct
+                            if (css[i].items[k].attribute.attributeAsString == "background-color")
                             {
-                                style.font_size = style.font_size*css[i].items[k].value.numberValue;
+                                if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                                {
+                                    style.background_color.r = css[i].items[k].value.color.r;
+                                    style.background_color.g = css[i].items[k].value.color.g;
+                                    style.background_color.b = css[i].items[k].value.color.b;
+                                }
                             }
-                        }
-                        if (css[i].items[k].attribute.attributeAsString == "display")
-                        {
-                            if (css[i].items[k].value.valueAsString == "block")
+                            if (css[i].items[k].attribute.attributeAsString == "font-size")
                             {
-                                style.display = "block";
+                                if (css[i].items[k].value.type == css::CSS_TYPE_PX)
+                                {
+                                    style.font_size = css[i].items[k].value.numberValue;
+                                }
+                                if (css[i].items[k].value.type == css::CSS_TYPE_EM)///Todo: @mario-132 Make sure this is actually correct
+                                {
+                                    style.font_size = style.font_size*css[i].items[k].value.numberValue;
+                                }
                             }
-                            if (css[i].items[k].value.valueAsString == "inline")
+                            if (css[i].items[k].attribute.attributeAsString == "display")
                             {
-                                style.display = "inline";
+                                if (css[i].items[k].value.valueAsString == "block")
+                                {
+                                    style.display = "block";
+                                }
+                                if (css[i].items[k].value.valueAsString == "inline")
+                                {
+                                    style.display = "inline";
+                                }
+                                if (css[i].items[k].value.valueAsString == "inline-block")
+                                {
+                                    style.display = "inline";
+                                }
+                                if (css[i].items[k].value.valueAsString == "none")
+                                {
+                                    style.display = "none";
+                                }
                             }
-                            if (css[i].items[k].value.valueAsString == "inline-block")
+                            if (css[i].items[k].attribute.attributeAsString == "font-weight")
                             {
-                                style.display = "inline";
+                                if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
+                                {
+                                    style.bold = (css[i].items[k].value.numberValue > 550);
+                                }
+                                if (css[i].items[k].value.valueAsString == "bold")
+                                {
+                                    style.bold = true;
+                                }
+                                if (css[i].items[k].value.valueAsString == "bolder")
+                                {
+                                    style.bold = true;
+                                }
+                                if (css[i].items[k].value.valueAsString == "normal")
+                                {
+                                    style.bold = false;
+                                }
+                                if (css[i].items[k].value.valueAsString == "lighter")
+                                {
+                                    style.bold = false;
+                                }
                             }
-                            if (css[i].items[k].value.valueAsString == "none")
+                            if (css[i].items[k].attribute.attributeAsString == "text-align")
                             {
-                                style.display = "none";
+                                style.text_align = css[i].items[k].value.valueAsString;
                             }
-                        }
-                        if (css[i].items[k].attribute.attributeAsString == "font-weight")
-                        {
-                            if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
+                            if (css[i].items[k].attribute.attributeAsString == "--wb-islink")
                             {
-                                style.bold = (css[i].items[k].value.numberValue > 550);
+                                style.isLink = (css[i].items[k].value.valueAsString == "link");
                             }
-                            if (css[i].items[k].value.valueAsString == "bold")
+                            if (css[i].items[k].attribute.attributeAsString == "line-height")
                             {
-                                style.bold = true;
-                            }
-                            if (css[i].items[k].value.valueAsString == "bolder")
-                            {
-                                style.bold = true;
-                            }
-                            if (css[i].items[k].value.valueAsString == "normal")
-                            {
-                                style.bold = false;
-                            }
-                            if (css[i].items[k].value.valueAsString == "lighter")
-                            {
-                                style.bold = false;
-                            }
-                        }
-                        if (css[i].items[k].attribute.attributeAsString == "text-align")
-                        {
-                            style.text_align = css[i].items[k].value.valueAsString;
-                        }
-                        if (css[i].items[k].attribute.attributeAsString == "--wb-islink")
-                        {
-                            style.isLink = (css[i].items[k].value.valueAsString == "link");
-                        }
-                        if (css[i].items[k].attribute.attributeAsString == "line-height")
-                        {
-                            if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
-                            {
-                                style.line_height = css[i].items[k].value.numberValue;
+                                if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
+                                {
+                                    style.line_height = css[i].items[k].value.numberValue;
+                                }
                             }
                         }
                     }
@@ -308,10 +347,12 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             }
         }
 
+        domCallStack.push_back(gumboTagToString(node->v.element.tag));
         for (int i = 0; i < node->v.element.children.length; i++)
         {
             item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, baseURL, css));
         }
+        domCallStack.pop_back();
     }
     else if (node->type == GUMBO_NODE_TEXT)
     {

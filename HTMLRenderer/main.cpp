@@ -143,6 +143,7 @@ int main()
     std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
 
     RenderDOM dom;
+    dom.domCallStack.clear();
     RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "https://reddit.com/", cssOut);
 
     for (int i = 0; i < cssOut.size() && true; i++)
