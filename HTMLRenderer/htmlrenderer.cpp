@@ -341,13 +341,19 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = line.lineX + line.lineW;
                     item.position.y = line.lineY + line.lineHTop;
+                    item.position.w = cX-(line.lineX + line.lineW);
+                    item.position.h = line.lineHTop + line.lineHBottom;
                     item.text.textSize = activeStyle.font_size;
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
 
-                    item.text.cR = activeStyle.cR;
-                    item.text.cG = activeStyle.cG;
-                    item.text.cB = activeStyle.cB;
+                    item.text.color.r = activeStyle.color.r;
+                    item.text.color.g = activeStyle.color.g;
+                    item.text.color.b = activeStyle.color.b;
+
+                    item.text.background_color.r = activeStyle.background_color.r;
+                    item.text.background_color.g = activeStyle.background_color.g;
+                    item.text.background_color.b = activeStyle.background_color.b;
 
                     RenderItems.push_back(item);
                     line.lineW += cX-(line.lineX + line.lineW);
@@ -382,12 +388,20 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             fte::makeBold(inst, items[i].text.bold);
             fte::setFontSize(inst, items[i].text.textSize);
 
-            fte::setTextColor(inst, (255-items[i].text.cR)/255.0f, (255-items[i].text.cG)/255.0f, (255-items[i].text.cB)/255.0f);
+            fte::setTextColor(inst, (255-items[i].text.color.r)/255.0f, (255-items[i].text.color.g)/255.0f, (255-items[i].text.color.b)/255.0f);
 
-            //if (items[i].text.isLink)
-            //    fte::setTextColor(inst, (255-26)/255.0f, (255-13)/255.0f, (255-171)/255.0f);
-            //else
-                //fte::setTextColor(inst, 1, 1, 1);
+            if (items[i].text.background_color.r != 255 || items[i].text.background_color.g != 255 || items[i].text.background_color.b != 255)
+            {
+                for (int x = items[i].position.x; x < items[i].position.x + items[i].position.w; x++)
+                {
+                    for (int y = items[i].position.y; y >= items[i].position.y - items[i].position.h; y--)
+                    {
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)] =   items[i].text.background_color.r;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = items[i].text.background_color.g;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = items[i].text.background_color.b;
+                    }
+                }
+            }
 
             int x = 0;
             if (items[i].position.y < framebufferHeight)// Make sure we are not trying to write a character off screen

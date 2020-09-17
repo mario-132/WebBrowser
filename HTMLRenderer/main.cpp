@@ -75,8 +75,6 @@ void getStyleFromDOM(GumboNode *dom, std::string &style, bool _isInStyle = false
 
 int main()
 {
-
-
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
@@ -96,8 +94,8 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/imgtext.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://www.reddit.com/");
+    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/colortest.html");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://www.reddit.com/");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
 
@@ -111,9 +109,12 @@ int main()
     style.line_height = 1.2;
     style.bold = false;
     style.isLink = false;
-    style.cR = 0;
-    style.cG = 0;
-    style.cB = 0;
+    style.color.r = 0;
+    style.color.g = 0;
+    style.color.b = 0;
+    style.background_color.r = 255;
+    style.background_color.g = 255;
+    style.background_color.b = 255;
 
     std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
     getStyleFromDOM(output->root, css);
@@ -122,7 +123,7 @@ int main()
     RenderDOM dom;
     RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "https://reddit.com/", cssOut);
 
-    for (int i = 0; i < cssOut.size() && false; i++)
+    for (int i = 0; i < cssOut.size() && true; i++)
     {
         std::cout << "<";
         for (int j = 0; j < cssOut[i].selectors.size(); j++)

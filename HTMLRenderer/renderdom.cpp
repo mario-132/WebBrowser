@@ -133,10 +133,18 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         {
                             if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
                             {
-                                style.cR = css[i].items[k].value.color.r;
-                                style.cG = css[i].items[k].value.color.g;
-                                style.cB = css[i].items[k].value.color.b;
-                                std::cout << (int)style.cR << ", " << (int)style.cG << ", " << (int)style.cB << std::endl;
+                                style.color.r = css[i].items[k].value.color.r;
+                                style.color.g = css[i].items[k].value.color.g;
+                                style.color.b = css[i].items[k].value.color.b;
+                            }
+                        }
+                        if (css[i].items[k].attribute.attributeAsString == "background-color")
+                        {
+                            if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                            {
+                                style.background_color.r = css[i].items[k].value.color.r;
+                                style.background_color.g = css[i].items[k].value.color.g;
+                                style.background_color.b = css[i].items[k].value.color.b;
                             }
                         }
                         if (css[i].items[k].attribute.attributeAsString == "font-size")

@@ -5,6 +5,13 @@
 #include <iostream>
 #include "cssparse.h"
 
+struct RenderDOMColor
+{
+    unsigned int r;
+    unsigned int g;
+    unsigned int b;
+};
+
 struct RenderDOMStyle
 {
     std::string display;
@@ -14,9 +21,8 @@ struct RenderDOMStyle
     float line_height;
     std::string text_align;
 
-    unsigned char cR;
-    unsigned char cG;
-    unsigned char cB;
+    RenderDOMColor color;
+    RenderDOMColor background_color;
 
     bool bold;
     bool isLink;

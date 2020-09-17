@@ -45,9 +45,9 @@ namespace css
 
     struct CSSColor
     {
-        char r;
-        char g;
-        char b;
+        unsigned char r;
+        unsigned char g;
+        unsigned char b;
     };
 
     struct CSSAttribute

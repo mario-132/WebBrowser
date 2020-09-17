@@ -538,6 +538,58 @@ namespace css
                         unit += value[chrI];
                         chrI++;
                     }
+
+                    if (unit == "black")
+                    {
+                        val.color.r = 0;
+                        val.color.g = 0;
+                        val.color.b = 0;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "blue")
+                    {
+                        val.color.r = 0;
+                        val.color.g = 0;
+                        val.color.b = 255;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "green")
+                    {
+                        val.color.r = 0;
+                        val.color.g = 0x80;
+                        val.color.b = 0;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "red")
+                    {
+                        val.color.r = 255;
+                        val.color.g = 0;
+                        val.color.b = 0;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "aqua" || unit == "cyan")
+                    {
+                        val.color.r = 0;
+                        val.color.g = 255;
+                        val.color.b = 255;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "lime")
+                    {
+                        val.color.r = 0;
+                        val.color.g = 255;
+                        val.color.b = 0;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "yellow")
+                    {
+                        val.color.r = 255;
+                        val.color.g = 255;
+                        val.color.b = 0;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+
+
                     if (unit == "px")
                     {
                         //std::cout << "Value: " << stof(number) << " unit: px" << std::endl;
