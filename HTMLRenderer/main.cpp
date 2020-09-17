@@ -73,6 +73,24 @@ void getStyleFromDOM(GumboNode *dom, std::string &style, bool _isInStyle = false
     }
 }
 
+void getTitleFromDOM(GumboNode *dom, std::string &title, bool _isInTitle = false)
+{
+    if (dom->type == GUMBO_NODE_ELEMENT)
+    {
+        for (int i = 0; i < dom->v.element.children.length; i++)
+        {
+            getTitleFromDOM((GumboNode*)dom->v.element.children.data[i], title, dom->v.element.tag == GUMBO_TAG_TITLE);
+        }
+    }
+    else if (dom->type == GUMBO_NODE_TEXT)
+    {
+        if (_isInTitle)
+        {
+            title += dom->v.text.text;
+        }
+    }
+}
+
 int main()
 {
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
@@ -94,7 +112,7 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/colortest.html");
+    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/cssselectiontest.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://www.reddit.com/");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
@@ -102,6 +120,9 @@ int main()
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
 
     GumboOutput* output = gumbo_parse(htmlFile.c_str());
+
+    std::string pageTitle;// Temporary way to get page title.
+    getTitleFromDOM(output->root, pageTitle, false);
 
     RenderDOMStyle style;
     style.display = "inline";
@@ -179,6 +200,9 @@ int main()
     htmlrenderer.framebuffer = framebuffer;
     htmlrenderer.framebufferWidth = FRAMEBUFFER_WIDTH;
     htmlrenderer.framebufferHeight = FRAMEBUFFER_HEIGHT;
+
+    window.setTitle("WebBrowser - " + pageTitle);
+
     int a = 2;
     while(1)
     {

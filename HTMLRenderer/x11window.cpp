@@ -117,6 +117,11 @@ void X11Window::processWindowEvents()
     //if (e.type == KeyPress)
 }
 
+void X11Window::setTitle(std::string title)
+{
+    XStoreName(display, window, title.c_str());
+}
+
 void X11Window::closeWindow()
 {
     XCloseDisplay(display);
