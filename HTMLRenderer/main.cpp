@@ -118,6 +118,7 @@ int main()
 
     std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
     getStyleFromDOM(output->root, css);
+    css = css::commentRemover(css);
     std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
 
     RenderDOM dom;

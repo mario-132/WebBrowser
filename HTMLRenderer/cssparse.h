@@ -123,6 +123,8 @@ namespace css
 
     std::vector<CSSSelectorBlock> parseFromString(std::string css);/// Takes a stylesheet as a string and parses it.
 
+    std::string commentRemover(std::string str);
+
     CSSAttribute parseSingleAttribute(std::string attrib);
     CSSValue parseSingleValue(std::string value);
 }

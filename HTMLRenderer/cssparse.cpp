@@ -620,4 +620,45 @@ namespace css
         return val;
     }
 
+    std::string commentRemover(std::string str)
+    {
+        std::string newStr;
+        char prevC = ' ';
+        bool isCommenting = false;
+        for (int i = 0; i < str.size(); i++)
+        {
+            if (str[i] == '/')
+            {
+                if (i + 1 < str.size())
+                {
+                    if (str[i+1] == '*')
+                    {
+                        isCommenting = true;
+                    }
+                }
+            }
+            if (str[i] == '*')
+            {
+                if (i + 1 < str.size())
+                {
+                    if (str[i+1] == '/')
+                    {
+                        isCommenting = false;
+                        if (i+2 < str.size())
+                        {
+                            i+=2;
+                        }
+                    }
+                }
+            }
+
+            if (isCommenting == false)
+            {
+                newStr.push_back(str[i]);
+            }
+            prevC = str[i];
+        }
+        return newStr;
+    }
+
 }
