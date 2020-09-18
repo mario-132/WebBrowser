@@ -525,7 +525,7 @@ namespace css
                 {
                     chrI++;
                     unsigned long c = strtol(value.c_str() + chrI, NULL, 16);
-                    std::cout << value.c_str() + chrI << ": " << c << std::endl;
+                    //std::cout << value.c_str() + chrI << ": " << c << std::endl;
                     val.color.r = (c >> 16) & 0xFF;
                     val.color.g = (c >> 8) & 0xFF;
                     val.color.b = (c) & 0xFF;

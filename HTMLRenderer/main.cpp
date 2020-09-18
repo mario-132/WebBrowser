@@ -55,13 +55,33 @@ void printFps()
     }
 }
 
-void getStyleFromDOM(GumboNode *dom, std::string &style, bool _isInStyle = false)
+void getStyleFromDOM(GumboNode *dom, std::string &style, std::vector<std::string> &stylesheetPaths, bool _isInStyle = false)
 {
     if (dom->type == GUMBO_NODE_ELEMENT)
     {
+        if (dom->v.element.tag == GUMBO_TAG_LINK)
+        {
+            std::string href;
+            std::string rel;
+            for (int i = 0; i < dom->v.element.attributes.length; i++)
+            {
+                if (std::string(((GumboAttribute*)dom->v.element.attributes.data[i])->name) == "href")
+                {
+                    href = ((GumboAttribute*)dom->v.element.attributes.data[i])->value;
+                }
+                if (std::string(((GumboAttribute*)dom->v.element.attributes.data[i])->name) == "rel")
+                {
+                    rel = ((GumboAttribute*)dom->v.element.attributes.data[i])->value;
+                }
+            }
+            if (rel == "stylesheet")
+            {
+                stylesheetPaths.push_back(href);
+            }
+        }
         for (int i = 0; i < dom->v.element.children.length; i++)
         {
-            getStyleFromDOM((GumboNode*)dom->v.element.children.data[i], style, dom->v.element.tag == GUMBO_TAG_STYLE);
+            getStyleFromDOM((GumboNode*)dom->v.element.children.data[i], style, stylesheetPaths, dom->v.element.tag == GUMBO_TAG_STYLE);
         }
     }
     else if (dom->type == GUMBO_NODE_TEXT)
@@ -112,10 +132,12 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/cssselectiontest.html");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://www.reddit.com/");
+    std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/multiselector.html");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://mangadex.org/");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://github.com/mario-132/");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://myanimelist.net/animelist/timl132?status=7");
+
+    std::string baseURL = "https://mangadex.org/";
 
     findAndReplaceAll( htmlFile, "&nbsp;", " ");
 
@@ -138,15 +160,57 @@ int main()
     style.background_color.b = 255;
 
     std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
-    getStyleFromDOM(output->root, css);
+    std::vector<std::string> stylesheetPaths;
+    getStyleFromDOM(output->root, css, stylesheetPaths);
+    for (int i = 0; i < stylesheetPaths.size(); i++)
+    {
+        std::string imgSource = stylesheetPaths[i];
+        std::string newsrc;
+
+        std::string newImgSrc;
+        bool findingSlash = true;
+        for (int i = 0; i < imgSource.size(); i++)
+        {
+            if (findingSlash && imgSource[i] == '/')
+            {
+
+            }
+            else
+            {
+                newImgSrc.push_back(imgSource[i]);
+                findingSlash = false;
+            }
+        }
+        imgSource = newImgSrc;
+
+        if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
+        {
+
+            newsrc = imgSource;
+            if (imgSource.find("http") == imgSource.npos)
+            {
+                newsrc = "http://" + imgSource;
+            }
+        }
+        else
+        {
+            if (imgSource.size() > 1)
+            {
+                newsrc = baseURL + imgSource;
+            }
+        }
+        css += WebService::htmlFileDownloader(newsrc);
+        std::cout << "Downloaded stylesheet: " << stylesheetPaths[i] << std::endl;
+    }
+
     css = css::commentRemover(css);
     std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
 
     RenderDOM dom;
     dom.domCallStack.clear();
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, "https://reddit.com/", cssOut);
+    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, baseURL, cssOut);
 
-    for (int i = 0; i < cssOut.size() && true; i++)
+    for (int i = 0; i < cssOut.size() && false; i++)
     {
         std::cout << "<";
         for (int j = 0; j < cssOut[i].selectors.size(); j++)

@@ -396,6 +396,10 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                 {
                     for (int y = items[i].position.y; y >= items[i].position.y - items[i].position.h; y--)
                     {
+                        if (x < 0 || y < 0 || x > framebufferWidth-1 || y > framebufferHeight-1)
+                        {
+                            continue;
+                        }
                         framebuffer[(y*framebufferWidth*3)+((x)*3)] =   items[i].text.background_color.r;
                         framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = items[i].text.background_color.g;
                         framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = items[i].text.background_color.b;

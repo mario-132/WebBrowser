@@ -111,6 +111,7 @@ namespace freetypeeasy
             unsigned char* data = inst->glyphCache[inst->bold][inst->fontsize][character].glyphData;
             int width = inst->glyphCache[inst->bold][inst->fontsize][character].info.width;
             int height = inst->glyphCache[inst->bold][inst->fontsize][character].info.height;
+
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
