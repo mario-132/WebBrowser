@@ -149,7 +149,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     {
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
                         {
-                            match = false;
+                            if (domCallStack[selectorOffset] != css[i].selectors[j].additionals[k].name)
+                            {
+                                match = false;
+                            }
                         }
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_INSIDE_OF)
                         {
@@ -159,6 +162,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 if (domCallStack[selectorOffset] == css[i].selectors[j].additionals[k].name)
                                 {
                                     found = true;
+                                    if (selectorOffset > 0)
+                                    {
+                                        selectorOffset--;
+                                    }
                                     break;
                                 }
                             }
