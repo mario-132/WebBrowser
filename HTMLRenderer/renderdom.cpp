@@ -95,6 +95,22 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "script";
     }
+    else if (tag == GUMBO_TAG_FORM)
+    {
+        name = "form";
+    }
+    else if (tag == GUMBO_TAG_BUTTON)
+    {
+        name = "button";
+    }
+    else if (tag == GUMBO_TAG_SECTION)
+    {
+        name = "section";
+    }
+    else if (tag == GUMBO_TAG_LINK)
+    {
+        name = "link";
+    }
 
     return name;
 }
@@ -129,38 +145,35 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                 {
                     bool match = true;
                     int selectorOffset = domCallStack.size()-1;
-                    for (int k = css[i].selectors[j].additionals.size()-1; k >= 0; k--)
+                    for (int k = css[i].selectors[j].additionals.size()-2; k >= 0; k--)// We skip the last element because it is checked in the if already
                     {
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
                         {
-                            if (css[i].selectors[j].additionals[k].name != domCallStack[selectorOffset])
-                            {
-                                match = false;
-                            }
-                            else
-                            {
-                                selectorOffset -= 1;
-                            }
+                            match = false;
                         }
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_INSIDE_OF)
                         {
                             bool found = false;
-                            for ( int s = domCallStack.size()-1; s >= 0; s--)
+                            for (; selectorOffset >= 0; selectorOffset--)
                             {
-                                if (css[i].selectors[j].additionals[k].name == domCallStack[selectorOffset])
+                                if (domCallStack[selectorOffset] == css[i].selectors[j].additionals[k].name)
                                 {
                                     found = true;
-                                    selectorOffset -= 1;
                                     break;
                                 }
-                                else
-                                {
-                                    selectorOffset -= 1;
-                                    //break;
-                                }
-
                             }
-                            match = found;
+                            if (!found)
+                            {
+                                match = false;
+                            }
+                        }
+                        if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_ADJECENT_TO)
+                        {
+                            match = false;
+                        }
+                        if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECTLY_ADJECENT_TO)
+                        {
+                            match = false;
                         }
                     }
                     if (match)
