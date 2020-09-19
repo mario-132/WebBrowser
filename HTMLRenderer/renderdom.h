@@ -71,13 +71,21 @@ struct RenderDOMItem
     std::vector<RenderDOMItem> children;
 };
 
+struct DOMStackItem
+{
+    std::string tag;
+    std::string unparsedClasses;
+    std::string unparsedIDs;
+};
+
 class RenderDOM
 {
 public:
     RenderDOM();
     RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css);
-    std::vector<std::string> domCallStack;
+    std::vector<DOMStackItem> domCallStack;
     void applyStyle(RenderDOMItem &item, RenderDOMStyle &style);
+    bool checkSelectorMatch(std::string selector, const DOMStackItem &item);
 };
 
 #endif // RENDERDOM_H

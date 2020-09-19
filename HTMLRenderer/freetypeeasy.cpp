@@ -124,9 +124,13 @@ namespace freetypeeasy
                         {
                             continue;
                         }
-                        framebuffer[(yp*bufferWidth*3)+(xp*3)+0] = 255-(data[(y*width)+x]*inst->r);
-                        framebuffer[(yp*bufferWidth*3)+(xp*3)+1] = 255-(data[(y*width)+x]*inst->g);
-                        framebuffer[(yp*bufferWidth*3)+(xp*3)+2] = 255-(data[(y*width)+x]*inst->b);
+                        framebuffer[(yp*bufferWidth*3)+(xp*3)+0] = (inst->r * data[(y*width)+x]) + (framebuffer[(yp*bufferWidth*3)+(xp*3)+0] * (((float)(255-data[(y*width)+x]))/255));
+                        framebuffer[(yp*bufferWidth*3)+(xp*3)+1] = (inst->g * data[(y*width)+x]) + (framebuffer[(yp*bufferWidth*3)+(xp*3)+1] * (((float)(255-data[(y*width)+x]))/255));
+                        framebuffer[(yp*bufferWidth*3)+(xp*3)+2] = (inst->b * data[(y*width)+x]) + (framebuffer[(yp*bufferWidth*3)+(xp*3)+2] * (((float)(255-data[(y*width)+x]))/255));
+
+                        //framebuffer[(yp*bufferWidth*3)+(xp*3)+0] = 255-(data[(y*width)+x]*inst->r);
+                        //framebuffer[(yp*bufferWidth*3)+(xp*3)+1] = 255-(data[(y*width)+x]*inst->g);
+                        //framebuffer[(yp*bufferWidth*3)+(xp*3)+2] = 255-(data[(y*width)+x]*inst->b);
                     }
                 }
             }

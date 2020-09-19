@@ -388,7 +388,8 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             fte::makeBold(inst, items[i].text.bold);
             fte::setFontSize(inst, items[i].text.textSize);
 
-            fte::setTextColor(inst, (255-items[i].text.color.r)/255.0f, (255-items[i].text.color.g)/255.0f, (255-items[i].text.color.b)/255.0f);
+            //fte::setTextColor(inst, (255-items[i].text.color.r)/255.0f, (255-items[i].text.color.g)/255.0f, (255-items[i].text.color.b)/255.0f);
+            fte::setTextColor(inst, (items[i].text.color.r)/255.0f, (items[i].text.color.g)/255.0f, (items[i].text.color.b)/255.0f);
 
             if (items[i].text.background_color.r != 255 || items[i].text.background_color.g != 255 || items[i].text.background_color.b != 255)
             {

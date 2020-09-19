@@ -115,6 +115,26 @@ std::string gumboTagToString(GumboTag tag)
     return name;
 }
 
+bool RenderDOM::checkSelectorMatch(std::string selector, const DOMStackItem &item)
+{
+    if (selector.size()>0)
+    {
+        if (selector[0] == '.')
+        {
+
+        }
+        else if (selector[0] == '#')
+        {
+
+        }
+        else
+        {
+            return selector == item.tag;
+        }
+    }
+    return false;
+}
+
 RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css)
 {
     RenderDOMItem item;
@@ -131,17 +151,31 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             attr.value = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
             item.element.attributes.push_back(attr);
         }
+
+        DOMStackItem stackitem;
+        stackitem.tag = gumboTagToString(node->v.element.tag);
+        for (int i = 0; i < item.element.attributes.size(); i++)
+        {
+            if (std::string("class") == item.element.attributes[i].name)
+            {
+                stackitem.unparsedClasses = item.element.attributes[i].value;
+            }
+            if (std::string("id") == item.element.attributes[i].name)
+            {
+                stackitem.unparsedIDs = item.element.attributes[i].value;
+            }
+        }
+
         if (style.display != "none")
         {
             style.display = "inline";
         }
-        //applyStyle(item, style);
 
         for (int i = 0; i < css.size(); i++)
         {
             for (int j = 0; j < css[i].selectors.size(); j++)
             {
-                if (css[i].selectors[j].additionals.back().name == gumboTagToString(node->v.element.tag))
+                if (checkSelectorMatch(css[i].selectors[j].additionals.back().name, stackitem))
                 {
                     bool match = true;
                     int selectorOffset = domCallStack.size()-1;
@@ -166,7 +200,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         //    std::cout << gumboTagToString(node->v.element.tag) << "=" << domCallStack[selectorOffset] << ", " << css[i].selectors[j].additionals[k].name << std::endl;
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
                         {
-                            if (domCallStack[selectorOffset] != css[i].selectors[j].additionals[k].name)
+                            if (!checkSelectorMatch(css[i].selectors[j].additionals[k].name, domCallStack[selectorOffset]))
                             {
                                 match = false;
                                 break;
@@ -181,7 +215,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             bool found = false;
                             for (; selectorOffset >= 0; selectorOffset--)
                             {
-                                if (domCallStack[selectorOffset] == css[i].selectors[j].additionals[k].name)
+                                if (checkSelectorMatch(css[i].selectors[j].additionals[k].name, domCallStack[selectorOffset]))
                                 {
                                     found = true;
                                     if (selectorOffset > 0)
@@ -196,7 +230,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 match = false;
                             }
                         }
-                        if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_ADJECENT_TO)
+                        if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_ADJECENT_TO)/// Todo: @mario-132 Implement these 2 selectors
                         {
                             match = false;
                         }
@@ -241,6 +275,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             if (css[i].items[k].attribute.attributeAsString == "display")
                             {
                                 if (css[i].items[k].value.valueAsString == "block")
+                                {
+                                    style.display = "block";
+                                }
+                                if (css[i].items[k].value.valueAsString == "flex")
                                 {
                                     style.display = "block";
                                 }
@@ -389,7 +427,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             }
         }
 
-        domCallStack.push_back(gumboTagToString(node->v.element.tag));
+        domCallStack.push_back(stackitem);
         for (int i = 0; i < node->v.element.children.length; i++)
         {
             item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, baseURL, css));
