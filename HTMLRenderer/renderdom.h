@@ -87,6 +87,8 @@ public:
     void applyStyle(RenderDOMItem &item, RenderDOMStyle &style);
     bool checkSelectorMatch(std::string selector, const DOMStackItem &item);
     std::vector<std::string> parseSpaceSeparatedString(std::string str);
+    bool checkClassMatch(std::string classname, std::string items);
+    bool checkIDMatch(std::string idname, std::string items);
 };
 
 #endif // RENDERDOM_H

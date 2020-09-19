@@ -121,27 +121,15 @@ bool RenderDOM::checkSelectorMatch(std::string selector, const DOMStackItem &ite
     {
         if (selector[0] == '.')
         {
-            selector.erase(0);
-            std::vector<std::string> classes = parseSpaceSeparatedString(item.unparsedClasses);
-            for (int l = 0; l < classes.size(); l++)
-            {
-                if (classes[l] == selector)
-                {
-                    return true;
-                }
-            }
+            selector.erase(0, 1);
+            if (checkClassMatch(selector, item.unparsedClasses))
+                return true;
         }
         else if (selector[0] == '#')
         {
-            selector.erase(0);
-            std::vector<std::string> classes = parseSpaceSeparatedString(item.unparsedIDs);
-            for (int l = 0; l < classes.size(); l++)
-            {
-                if (classes[l] == selector)
-                {
-                    return true;
-                }
-            }
+            selector.erase(0, 1);
+            if (checkIDMatch(selector, item.unparsedIDs))
+                return true;
         }
         else
         {
@@ -166,13 +154,39 @@ std::vector<std::string> RenderDOM::parseSpaceSeparatedString(std::string str)
             items.back() += str[pos];
             pos++;
         }
-        while(str[pos] == ' ')
+        while(str[pos] == ' ' && pos < max)
         {
             pos++;
         }
     }
 
     return items;
+}
+
+bool RenderDOM::checkClassMatch(std::string classname, std::string items)
+{
+    std::vector<std::string> classes = parseSpaceSeparatedString(items);
+    for (int l = 0; l < classes.size(); l++)
+    {
+        if (classes[l] == classname)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool RenderDOM::checkIDMatch(std::string idname, std::string items)
+{
+    std::vector<std::string> ids = parseSpaceSeparatedString(items);
+    for (int l = 0; l < ids.size(); l++)
+    {
+        if (ids[l] == idname)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css)
@@ -223,7 +237,22 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     {
                         break;
                     }
-
+                    for (int k = 0; k < css[i].selectors[j].additionals.back().matchingClasses.size(); k++)
+                    {
+                        std::string sel = css[i].selectors[j].additionals.back().matchingClasses[k];
+                        if (sel[0] == '.')
+                        {
+                            sel.erase(0, 1);
+                            if (!checkClassMatch(sel, stackitem.unparsedClasses))
+                                match = false;
+                        }
+                        if (sel[0] == '#')
+                        {
+                            sel.erase(0, 1);
+                            if (!checkIDMatch(sel, stackitem.unparsedIDs))
+                                match = false;
+                        }
+                    }
                     //css[i].selectors[j].additionals.back().matchingClasses
 
                     /*for (int i = 0; i < domCallStack.size(); i++)
