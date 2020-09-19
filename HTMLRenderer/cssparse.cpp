@@ -238,27 +238,29 @@ namespace css
         bool writingToMatchingID = false;
         while(numChr < cssSize)
         {
-            if (numChr < cssSize)
+            if (numChr < cssSize)// In here aselector character is added to the appropriate string.
             {
+                // an element is added to matchingIDs or mathingClasses beforehand somewhere at the end of this function.
                 if (writingToMatchingID)
                 {
-                    addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
+                    addSel.matchingIDs.back() += css[i].selectorCombo[numChr];
                 }
                 else if (writingToMatchingClass)
                 {
-                    addSel.matchingClasses.back()+= css[i].selectorCombo[numChr];
+                    addSel.matchingClasses.back() += css[i].selectorCombo[numChr];
                 }
                 else
                 {
-                    selector+= css[i].selectorCombo[numChr];
+                    selector += css[i].selectorCombo[numChr];
                 }
                 numChr++;
             }
             bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
                                            // (And made part of the selector name string to avoid conflicts with actual supported selectors
+
             while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
             {
-                if (css[i].selectorCombo[numChr] == '[')
+                if (css[i].selectorCombo[numChr] == '[')// If there is an open bracket, just write the contents paying no mind to what's in it till a end bracket is found.
                 {
                     continueAndIgnore = true;
                 }
@@ -266,6 +268,7 @@ namespace css
                 {
                     continueAndIgnore = false;
                 }
+
                 if (writingToMatchingID)
                 {
                     addSel.matchingIDs.back()+= css[i].selectorCombo[numChr];
@@ -281,26 +284,27 @@ namespace css
 
                 numChr++;
             }
+            // If the current char is a . or a # it means there's an id or class following and we have to read that as well.
             if (css[i].selectorCombo[numChr] == '.')///Todo: Fixme: @mario-132 Bug: doesn't work with more than 1 additional class or ID (this is the combining part e.g.: ".classa.classb.classc {}"
             {
                 writingToMatchingClass = true;
                 writingToMatchingID = false;
-                addSel.matchingClasses.push_back(".");
-                numChr++;
+                addSel.matchingClasses.push_back("");// For writing the class into
+                //numChr++;
             }
             else if (css[i].selectorCombo[numChr] == '#')
             {
                 writingToMatchingClass = false;
                 writingToMatchingID = true;
-                addSel.matchingIDs.push_back("#");
-                numChr++;
+                addSel.matchingIDs.push_back("");// For writing the ID into.
+                //numChr++;
             }
-            else
+            else // No class or id specifier is following this selector so we end it here
             {
                 break;
             }
         }
-        while(css[i].selectorCombo[numChr] == ' ' && numChr < cssSize)
+        while((css[i].selectorCombo[numChr] == ' ' || css[i].selectorCombo[numChr] == '\t' || css[i].selectorCombo[numChr] == '\n') && numChr < cssSize)
         {
             numChr++;
         }
@@ -322,12 +326,12 @@ namespace css
         }
         else if (css[i].selectorCombo[numChr] == ',')/// FIXME: TODO: @mario-132 Currently, ',' is ignored and is added as a additionalselector with CSS_NONE.
         {
-
             pushbackSelector = true;
             numChr++;
         }
         else if (numChr < cssSize)
         {
+            // If it is none of the above operators and a new selectorStarter character is detected, it means it is a space and therefore an inside of operator.
             if (isValidSelectorNameStart(css[i].selectorCombo[numChr]))
             {
                 addSel.selectorOp = CSS_INSIDE_OF;

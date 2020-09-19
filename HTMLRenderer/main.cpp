@@ -255,6 +255,8 @@ int main()
                 std::cout << " UNKNOWN" << std::endl;
             else if (cssOut[i].items[j].value.type == css::CSS_TYPE_NUMBER)
                 std::cout << " " << cssOut[i].items[j].value.numberValue << std::endl;
+            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_COLOR)
+                std::cout << " " << (int)cssOut[i].items[j].value.color.r << "," << (int)cssOut[i].items[j].value.color.g << "," << (int)cssOut[i].items[j].value.color.b << std::endl;
         }
     }
 

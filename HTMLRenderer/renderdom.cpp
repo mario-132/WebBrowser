@@ -150,7 +150,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         break;
                     }
 
-                    for (int i = 0; i < domCallStack.size(); i++)
+                    /*for (int i = 0; i < domCallStack.size(); i++)
                     {
                         std::cout << domCallStack[i] << ". ";
                     }
@@ -159,10 +159,11 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     {
                         std::cout << css[i].selectors[j].additionals[k].name << css[i].selectors[j].additionals[k].selectorOp << ", ";
                     }
-                    std::cout << std::endl;
+                    std::cout << std::endl;*/
                     for (int k = css[i].selectors[j].additionals.size()-2; k >= 0; k--)// We skip the last element because it is checked in the if already
                     {
-                        std::cout << gumboTagToString(node->v.element.tag) << "=" << domCallStack[selectorOffset] << ", " << css[i].selectors[j].additionals[k].name << std::endl;
+                        //if (selectorOffset >= 0)
+                        //    std::cout << gumboTagToString(node->v.element.tag) << "=" << domCallStack[selectorOffset] << ", " << css[i].selectors[j].additionals[k].name << std::endl;
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
                         {
                             if (domCallStack[selectorOffset] != css[i].selectors[j].additionals[k].name)
