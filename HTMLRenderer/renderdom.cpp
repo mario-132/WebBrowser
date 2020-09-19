@@ -189,6 +189,100 @@ bool RenderDOM::checkIDMatch(std::string idname, std::string items)
     return false;
 }
 
+void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
+{
+    if (item.attribute.attributeAsString == "color")
+    {
+        if (item.value.type == css::CSS_TYPE_COLOR)
+        {
+            style.color.r = item.value.color.r;
+            style.color.g = item.value.color.g;
+            style.color.b = item.value.color.b;
+        }
+    }
+    if (item.attribute.attributeAsString == "background-color")
+    {
+        if (item.value.type == css::CSS_TYPE_COLOR)
+        {
+            style.background_color.r = item.value.color.r;
+            style.background_color.g = item.value.color.g;
+            style.background_color.b = item.value.color.b;
+        }
+    }
+    if (item.attribute.attributeAsString == "font-size")
+    {
+        if (item.value.type == css::CSS_TYPE_PX)
+        {
+            style.font_size = item.value.numberValue;
+        }
+        if (item.value.type == css::CSS_TYPE_EM)///Todo: @mario-132 Make sure this is actually correct
+        {
+            style.font_size = style.font_size*item.value.numberValue;
+        }
+    }
+    if (item.attribute.attributeAsString == "display")
+    {
+        if (item.value.valueAsString == "block")
+        {
+            style.display = "block";
+        }
+        if (item.value.valueAsString == "flex")
+        {
+            style.display = "block";
+        }
+        if (item.value.valueAsString == "inline")
+        {
+            style.display = "inline";
+        }
+        if (item.value.valueAsString == "inline-block")
+        {
+            style.display = "inline";
+        }
+        if (item.value.valueAsString == "none")
+        {
+            style.display = "none";
+        }
+    }
+    if (item.attribute.attributeAsString == "font-weight")
+    {
+        if (item.value.type == css::CSS_TYPE_NUMBER)
+        {
+            style.bold = (item.value.numberValue > 550);
+        }
+        if (item.value.valueAsString == "bold")
+        {
+            style.bold = true;
+        }
+        if (item.value.valueAsString == "bolder")
+        {
+            style.bold = true;
+        }
+        if (item.value.valueAsString == "normal")
+        {
+            style.bold = false;
+        }
+        if (item.value.valueAsString == "lighter")
+        {
+            style.bold = false;
+        }
+    }
+    if (item.attribute.attributeAsString == "text-align")
+    {
+        style.text_align = item.value.valueAsString;
+    }
+    if (item.attribute.attributeAsString == "--wb-islink")
+    {
+        style.isLink = (item.value.valueAsString == "link");
+    }
+    if (item.attribute.attributeAsString == "line-height")
+    {
+        if (item.value.type == css::CSS_TYPE_NUMBER)
+        {
+            style.line_height = item.value.numberValue;
+        }
+    }
+}
+
 RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css)
 {
     RenderDOMItem item;
@@ -206,6 +300,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             item.element.attributes.push_back(attr);
         }
 
+        // Get the tag, class and id string and add them to stackItem for later use in the parsing of the css stylesheet nodes to see if they apply to this node.
         DOMStackItem stackitem;
         stackitem.tag = gumboTagToString(node->v.element.tag);
         for (int i = 0; i < item.element.attributes.size(); i++)
@@ -220,11 +315,13 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             }
         }
 
+        // Display is not inherited so always reset it to inline, unless the display is none, in which case we want to keep the elements inside it hidden.
         if (style.display != "none")
         {
             style.display = "inline";
         }
 
+        // Look if there are any selectors in the global stylesheets that apply to this node.
         for (int i = 0; i < css.size(); i++)
         {
             for (int j = 0; j < css[i].selectors.size(); j++)
@@ -237,6 +334,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     {
                         break;
                     }
+                    // Check if the additional class or id specifiers also apply to this css selector block(e.g. make sure the .classa in div.classa{} is present in this node).
                     for (int k = 0; k < css[i].selectors[j].additionals.back().matchingClasses.size(); k++)
                     {
                         std::string sel = css[i].selectors[j].additionals.back().matchingClasses[k];
@@ -246,12 +344,12 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             if (!checkClassMatch(sel, stackitem.unparsedClasses))
                                 match = false;
                         }
-                        if (sel[0] == '#')
+                        /*if (sel[0] == '#')
                         {
                             sel.erase(0, 1);
                             if (!checkIDMatch(sel, stackitem.unparsedIDs))
                                 match = false;
-                        }
+                        }*/
                     }
                     //css[i].selectors[j].additionals.back().matchingClasses
 
@@ -314,103 +412,28 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     {
                         for (int k = 0; k < css[i].items.size(); k++)
                         {
-                            if (css[i].items[k].attribute.attributeAsString == "color")
-                            {
-                                if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
-                                {
-                                    style.color.r = css[i].items[k].value.color.r;
-                                    style.color.g = css[i].items[k].value.color.g;
-                                    style.color.b = css[i].items[k].value.color.b;
-                                }
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "background-color")
-                            {
-                                if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
-                                {
-                                    style.background_color.r = css[i].items[k].value.color.r;
-                                    style.background_color.g = css[i].items[k].value.color.g;
-                                    style.background_color.b = css[i].items[k].value.color.b;
-                                }
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "font-size")
-                            {
-                                if (css[i].items[k].value.type == css::CSS_TYPE_PX)
-                                {
-                                    style.font_size = css[i].items[k].value.numberValue;
-                                }
-                                if (css[i].items[k].value.type == css::CSS_TYPE_EM)///Todo: @mario-132 Make sure this is actually correct
-                                {
-                                    style.font_size = style.font_size*css[i].items[k].value.numberValue;
-                                }
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "display")
-                            {
-                                if (css[i].items[k].value.valueAsString == "block")
-                                {
-                                    style.display = "block";
-                                }
-                                if (css[i].items[k].value.valueAsString == "flex")
-                                {
-                                    style.display = "block";
-                                }
-                                if (css[i].items[k].value.valueAsString == "inline")
-                                {
-                                    style.display = "inline";
-                                }
-                                if (css[i].items[k].value.valueAsString == "inline-block")
-                                {
-                                    style.display = "inline";
-                                }
-                                if (css[i].items[k].value.valueAsString == "none")
-                                {
-                                    style.display = "none";
-                                }
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "font-weight")
-                            {
-                                if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
-                                {
-                                    style.bold = (css[i].items[k].value.numberValue > 550);
-                                }
-                                if (css[i].items[k].value.valueAsString == "bold")
-                                {
-                                    style.bold = true;
-                                }
-                                if (css[i].items[k].value.valueAsString == "bolder")
-                                {
-                                    style.bold = true;
-                                }
-                                if (css[i].items[k].value.valueAsString == "normal")
-                                {
-                                    style.bold = false;
-                                }
-                                if (css[i].items[k].value.valueAsString == "lighter")
-                                {
-                                    style.bold = false;
-                                }
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "text-align")
-                            {
-                                style.text_align = css[i].items[k].value.valueAsString;
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "--wb-islink")
-                            {
-                                style.isLink = (css[i].items[k].value.valueAsString == "link");
-                            }
-                            if (css[i].items[k].attribute.attributeAsString == "line-height")
-                            {
-                                if (css[i].items[k].value.type == css::CSS_TYPE_NUMBER)
-                                {
-                                    style.line_height = css[i].items[k].value.numberValue;
-                                }
-                            }
+                            applyItemToStyle(css[i].items[k], style);
                         }
                     }
                 }
             }
         }
 
-        item.element.style = style;
+        // Parse all inline style sheets
+        for (int i = 0; i < item.element.attributes.size(); i++)
+        {
+            if (std::string("style") == item.element.attributes[i].name)
+            {
+                std::string css = item.element.attributes[i].value;
+                std::vector<css::CSSItem> inlineItems = css::parseInlineFromString(css);
+                for (int k = 0; k < inlineItems.size(); k++)
+                {
+                    applyItemToStyle(inlineItems[k], style);
+                }
+            }
+        }
+
+        item.element.style = style;// Save computed style to the item.
 
         if (item.element.tag == GUMBO_TAG_IMG)
         {

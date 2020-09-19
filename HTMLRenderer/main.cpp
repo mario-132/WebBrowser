@@ -133,6 +133,7 @@ int main()
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
 
     std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/classtest.html");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/codeview.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/multiselector.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://mangadex.org/");
     //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
@@ -211,7 +212,7 @@ int main()
     dom.domCallStack.clear();
     RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, baseURL, cssOut);
 
-    for (int i = 0; i < cssOut.size() && false; i++)
+    for (int i = 0; i < cssOut.size() && true; i++)
     {
         std::cout << "<";
         for (int j = 0; j < cssOut[i].selectors.size(); j++)

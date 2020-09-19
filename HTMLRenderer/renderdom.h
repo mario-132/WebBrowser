@@ -78,7 +78,7 @@ struct DOMStackItem
     std::string unparsedIDs;
 };
 
-class RenderDOM
+class RenderDOM/// Takes the html dom and css and puts it together
 {
 public:
     RenderDOM();
@@ -89,6 +89,8 @@ public:
     std::vector<std::string> parseSpaceSeparatedString(std::string str);
     bool checkClassMatch(std::string classname, std::string items);
     bool checkIDMatch(std::string idname, std::string items);
+
+    void applyItemToStyle(css::CSSItem item, RenderDOMStyle &style);
 };
 
 #endif // RENDERDOM_H

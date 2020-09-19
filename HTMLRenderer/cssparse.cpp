@@ -616,8 +616,11 @@ namespace css
             }
             else
             {
-                val.type = CSS_TYPE_NUMBER;
-                val.numberValue = stof(number);
+                if (number.size() > 0)
+                {
+                    val.type = CSS_TYPE_NUMBER;
+                    val.numberValue = stof(number);
+                }
             }
         }
 
@@ -665,4 +668,59 @@ namespace css
         return newStr;
     }
 
+    std::vector<CSSItem> parseInlineFromString(std::string inlineCSS)
+    {
+        std::vector<CSSBasicItem> items;
+        inlineCSS = commentRemover(inlineCSS);// First remove the comments if there are any
+
+        int curChr = 0;
+        int cssLength = inlineCSS.size();
+
+        std::string attribute;
+        std::string value;
+        bool isFinal = false;// Tells when the selectors have ended, unused since there is are none.
+        bool isFinalAttribute = false;// When the last attribute has been found.
+
+        while((inlineCSS[curChr] == ' ' || inlineCSS[curChr] == '\n' || inlineCSS[curChr] == '\t') && curChr < cssLength)
+        {
+            cssLength++;
+        }
+
+        while(curChr < cssLength && !isFinalAttribute)
+        {
+            attribute = "";
+            value = "";
+
+            bool attribContinue = false;
+            if (getAttribute(inlineCSS, cssLength, isFinal, isFinalAttribute, curChr, attribute, attribContinue))
+            {
+                break;
+            }
+            if (attribContinue)
+            {
+                continue;
+            }
+
+            if (getValue(inlineCSS, cssLength, isFinal, isFinalAttribute, curChr, value))
+            {
+                break;
+            }
+            items.push_back({attribute, value});
+            //std::cout << "  " << attribute << ":" << value << ";" << std::endl;
+        }
+
+        std::vector<CSSItem> parsedItems;
+        for (int i = 0; i < items.size(); i++)
+        {
+            CSSAttribute attr = parseSingleAttribute(items[i].name);
+            CSSValue value = parseSingleValue(items[i].value);
+
+            CSSItem item;
+            item.attribute = attr;
+            item.value = value;
+            parsedItems.push_back(item);
+        }
+
+        return parsedItems;
+    }
 }
