@@ -365,6 +365,11 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     std::cout << std::endl;*/
                     for (int k = css[i].selectors[j].additionals.size()-2; k >= 0; k--)// We skip the last element because it is checked in the if already
                     {
+                        if (selectorOffset < 0)// The ammount of additionals is bigger than we have selectorOffsets, so the selector doesn't match.
+                        {
+                            match = false;
+                            break;
+                        }
                         //if (selectorOffset >= 0)
                         //    std::cout << gumboTagToString(node->v.element.tag) << "=" << domCallStack[selectorOffset] << ", " << css[i].selectors[j].additionals[k].name << std::endl;
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)

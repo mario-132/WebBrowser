@@ -212,12 +212,22 @@ int main()
     dom.domCallStack.clear();
     RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, baseURL, cssOut);
 
-    for (int i = 0; i < cssOut.size() && true; i++)
+    for (int i = 0; i < cssOut.size() && false; i++)
     {
         std::cout << "<";
         for (int j = 0; j < cssOut[i].selectors.size(); j++)
         {
-            std::cout << cssOut[i].selectors[j].additionals.back().name << ", ";
+            std::cout << cssOut[i].selectors[j].additionals.back().name;
+            if (cssOut[i].selectors[j].additionals.back().matchingClasses.size())
+            {
+                std::cout << "(";
+                for (int k = 0; k < cssOut[i].selectors[j].additionals.back().matchingClasses.size(); k++)
+                {
+                    std::cout << cssOut[i].selectors[j].additionals.back().matchingClasses[k];
+                }
+                std::cout << ")";
+            }
+            std::cout << ", ";
         }
         std::cout << ">\n";
         for (int j = 0; j < cssOut[i].items.size(); j++)

@@ -189,7 +189,7 @@ namespace css
 
     bool isValidSelectorNameStart(char c)
     {
-        return isChr(c) || isNum(c) || c == '@' || c == '*' || c == '.' || c == ':' || c == '-' || c == '#' || c == '[' || c == ']';
+        return isChr(c) || isNum(c) || c == '@' || c == '*' || c == '.' || c == ':' || c == '-' || c == '#' || c == '[' || c == ']' || c == '_' || c == '-';
     }
 
     bool isNum(char c)
@@ -219,7 +219,7 @@ namespace css
 
     bool isSelectorEnding(char c)
     {
-        return (!isChr(c) && !isNum(c) && c != ':');
+        return (!isChr(c) && !isNum(c) && c != ':' && c != '_' && c != '-');
     }
 
     bool parseSingleSelector(std::string &selector, int &numChr, int &cssSize, std::vector<CSSBasicSelector> &css, int &i, bool &isFirstSelector, std::vector<CSSAdditionalSelector> &additionalOperands, CSSSelectorBlock &cssSelBlock)
