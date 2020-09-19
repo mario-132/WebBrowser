@@ -121,11 +121,27 @@ bool RenderDOM::checkSelectorMatch(std::string selector, const DOMStackItem &ite
     {
         if (selector[0] == '.')
         {
-
+            selector.erase(0);
+            std::vector<std::string> classes = parseSpaceSeparatedString(item.unparsedClasses);
+            for (int l = 0; l < classes.size(); l++)
+            {
+                if (classes[l] == selector)
+                {
+                    return true;
+                }
+            }
         }
         else if (selector[0] == '#')
         {
-
+            selector.erase(0);
+            std::vector<std::string> classes = parseSpaceSeparatedString(item.unparsedIDs);
+            for (int l = 0; l < classes.size(); l++)
+            {
+                if (classes[l] == selector)
+                {
+                    return true;
+                }
+            }
         }
         else
         {
@@ -133,6 +149,30 @@ bool RenderDOM::checkSelectorMatch(std::string selector, const DOMStackItem &ite
         }
     }
     return false;
+}
+
+std::vector<std::string> RenderDOM::parseSpaceSeparatedString(std::string str)
+{
+    std::vector<std::string> items;
+
+    int pos = 0;
+    int max = str.size();
+
+    while(pos < max)
+    {
+        items.push_back("");
+        while(str[pos] != ' ' && pos < max)
+        {
+            items.back() += str[pos];
+            pos++;
+        }
+        while(str[pos] == ' ')
+        {
+            pos++;
+        }
+    }
+
+    return items;
 }
 
 RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css)
@@ -183,6 +223,8 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     {
                         break;
                     }
+
+                    //css[i].selectors[j].additionals.back().matchingClasses
 
                     /*for (int i = 0; i < domCallStack.size(); i++)
                     {

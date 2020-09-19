@@ -86,6 +86,7 @@ public:
     std::vector<DOMStackItem> domCallStack;
     void applyStyle(RenderDOMItem &item, RenderDOMStyle &style);
     bool checkSelectorMatch(std::string selector, const DOMStackItem &item);
+    std::vector<std::string> parseSpaceSeparatedString(std::string str);
 };
 
 #endif // RENDERDOM_H

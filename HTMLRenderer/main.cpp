@@ -119,6 +119,7 @@ int main()
     //fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
     //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
     fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Regular.otf", "/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Bold.otf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/Development/WebBrowserData/Gothic_A1/GothicA1-Regular.ttf", "/home/tim/Documents/Development/WebBrowserData/Gothic_A1/GothicA1-Bold.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
 
     fte::makeBold(inst, false);
     //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
@@ -133,8 +134,8 @@ int main()
 
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/chartest.html");
     //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/multiselector.html");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://mangadex.org/");
-    std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
+    std::string htmlFile = WebService::htmlFileDownloader("https://mangadex.org/");
+    //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
     //std::string htmlFile = WebService::htmlFileDownloader("https://myanimelist.net/animelist/timl132?status=7");
 
     std::string baseURL = "https://mangadex.org/";
@@ -200,7 +201,7 @@ int main()
             }
         }
         css += WebService::htmlFileDownloader(newsrc);
-        std::cout << "Downloaded stylesheet: " << stylesheetPaths[i] << std::endl;
+        std::cout << "Downloaded stylesheet: " << newsrc << std::endl;
     }
 
     css = css::commentRemover(css);
