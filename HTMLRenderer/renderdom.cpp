@@ -111,6 +111,66 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "link";
     }
+    else if (tag == GUMBO_TAG_UL)
+    {
+        name = "ul";
+    }
+    else if (tag == GUMBO_TAG_LI)
+    {
+        name = "li";
+    }
+    else if (tag == GUMBO_TAG_OL)
+    {
+        name = "ol";
+    }
+    else if (tag == GUMBO_TAG_NOSCRIPT)
+    {
+        name = "noscript";
+    }
+    else if (tag == GUMBO_TAG_NOFRAMES)
+    {
+        name = "noframes";
+    }
+    else if (tag == GUMBO_TAG_HEADER)
+    {
+        name = "header";
+    }
+    else if (tag == GUMBO_TAG_NAV)
+    {
+        name = "nav";
+    }
+    else if (tag == GUMBO_TAG_ARTICLE)
+    {
+        name = "article";
+    }
+    else if (tag == GUMBO_TAG_ASIDE)
+    {
+        name = "aside";
+    }
+    else if (tag == GUMBO_TAG_FOOTER)
+    {
+        name = "footer";
+    }
+    else if (tag == GUMBO_TAG_DETAILS)
+    {
+        name = "details";
+    }
+    else if (tag == GUMBO_TAG_SUMMARY)
+    {
+        name = "summary";
+    }
+    else if (tag == GUMBO_TAG_META)
+    {
+        name = "meta";
+    }
+    else if (tag == GUMBO_TAG_VIDEO)
+    {
+        name = "video";
+    }
+    else if (tag == GUMBO_TAG_AUDIO)
+    {
+        name = "audio";
+    }
 
     return name;
 }
