@@ -17,7 +17,14 @@ public:
     int width;
     int height;
 
+    int mousex;
+    int mousey;
+    int mousePressed;
+
     int scrollPos;
+
+    Window inwin;      /* root window the pointer is in */
+    Window inchildwin; /* child win the pointer is in */
 
     char *displayBuffer;
     void createWindow(std::string title, int width, int height, int framebufferWidth, int framebufferHeight);

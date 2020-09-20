@@ -373,6 +373,38 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     }
 
                     charactersPreWritten = i+1;
+
+                    if (mouseX > item.position.x && mouseY < item.position.y && mouseX < item.position.x + item.position.w && mouseY > item.position.y - item.position.h)
+                    {
+                        //std::cout << activeStyle.background_color.r << std::endl;
+                        for (int i = 0; i < activeStyle.cssdbg.matchingSelectorStrings.size(); i++)
+                        {
+                            //std::cout << activeStyle.cssdbg.matchingSelectorStrings[i] << std::endl;
+                            RItem item;
+                            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                            std::wstring wide = converter.from_bytes(activeStyle.cssdbg.matchingSelectorStrings[i]);
+                            item.text.text = wide;
+                            item.position.x = mouseX+10;
+                            item.position.y = mouseY+40+(i*20);
+                            item.position.h = 16;
+                            item.position.w = 200;
+                            item.type = RITEM_TEXT;
+
+                            item.text.color.r = 0;
+                            item.text.color.g = 0;
+                            item.text.color.b = 0;
+
+                            item.text.background_color.r = 180;
+                            item.text.background_color.g = 180;
+                            item.text.background_color.b = 150;
+
+                            item.text.textSize = 16;
+                            item.text.bold = true;
+                            item.text.isLink = false;
+
+                            RenderItems.push_back(item);
+                        }
+                    }
                 }
             }
         }
@@ -401,9 +433,12 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         {
                             continue;
                         }
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)] =   items[i].text.background_color.r;
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = items[i].text.background_color.g;
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = items[i].text.background_color.b;
+                        else
+                        {
+                            framebuffer[(y*framebufferWidth*3)+((x)*3)] =   items[i].text.background_color.r;
+                            framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = items[i].text.background_color.g;
+                            framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = items[i].text.background_color.b;
+                        }
                     }
                 }
             }
@@ -440,19 +475,23 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         }
                         if (items[i].img.comp == 4)
                         {
-                            if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] > 50)
+                            /*if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] > 50)
                             {
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)] =   items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)];
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1];
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2];
-                            }
+                            }*/
+                            // Lol wtf is this blending my guy
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0]/255)*(255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+0]/255) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1]/255)*(255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1]/255) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2]/255)*(255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2]/255) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
                         }
-                        if (x == 0 || y == 0 || x == items[i].img.w-1 || y == items[i].img.h-1)
+                        /*if (x == 0 || y == 0 || x == items[i].img.w-1 || y == items[i].img.h-1)
                         {
                             framebuffer[(yp*framebufferWidth*3)+((xp)*3)] = 255;
                             framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = 128;
                             framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = 128;
-                        }
+                        }*/
                     }
                 }
             }

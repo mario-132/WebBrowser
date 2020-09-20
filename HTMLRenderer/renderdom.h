@@ -12,6 +12,11 @@ struct RenderDOMColor
     unsigned int b;
 };
 
+struct AdditionalDebuggingCSSInfo
+{
+    std::vector<std::string> matchingSelectorStrings;
+};
+
 struct RenderDOMStyle
 {
     std::string display;
@@ -23,6 +28,8 @@ struct RenderDOMStyle
 
     RenderDOMColor color;
     RenderDOMColor background_color;
+
+    AdditionalDebuggingCSSInfo cssdbg;
 
     bool bold;
     bool isLink;

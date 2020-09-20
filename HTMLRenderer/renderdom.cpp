@@ -123,6 +123,22 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "ol";
     }
+    else if (tag == GUMBO_TAG_TABLE)
+    {
+        name = "table";
+    }
+    else if (tag == GUMBO_TAG_TBODY)
+    {
+        name = "tbody";
+    }
+    else if (tag == GUMBO_TAG_TR)
+    {
+        name = "tr";
+    }
+    else if (tag == GUMBO_TAG_TD)
+    {
+        name = "td";
+    }
     else if (tag == GUMBO_TAG_NOSCRIPT)
     {
         name = "noscript";
@@ -193,6 +209,8 @@ bool RenderDOM::checkSelectorMatch(std::string selector, const DOMStackItem &ite
         }
         else
         {
+            if (selector == "*")
+                return true;
             return selector == item.tag;
         }
     }
@@ -285,6 +303,11 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
         if (item.value.valueAsString == "block")
         {
             style.display = "block";
+        }
+        if (item.value.valueAsString == "table-row")
+        {
+            style.display = "block";
+            std::cout << "TR" << std::endl;
         }
         if (item.value.valueAsString == "flex")
         {
@@ -404,12 +427,16 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             if (!checkClassMatch(sel, stackitem.unparsedClasses))
                                 match = false;
                         }
-                        /*if (sel[0] == '#')
+                    }
+                    for (int k = 0; k < css[i].selectors[j].additionals.back().matchingIDs.size(); k++)
+                    {
+                        std::string sel = css[i].selectors[j].additionals.back().matchingIDs[k];
+                        if (sel[0] == '#')
                         {
                             sel.erase(0, 1);
                             if (!checkIDMatch(sel, stackitem.unparsedIDs))
                                 match = false;
-                        }*/
+                        }
                     }
                     //css[i].selectors[j].additionals.back().matchingClasses
 
@@ -475,10 +502,38 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     }
                     if (match)
                     {
+                        std::string generatedSelectorString = css[i].selectors[j].additionals.back().name + "::";
+                        for (int k = 0; k < css[i].selectors[j].additionals.size(); k++)
+                        {
+                            generatedSelectorString += css[i].selectors[j].additionals[k].name;
+                            for (int l = 0; l < css[i].selectors[j].additionals[k].matchingClasses.size(); l++)
+                            {
+                                generatedSelectorString += "|" + css[i].selectors[j].additionals[k].matchingClasses[l] + "|";
+                            }
+                            if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
+                                generatedSelectorString += " > ";
+                            else if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_INSIDE_OF)
+                                generatedSelectorString += " ";
+                            else if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_ADJECENT_TO)
+                                generatedSelectorString += " _+ ";
+                            else if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECTLY_ADJECENT_TO)
+                                generatedSelectorString += " _- ";
+                            /*else if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_NONE)
+                                generatedSelectorString += " __ ";
+                            else
+                                generatedSelectorString += " ?? ";*/
+                        }
+                        //std::cout << generatedSelectorString << std::endl;
+                        generatedSelectorString += ";";
                         for (int k = 0; k < css[i].items.size(); k++)
                         {
                             applyItemToStyle(css[i].items[k], style);
+                            generatedSelectorString += css[i].items[k].attribute.attributeAsString + "=" + css[i].items[k].value.valueAsString;
+                            if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
+                                generatedSelectorString += "(" + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.r) + ")";
+                            generatedSelectorString += ";";
                         }
+                        style.cssdbg.matchingSelectorStrings.push_back(generatedSelectorString);
                     }
                 }
             }
@@ -491,6 +546,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             {
                 std::string css = item.element.attributes[i].value;
                 std::vector<css::CSSItem> inlineItems = css::parseInlineFromString(css);
+                item.element.style.cssdbg.matchingSelectorStrings.push_back("INLINE");
                 for (int k = 0; k < inlineItems.size(); k++)
                 {
                     applyItemToStyle(inlineItems[k], style);

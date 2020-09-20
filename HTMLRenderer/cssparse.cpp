@@ -1,5 +1,6 @@
 #include "cssparse.h"
 #include <iostream>
+#include <cstring>
 
 namespace css
 {
@@ -255,18 +256,28 @@ namespace css
                 }
                 numChr++;
             }
-            bool continueAndIgnore = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
+            bool continueAndIgnoreSq = false;// Used to just add the input to the selector string incase of [] since it is ignored right now.
                                            // (And made part of the selector name string to avoid conflicts with actual supported selectors
+            bool continueAndIgnoreRo = false;
 
-            while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || continueAndIgnore) && numChr < cssSize)
+            while (((!isSelectorEnding(css[i].selectorCombo[numChr]) || css[i].selectorCombo[numChr] == '[') || css[i].selectorCombo[numChr] == '(' || continueAndIgnoreSq || continueAndIgnoreRo) && numChr < cssSize)
             {
-                if (css[i].selectorCombo[numChr] == '[')// If there is an open bracket, just write the contents paying no mind to what's in it till a end bracket is found.
+                if (css[i].selectorCombo[numChr] == '[' && !continueAndIgnoreRo)// If there is a square open bracket, just write the contents paying no mind to what's in it till a end bracket is found.
                 {
-                    continueAndIgnore = true;
+                    continueAndIgnoreSq = true;
                 }
-                if (css[i].selectorCombo[numChr] == ']')
+                if (css[i].selectorCombo[numChr] == ']' && !continueAndIgnoreRo)
                 {
-                    continueAndIgnore = false;
+                    continueAndIgnoreSq = false;
+                }
+
+                if (css[i].selectorCombo[numChr] == '(' && !continueAndIgnoreSq)// If there is an round open bracket, just write the contents paying no mind to what's in it till a end bracket is found.
+                {
+                    continueAndIgnoreRo = true;
+                }
+                if (css[i].selectorCombo[numChr] == ')' && !continueAndIgnoreSq)
+                {
+                    continueAndIgnoreRo = false;
                 }
 
                 if (writingToMatchingID)
@@ -530,10 +541,24 @@ namespace css
                     chrI++;
                     unsigned long c = strtol(value.c_str() + chrI, NULL, 16);
                     //std::cout << value.c_str() + chrI << ": " << c << std::endl;
-                    val.color.r = (c >> 16) & 0xFF;
-                    val.color.g = (c >> 8) & 0xFF;
-                    val.color.b = (c) & 0xFF;
-                    val.type = CSS_TYPE_COLOR;
+                    if (strlen(value.c_str() + chrI) == 6)
+                    {
+                        val.color.r = (c >> 16) & 0xFF;
+                        val.color.g = (c >> 8) & 0xFF;
+                        val.color.b = (c) & 0xFF;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (strlen(value.c_str() + chrI) == 3)/// Todo: Fix this, you have to do more than the pwoer of 2 lol @mario-132
+                    {
+                        val.color.r = ((c >> 8) & 0xF) * ((c >> 8) & 0xF);
+                        val.color.g = ((c >> 4) & 0xF) * ((c >> 4) & 0xF);
+                        val.color.b = ((c) & 0xF) * ((c) & 0xF);
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else
+                    {
+                        std::cerr << "Unrecognised color! Color: " << value.c_str() + chrI << std::endl;
+                    }
                 }
                 else
                 {
@@ -590,6 +615,13 @@ namespace css
                         val.color.r = 255;
                         val.color.g = 255;
                         val.color.b = 0;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "transparent")// Make transparent white
+                    {
+                        val.color.r = 255;
+                        val.color.g = 255;
+                        val.color.b = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
 

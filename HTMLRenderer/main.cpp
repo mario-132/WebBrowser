@@ -307,6 +307,11 @@ int main()
         htmlrenderer.RenderItems.clear();
         //htmlrenderer.tX = 0;
         //htmlrenderer.tY = 100;
+        if (window.mousePressed && window.mousex > 0 && window.mousey > 0 && window.mousex < window.width && window.mousey < window.height)
+        {
+            htmlrenderer.mouseX = window.mousex;
+            htmlrenderer.mouseY = window.mousey;
+        }
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
 

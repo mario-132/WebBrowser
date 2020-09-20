@@ -108,6 +108,10 @@ public:
 
     //void applyStyle(GumboNode* node, RStyle &style);
 
+    /// THESE SHOULD BE TEMPORARY FOR NOW, THEY ARE JUST FOR THE CSS STYLE DEBUGGER!
+    int mouseX;
+    int mouseY;
+
     // Make stylebox more like a textbox and make it a reference so they can all access it, then when a div occurs you make a new stylebox/textbox and give it that.
     void assembleRenderList(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
     void assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
