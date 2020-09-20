@@ -111,191 +111,183 @@ void getTitleFromDOM(GumboNode *dom, std::string &title, bool _isInTitle = false
     }
 }
 
-int main()
+std::string resolvePath(std::string path, std::string baseURL)
 {
-    framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
-    memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
+    std::string imgSource = path;
+    std::string newsrc;
 
-    //fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
-    //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
-    fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Regular.otf", "/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Bold.otf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
-    //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/Development/WebBrowserData/Gothic_A1/GothicA1-Regular.ttf", "/home/tim/Documents/Development/WebBrowserData/Gothic_A1/GothicA1-Bold.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
-
-    fte::makeBold(inst, false);
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/simple_text.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia - Wikipedia.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/HTML/Google.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/es64f4.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Home - MangaDex.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
-    //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
-
-    //std::string htmlFile = WebService::htmlFileDownloader("https://www.w3schools.com/w3css/tryw3css_templates_band.htm");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/codeview.html");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/multiselector.html");
-    std::string htmlFile = WebService::htmlFileDownloader("https://mangadex.org/");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
-    //std::string htmlFile = WebService::htmlFileDownloader("https://myanimelist.net/animelist/timl132?status=7");
-
-    std::string baseURL = "https://mangadex.org/";
-
-    findAndReplaceAll( htmlFile, "&nbsp;", " ");
-
-    GumboOutput* output = gumbo_parse(htmlFile.c_str());
-
-    std::string pageTitle;// Temporary way to get page title.
-    getTitleFromDOM(output->root, pageTitle, false);
-
-    RenderDOMStyle style;
-    style.display = "inline";
-    style.font_size = 16;
-    style.line_height = 1.2;
-    style.bold = false;
-    style.isLink = false;
-    style.color.r = 0;
-    style.color.g = 0;
-    style.color.b = 0;
-    style.background_color.r = 255;
-    style.background_color.g = 255;
-    style.background_color.b = 255;
-
-    std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
-    std::vector<std::string> stylesheetPaths;
-    getStyleFromDOM(output->root, css, stylesheetPaths);
-    for (int i = 0; i < stylesheetPaths.size(); i++)
+    std::string newImgSrc;
+    bool findingSlash = true;
+    for (int i = 0; i < imgSource.size(); i++)
     {
-        std::string imgSource = stylesheetPaths[i];
-        std::string newsrc;
-
-        std::string newImgSrc;
-        bool findingSlash = true;
-        for (int i = 0; i < imgSource.size(); i++)
-        {
-            if (findingSlash && imgSource[i] == '/')
-            {
-
-            }
-            else
-            {
-                newImgSrc.push_back(imgSource[i]);
-                findingSlash = false;
-            }
-        }
-        imgSource = newImgSrc;
-
-        if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
+        if (findingSlash && imgSource[i] == '/')
         {
 
-            newsrc = imgSource;
-            if (imgSource.find("http") == imgSource.npos)
-            {
-                newsrc = "http://" + imgSource;
-            }
         }
         else
         {
-            if (imgSource.size() > 1)
-            {
-                newsrc = baseURL + imgSource;
-            }
+            newImgSrc.push_back(imgSource[i]);
+            findingSlash = false;
         }
-        css += WebService::htmlFileDownloader(newsrc);
-        std::cout << "Downloaded stylesheet: " << newsrc << std::endl;
     }
+    imgSource = newImgSrc;
 
-    css = css::commentRemover(css);
-    findAndReplaceAll(css, "!important", "");
-    std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
+    if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
+    {
 
+        newsrc = imgSource;
+        if (imgSource.find("http") == imgSource.npos)
+        {
+            newsrc = "http://" + imgSource;
+        }
+    }
+    else
+    {
+        if (imgSource.size() > 1)
+        {
+            newsrc = baseURL + imgSource;
+        }
+    }
+    return newsrc;
+}
+
+class WebPage
+{
+public:
+    std::string pageTitle;// Temporary way to get page title.
     RenderDOM dom;
-    dom.domCallStack.clear();
-    RenderDOMItem rootDomItem = dom.parseGumboTree(output->root, style, baseURL, cssOut);
-
-    for (int i = 0; i < cssOut.size() && false; i++)
+    RenderDOMItem rootDomItem;
+    HTMLRenderer htmlrenderer;
+    GumboOutput* output;
+    ~WebPage()
     {
-        std::cout << "<";
-        for (int j = 0; j < cssOut[i].selectors.size(); j++)
-        {
-            std::cout << cssOut[i].selectors[j].additionals.back().name;
-            if (cssOut[i].selectors[j].additionals.back().matchingClasses.size())
-            {
-                std::cout << "(";
-                for (int k = 0; k < cssOut[i].selectors[j].additionals.back().matchingClasses.size(); k++)
-                {
-                    std::cout << cssOut[i].selectors[j].additionals.back().matchingClasses[k];
-                }
-                std::cout << ")";
-            }
-            std::cout << ", ";
-        }
-        std::cout << ">\n";
-        for (int j = 0; j < cssOut[i].items.size(); j++)
-        {
-            std::cout << "  " << cssOut[i].items[j].attribute.attributeAsString;
-            if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
-            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
-            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
-
-            else if (cssOut[i].items[j].attribute.attributeAsString == "display")
-            {
-                if (cssOut[i].items[j].value.valueAsString == "block")
-                {
-                    std::cout << " block" << std::endl;
-                }
-                else if (cssOut[i].items[j].value.valueAsString == "inline")
-                {
-                    std::cout << " inline" << std::endl;
-                }
-                else if (cssOut[i].items[j].value.valueAsString == "inline-block")
-                {
-                    std::cout << " inline-block" << std::endl;
-                }
-                else if (cssOut[i].items[j].value.valueAsString == "none")
-                {
-                    std::cout << " none" << std::endl;
-                }
-                else
-                {
-                    std::cout << " UNKNOWN" << std::endl;
-                }
-            }
-            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
-                std::cout << " UNKNOWN" << std::endl;
-            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_NUMBER)
-                std::cout << " " << cssOut[i].items[j].value.numberValue << std::endl;
-            else if (cssOut[i].items[j].value.type == css::CSS_TYPE_COLOR)
-                std::cout << " " << (int)cssOut[i].items[j].value.color.r << "," << (int)cssOut[i].items[j].value.color.g << "," << (int)cssOut[i].items[j].value.color.b << std::endl;
-        }
+        gumbo_destroy_output(&kGumboDefaultOptions, output);
     }
 
-    X11Window window;
-    window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
-
-    HTMLRenderer htmlrenderer;
-    htmlrenderer.framebuffer = framebuffer;
-    htmlrenderer.framebufferWidth = FRAMEBUFFER_WIDTH;
-    htmlrenderer.framebufferHeight = FRAMEBUFFER_HEIGHT;
-
-    window.setTitle("WebBrowser - " + pageTitle);
-
-    int a = 2;
-    while(1)
+    void init(std::string url, std::string baseURL)
     {
-        int scrpos = window.scrollPos*-20;
-        printFps();
 
-        int memsetPos = scrpos;
-        if (memsetPos < 0)
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/simple_text.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Wikipedia - Wikipedia.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/HTML/Google.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/es64f4.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/Home - MangaDex.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/reddit_ the front page of the internet.html");
+        //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/mario-132 · GitHub.html");
+
+        //std::string htmlFile = WebService::htmlFileDownloader("https://www.w3schools.com/w3css/tryw3css_templates_band.htm");
+        //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/codeview.html");
+        //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/multiselector.html");
+        std::string htmlFile = WebService::htmlFileDownloader(url);
+        //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
+        //std::string htmlFile = WebService::htmlFileDownloader("https://myanimelist.net/animelist/timl132?status=7");
+
+        findAndReplaceAll( htmlFile, "&nbsp;", " ");
+
+        output = gumbo_parse(htmlFile.c_str());
+
+
+        getTitleFromDOM(output->root, pageTitle, false);
+
+        RenderDOMStyle style;
+        style.display = "inline";
+        style.font_size = 16;
+        style.line_height = 1.2;
+        style.bold = false;
+        style.isLink = false;
+        style.color.r = 0;
+        style.color.g = 0;
+        style.color.b = 0;
+        style.background_color.r = 255;
+        style.background_color.g = 255;
+        style.background_color.b = 255;
+
+        std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
+        std::vector<std::string> stylesheetPaths;
+        getStyleFromDOM(output->root, css, stylesheetPaths);
+        for (int i = 0; i < stylesheetPaths.size(); i++)
         {
-            memsetPos = 0;
+            std::string newsrc = resolvePath(stylesheetPaths[i], baseURL);
+            css += WebService::htmlFileDownloader(newsrc);
+            std::cout << "Downloaded stylesheet: " << newsrc << std::endl;
         }
-        memset(framebuffer+(memsetPos*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
+        css = css::commentRemover(css);
+        findAndReplaceAll(css, "!important", "");
+        std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
+
+        dom.domCallStack.clear();
+        rootDomItem = dom.parseGumboTree(output->root, style, baseURL, cssOut);
+
+        for (int i = 0; i < cssOut.size() && false; i++)
+        {
+            std::cout << "<";
+            for (int j = 0; j < cssOut[i].selectors.size(); j++)
+            {
+                std::cout << cssOut[i].selectors[j].additionals.back().name;
+                if (cssOut[i].selectors[j].additionals.back().matchingClasses.size())
+                {
+                    std::cout << "(";
+                    for (int k = 0; k < cssOut[i].selectors[j].additionals.back().matchingClasses.size(); k++)
+                    {
+                        std::cout << cssOut[i].selectors[j].additionals.back().matchingClasses[k];
+                    }
+                    std::cout << ")";
+                }
+                std::cout << ", ";
+            }
+            std::cout << ">\n";
+            for (int j = 0; j < cssOut[i].items.size(); j++)
+            {
+                std::cout << "  " << cssOut[i].items[j].attribute.attributeAsString;
+                if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
+                    std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
+                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
+                    std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
+                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
+                    std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
+
+                else if (cssOut[i].items[j].attribute.attributeAsString == "display")
+                {
+                    if (cssOut[i].items[j].value.valueAsString == "block")
+                    {
+                        std::cout << " block" << std::endl;
+                    }
+                    else if (cssOut[i].items[j].value.valueAsString == "inline")
+                    {
+                        std::cout << " inline" << std::endl;
+                    }
+                    else if (cssOut[i].items[j].value.valueAsString == "inline-block")
+                    {
+                        std::cout << " inline-block" << std::endl;
+                    }
+                    else if (cssOut[i].items[j].value.valueAsString == "none")
+                    {
+                        std::cout << " none" << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << " UNKNOWN" << std::endl;
+                    }
+                }
+                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
+                    std::cout << " UNKNOWN" << std::endl;
+                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_NUMBER)
+                    std::cout << " " << cssOut[i].items[j].value.numberValue << std::endl;
+                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_COLOR)
+                    std::cout << " " << (int)cssOut[i].items[j].value.color.r << "," << (int)cssOut[i].items[j].value.color.g << "," << (int)cssOut[i].items[j].value.color.b << std::endl;
+            }
+        }
+
+
+        htmlrenderer.framebuffer = framebuffer;
+        htmlrenderer.framebufferWidth = FRAMEBUFFER_WIDTH;
+        htmlrenderer.framebufferHeight = FRAMEBUFFER_HEIGHT;
+    }
+    void loop(X11Window &window, fte::freetypeInst *inst)
+    {
         RDocumentBox documentBox;
         documentBox.x = 0;
         documentBox.y = 0;//window.height/3;
@@ -314,6 +306,43 @@ int main()
         }
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
+    }
+};
+
+int main()
+{
+    framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
+    memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
+
+    //fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Regular.otf", "/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/Font/NotoSansJP-Bold.otf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+    //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Documents/Development/WebBrowserData/Gothic_A1/GothicA1-Regular.ttf", "/home/tim/Documents/Development/WebBrowserData/Gothic_A1/GothicA1-Bold.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
+
+    fte::makeBold(inst, false);
+
+    X11Window window;
+    window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
+
+    WebPage webpage;
+    webpage.init("https://mangadex.org/", "https://mangadex.org/");
+
+    window.setTitle("WebBrowser - " + webpage.pageTitle);
+
+    int a = 2;
+    while(1)
+    {
+        int scrpos = window.scrollPos*-20;
+        printFps();
+
+        int memsetPos = scrpos;
+        if (memsetPos < 0)
+        {
+            memsetPos = 0;
+        }
+        memset(framebuffer+(memsetPos*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
+
+        webpage.loop(window, inst);
 
         //std::cout << scrpos << std::endl;
         for (int y = 0; y < window.height; y++)
@@ -329,7 +358,7 @@ int main()
         window.processWindowEvents();
     }
 
-    gumbo_destroy_output(&kGumboDefaultOptions, output);
+    delete framebuffer;
 
     return 0;
 }
