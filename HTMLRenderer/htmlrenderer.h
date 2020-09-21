@@ -111,6 +111,12 @@ public:
     /// THESE SHOULD BE TEMPORARY FOR NOW, THEY ARE JUST FOR THE CSS STYLE DEBUGGER!
     int mouseX;
     int mouseY;
+    bool pressed;
+    /// This page switcher is TEMPORARY as well!! Should be implemented in a better way later both in .h and .cpp.
+    std::string nextPage;
+    bool switchPage;
+
+    int yScroll;
 
     // Make stylebox more like a textbox and make it a reference so they can all access it, then when a div occurs you make a new stylebox/textbox and give it that.
     void assembleRenderList(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);

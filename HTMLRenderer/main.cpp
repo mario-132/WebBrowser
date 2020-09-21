@@ -10,7 +10,7 @@
 #include <chrono>
 
 #define FRAMEBUFFER_WIDTH 3840
-#define FRAMEBUFFER_HEIGHT 12690
+#define FRAMEBUFFER_HEIGHT 2160
 
 std::string htmlFileLoader(std::string path)
 {
@@ -304,6 +304,7 @@ public:
             htmlrenderer.mouseX = window.mousex;
             htmlrenderer.mouseY = window.mousey;
         }
+        htmlrenderer.pressed = window.mousePressed;
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
     }
@@ -324,35 +325,36 @@ int main()
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
-    std::string html = WebService::htmlFileDownloader("https://mangadex.org");
+    std::string html = WebService::htmlFileDownloader("https://lightboxengine.com/wbtests");
     WebPage webpage;
-    webpage.init(html, "https://mangadex.org/");
+    webpage.init(html, "https://lightboxengine.com/");
 
     while(1)
     {
-        int scrpos = window.scrollPos*-20;
+        int scrpos = window.scrollPos*30;
         printFps();
 
-        int memsetPos = scrpos;
-        if (memsetPos < 0)
+        if (scrpos > 0)
         {
-            memsetPos = 0;
+            scrpos = 0;
         }
-        memset(framebuffer+(memsetPos*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
+        //int memsetPos = scrpos;
+        memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
         window.setTitle("WebBrowser - " + webpage.pageTitle);
 
-        //std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+        std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+        webpage.htmlrenderer.yScroll = scrpos;
         webpage.loop(window, inst);
-        //std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
-        //std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
+        std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
+        std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
 
-        //std::cout << scrpos << std::endl;
+        std::cout << scrpos << std::endl;
         for (int y = 0; y < window.height; y++)
         {
             for (int x = 0; x < window.width; x++)
             {
-                int ys = y+scrpos;
+                int ys = y;
                 window.displayBuffer[(y*3840*4)+(x*4)+4] = 0;
                 window.displayBuffer[(y*3840*4)+(x*4)+2] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+0];
                 window.displayBuffer[(y*3840*4)+(x*4)+1] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+1];

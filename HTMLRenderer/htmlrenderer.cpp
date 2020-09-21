@@ -9,7 +9,7 @@
 
 HTMLRenderer::HTMLRenderer()
 {
-
+    switchPage = false;
 }
 
 /*void findAndReplaceAll(std::string& data, const std::string& match, const std::string& replace)
@@ -280,7 +280,7 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
             }
 
             item.position.x = line.lineX + line.lineW;
-            item.position.y = (line.lineY + line.lineHTop)-imgH;
+            item.position.y = ((line.lineY + line.lineHTop)-imgH) + yScroll;
 
             line.lineW += imgW;
             RenderItems.push_back(item);
@@ -340,7 +340,7 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     item.type = RITEM_TEXT;
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = line.lineX + line.lineW;
-                    item.position.y = line.lineY + line.lineHTop;
+                    item.position.y = line.lineY + line.lineHTop + yScroll;
                     item.position.w = cX-(line.lineX + line.lineW);
                     item.position.h = line.lineHTop + line.lineHBottom;
                     item.text.textSize = activeStyle.font_size;
@@ -376,6 +376,10 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
 
                     if (mouseX > item.position.x && mouseY < item.position.y && mouseX < item.position.x + item.position.w && mouseY > item.position.y - item.position.h)
                     {
+                        if (activeStyle.isLink && pressed)
+                        {
+                            std::cout << "Clicked link" << std::endl;
+                        }
                         //std::cout << activeStyle.background_color.r << std::endl;
                         for (int i = 0; i < activeStyle.cssdbg.matchingSelectorStrings.size(); i++)
                         {
@@ -415,7 +419,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
 {
     for (int i = 0; i < items.size(); i++)
     {
-        if (items[i].type == RITEM_TEXT)
+        if (items[i].type == RITEM_TEXT  && items[i].position.y < framebufferHeight+items[i].position.h && items[i].position.y > 0)
         {
             fte::makeBold(inst, items[i].text.bold);
             fte::setFontSize(inst, items[i].text.textSize);
@@ -423,7 +427,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             //fte::setTextColor(inst, (255-items[i].text.color.r)/255.0f, (255-items[i].text.color.g)/255.0f, (255-items[i].text.color.b)/255.0f);
             fte::setTextColor(inst, (items[i].text.color.r)/255.0f, (items[i].text.color.g)/255.0f, (items[i].text.color.b)/255.0f);
 
-            if (items[i].text.background_color.r != 255 || items[i].text.background_color.g != 255 || items[i].text.background_color.b != 255)
+            if ((items[i].text.background_color.r != 255 || items[i].text.background_color.g != 255 || items[i].text.background_color.b != 255))
             {
                 for (int x = items[i].position.x; x < items[i].position.x + items[i].position.w; x++)
                 {
@@ -453,7 +457,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                 }
             }
         }
-        else if (items[i].type == RITEM_IMAGE)
+        else if (items[i].type == RITEM_IMAGE && items[i].position.y < framebufferHeight && items[i].position.y > -items[i].position.h)
         {
             if (items[i].img.isValid)
             {
