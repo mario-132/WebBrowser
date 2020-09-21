@@ -51,7 +51,7 @@ struct RenderDOMAttribute
 struct RenderDOMImage
 {
     std::string imageDataRaw;
-    unsigned char* imageData;
+    unsigned char* imageData;/// Todo: @mario-132 Fix this memory leak!
     int imgW;
     int imgH;
     int comp;

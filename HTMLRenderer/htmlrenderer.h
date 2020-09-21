@@ -78,7 +78,7 @@ struct RItemLine
     int lineHTop;
     int lineHBottom;
     int lineW;
-    std::vector<RItem*> items;
+    std::vector<RItem*> items;// Item pointers aren't owned
 };
 
 /// Stores the dimensions of the current working box, this box will be the size of the window at program start, but
