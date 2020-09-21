@@ -164,7 +164,7 @@ public:
         gumbo_destroy_output(&kGumboDefaultOptions, output);
     }
 
-    void init(std::string url, std::string baseURL)
+    void init(std::string html, std::string baseURL)
     {
 
         //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
@@ -180,7 +180,7 @@ public:
         //std::string htmlFile = WebService::htmlFileDownloader("https://www.w3schools.com/w3css/tryw3css_templates_band.htm");
         //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/codeview.html");
         //std::string htmlFile = WebService::htmlFileDownloader("https://lightboxengine.com/multiselector.html");
-        std::string htmlFile = WebService::htmlFileDownloader(url);
+        std::string htmlFile = html;
         //std::string htmlFile = WebService::htmlFileDownloader("https://htmlyoutube.lightboxengine.com");
         //std::string htmlFile = WebService::htmlFileDownloader("https://myanimelist.net/animelist/timl132?status=7");
 
@@ -324,12 +324,10 @@ int main()
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
+    std::string html = WebService::htmlFileDownloader("https://mangadex.org");
     WebPage webpage;
-    webpage.init("https://old.reddit.com/", "https://old.reddit.com/");
+    webpage.init(html, "https://mangadex.org/");
 
-    window.setTitle("WebBrowser - " + webpage.pageTitle);
-
-    int a = 2;
     while(1)
     {
         int scrpos = window.scrollPos*-20;
@@ -342,7 +340,12 @@ int main()
         }
         memset(framebuffer+(memsetPos*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
+        window.setTitle("WebBrowser - " + webpage.pageTitle);
+
+        //std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
         webpage.loop(window, inst);
+        //std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
+        //std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
 
         //std::cout << scrpos << std::endl;
         for (int y = 0; y < window.height; y++)
@@ -350,6 +353,7 @@ int main()
             for (int x = 0; x < window.width; x++)
             {
                 int ys = y+scrpos;
+                window.displayBuffer[(y*3840*4)+(x*4)+4] = 0;
                 window.displayBuffer[(y*3840*4)+(x*4)+2] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+0];
                 window.displayBuffer[(y*3840*4)+(x*4)+1] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+1];
                 window.displayBuffer[(y*3840*4)+(x*4)+0] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+2];

@@ -98,8 +98,6 @@ void X11Window::processWindowEvents()
     XGetWindowAttributes(display, window, &attribs);
     width = attribs.width;
     height = attribs.height;
-    XPutImage(display, window, DefaultGC(display, 0),
-        ximage, 0, 0, 0, 0, width, height);
     while(XPending(display))
     {
         XNextEvent(display, &e);
@@ -113,14 +111,18 @@ void X11Window::processWindowEvents()
                     break;
             }
         }
+        if (e.type == Expose)
+        {
+
+        }
     }
     int rootx;
     int rooty;
     unsigned int mask;
     XQueryPointer(display, window, &inwin, &inchildwin, &rootx, &rooty, &mousex, &mousey, &mask);
+    mousePressed = mask & Button1Mask;
     XPutImage(display, window, DefaultGC(display, 0),
         ximage, 0, 0, 0, 0, width, height);
-    mousePressed = mask & Button1Mask;
     //if (e.type == KeyPress)
 }
 
