@@ -330,6 +330,8 @@ int main()
 
     fte::makeBold(inst, false);
 
+    WebService::init();
+
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
@@ -389,7 +391,7 @@ int main()
 
         window.processWindowEvents();
     }
-
+    WebService::destroy();
     delete framebuffer;
 
     return 0;
