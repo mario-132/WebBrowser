@@ -325,7 +325,7 @@ int main()
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
     WebPage webpage;
-    webpage.init("https://mangadex.org/", "https://mangadex.org/");
+    webpage.init("https://old.reddit.com/", "https://old.reddit.com/");
 
     window.setTitle("WebBrowser - " + webpage.pageTitle);
 

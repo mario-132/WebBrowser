@@ -475,16 +475,16 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         }
                         if (items[i].img.comp == 4)
                         {
-                            /*if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] > 50)
+                            /*if (items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4] != 0)
                             {
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)] =   items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)];
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1];
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2];
                             }*/
                             // Lol wtf is this blending my guy
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0]/255)*(255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+0]/255) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1]/255)*(255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1]/255) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2]/255)*(255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2]/255) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+0]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
                         }
                         /*if (x == 0 || y == 0 || x == items[i].img.w-1 || y == items[i].img.h-1)
                         {
