@@ -89,7 +89,7 @@ class RenderDOM/// Takes the html dom and css and puts it together
 {
 public:
     RenderDOM();
-    RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css);
+    RenderDOMItem parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string fullURL, std::vector<css::CSSSelectorBlock> &css);
     std::vector<DOMStackItem> domCallStack;
     void applyStyle(RenderDOMItem &item, RenderDOMStyle &style);
     bool checkSelectorMatch(std::string selector, const DOMStackItem &item);
@@ -98,6 +98,11 @@ public:
     bool checkIDMatch(std::string idname, std::string items);
 
     void applyItemToStyle(css::CSSItem item, RenderDOMStyle &style);
+
+private:
+    std::string findBasePath(std::string path);
+
+    std::string resolvePath(std::string path, std::string fullURL);
 };
 
 #endif // RENDERDOM_H

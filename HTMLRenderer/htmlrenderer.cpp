@@ -223,6 +223,16 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
     if (root.type == RENDERDOM_ELEMENT)
     {
         activeStyle = root.element.style;
+        if (activeStyle.isLink)
+        {
+            for (int i = 0; i < root.element.attributes.size(); i++)
+            {
+                if (std::string("href") == root.element.attributes[i].name)
+                {
+                    nextPage = root.element.attributes[i].value;
+                }
+            }
+        }
 
         if (activeStyle.display == "block")
         {
@@ -378,7 +388,8 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     {
                         if (activeStyle.isLink && pressed)
                         {
-                            std::cout << "Clicked link" << std::endl;
+                            std::cout << "Clicked link: " << nextPage << std::endl;
+                            switchPage = true;
                         }
                         //std::cout << activeStyle.background_color.r << std::endl;
                         for (int i = 0; i < activeStyle.cssdbg.matchingSelectorStrings.size(); i++)

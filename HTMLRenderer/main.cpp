@@ -111,44 +111,52 @@ void getTitleFromDOM(GumboNode *dom, std::string &title, bool _isInTitle = false
     }
 }
 
-std::string resolvePath(std::string path, std::string baseURL)
+std::string findBasePath(std::string path)
 {
-    std::string imgSource = path;
-    std::string newsrc;
-
-    std::string newImgSrc;
-    bool findingSlash = true;
-    for (int i = 0; i < imgSource.size(); i++)
+    std::string newPath;
+    int slashAmount = 0;
+    for (int i = 0; i < path.size(); i++)
     {
-        if (findingSlash && imgSource[i] == '/')
+        if (path[i] == '/')
         {
-
+            slashAmount++;
+            if (slashAmount > 2)
+            {
+                break;
+            }
         }
-        else
-        {
-            newImgSrc.push_back(imgSource[i]);
-            findingSlash = false;
-        }
+        newPath.push_back(path[i]);
     }
-    imgSource = newImgSrc;
+    return newPath;
+}
 
-    if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
+std::string resolvePath(std::string path, std::string fullURL)
+{
+    std::string newPath;
+    if (path.size()<1)
+        return "";
+    if (path.find("http") != std::string::npos)
     {
-
-        newsrc = imgSource;
-        if (imgSource.find("http") == imgSource.npos)
-        {
-            newsrc = "http://" + imgSource;
-        }
+        return path;
+    }
+    else if (path[0] == '/')
+    {
+        newPath = findBasePath(fullURL) + path;
     }
     else
     {
-        if (imgSource.size() > 1)
+        for (int i = fullURL.size(); i >= 0; i--)
         {
-            newsrc = baseURL + imgSource;
+            if (fullURL[i] == '/')
+            {
+                fullURL.erase(i, fullURL.size()-i);
+                break;
+            }
         }
+        newPath = fullURL + "/" + path;
     }
-    return newsrc;
+
+    return newPath;
 }
 
 class WebPage
@@ -164,7 +172,7 @@ public:
         gumbo_destroy_output(&kGumboDefaultOptions, output);
     }
 
-    void init(std::string html, std::string baseURL)
+    void init(std::string html, std::string fullURL)
     {
 
         //std::string htmlFile = htmlFileLoader("/home/tim/Documents/Development/gumbo-parser/docs/html/index.html");
@@ -209,7 +217,7 @@ public:
         getStyleFromDOM(output->root, css, stylesheetPaths);
         for (int i = 0; i < stylesheetPaths.size(); i++)
         {
-            std::string newsrc = resolvePath(stylesheetPaths[i], baseURL);
+            std::string newsrc = resolvePath(stylesheetPaths[i], fullURL);
             css += WebService::htmlFileDownloader(newsrc);
             std::cout << "Downloaded stylesheet: " << newsrc << std::endl;
         }
@@ -219,7 +227,7 @@ public:
         std::vector<css::CSSSelectorBlock> cssOut = css::parseFromString(css);
 
         dom.domCallStack.clear();
-        rootDomItem = dom.parseGumboTree(output->root, style, baseURL, cssOut);
+        rootDomItem = dom.parseGumboTree(output->root, style, fullURL, cssOut);
 
         for (int i = 0; i < cssOut.size() && false; i++)
         {
@@ -325,9 +333,13 @@ int main()
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
-    std::string html = WebService::htmlFileDownloader("https://lightboxengine.com/wbtests");
-    WebPage webpage;
-    webpage.init(html, "https://lightboxengine.com/");
+    std::string currentWebPage = "https://htmlyoutube.lightboxengine.com/";
+
+    std::string html = WebService::htmlFileDownloader(currentWebPage);
+    //WebPage webpage;
+
+    WebPage *webpage = new WebPage();
+    webpage->init(html, findBasePath(currentWebPage));
 
     while(1)
     {
@@ -337,19 +349,19 @@ int main()
         if (scrpos > 0)
         {
             scrpos = 0;
+            window.scrollPos = 0;
         }
         //int memsetPos = scrpos;
         memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
-        window.setTitle("WebBrowser - " + webpage.pageTitle);
+        window.setTitle("WebBrowser - " + webpage->pageTitle);
 
-        std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
-        webpage.htmlrenderer.yScroll = scrpos;
-        webpage.loop(window, inst);
-        std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
-        std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
+        //std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+        webpage->htmlrenderer.yScroll = scrpos;
+        webpage->loop(window, inst);
+        //std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
+        //std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
 
-        std::cout << scrpos << std::endl;
         for (int y = 0; y < window.height; y++)
         {
             for (int x = 0; x < window.width; x++)
@@ -361,6 +373,20 @@ int main()
                 window.displayBuffer[(y*3840*4)+(x*4)+0] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+2];
             }
         }
+
+        if (webpage->htmlrenderer.switchPage)
+        {
+            std::string href = webpage->htmlrenderer.nextPage;
+            delete webpage;
+            webpage = new WebPage();
+
+            currentWebPage = resolvePath(href, currentWebPage);
+            std::cout << "Fetching: " << currentWebPage << std::endl;
+            std::string html = WebService::htmlFileDownloader(currentWebPage);
+            webpage->init(html, currentWebPage);
+            window.scrollPos = 0;
+        }
+
         window.processWindowEvents();
     }
 

@@ -366,7 +366,55 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
     }
 }
 
-RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string baseURL, std::vector<css::CSSSelectorBlock> &css)
+std::string RenderDOM::findBasePath(std::string path)
+{
+    std::string newPath;
+    int slashAmount = 0;
+    for (int i = 0; i < path.size(); i++)
+    {
+        if (path[i] == '/')
+        {
+            slashAmount++;
+            if (slashAmount > 2)
+            {
+                break;
+            }
+        }
+        newPath.push_back(path[i]);
+    }
+    return newPath;
+}
+
+std::string RenderDOM::resolvePath(std::string path, std::string fullURL)
+{
+    std::string newPath;
+    if (path.size()<1)
+        return "";
+    if (path.find("http") != std::string::npos)
+    {
+        return path;
+    }
+    else if (path[0] == '/')
+    {
+        newPath = findBasePath(fullURL) + path;
+    }
+    else
+    {
+        for (int i = fullURL.size(); i >= 0; i--)
+        {
+            if (fullURL[i] == '/')
+            {
+                fullURL.erase(i, fullURL.size()-i);
+                break;
+            }
+        }
+        newPath = fullURL + "/" + path;
+    }
+
+    return newPath;
+}
+
+RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, std::string fullURL, std::vector<css::CSSSelectorBlock> &css)
 {
     RenderDOMItem item;
     item.type = RENDERDOM_NONE;
@@ -576,40 +624,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     h = std::stoi(item.element.attributes[i].value);
                 }
             }
-            std::string newsrc;
-
-            std::string newImgSrc;
-            bool findingSlash = true;
-            for (int i = 0; i < imgSource.size(); i++)
-            {
-                if (findingSlash && imgSource[i] == '/')
-                {
-
-                }
-                else
-                {
-                    newImgSrc.push_back(imgSource[i]);
-                    findingSlash = false;
-                }
-            }
-            imgSource = newImgSrc;
-
-            if (imgSource.find("http") != imgSource.npos || imgSource.find(".com") != imgSource.npos)
-            {
-
-                newsrc = imgSource;
-                if (imgSource.find("http") == imgSource.npos)
-                {
-                    newsrc = "http://" + imgSource;
-                }
-            }
-            else
-            {
-                if (imgSource.size() > 1)
-                {
-                    newsrc = baseURL + imgSource;
-                }
-            }
+            std::string newsrc = resolvePath(imgSource, fullURL);
 
             int imgW, imgH, comp;
             std::string out;
@@ -645,7 +660,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         domCallStack.push_back(stackitem);
         for (int i = 0; i < node->v.element.children.length; i++)
         {
-            item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, baseURL, css));
+            item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, fullURL, css));
         }
         domCallStack.pop_back();
     }
