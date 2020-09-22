@@ -7,6 +7,7 @@
 #include "webservice.h"
 #include "renderdom.h"
 #include "cssparse.h"
+#include "debugger.h"
 #include <chrono>
 
 #define FRAMEBUFFER_WIDTH 3840
@@ -312,7 +313,7 @@ public:
             htmlrenderer.mouseX = window.mousex;
             htmlrenderer.mouseY = window.mousey;
         }
-        htmlrenderer.pressed = window.mousePressed;
+        htmlrenderer.pressed = window.mousePressed && window.mousex > 0 && window.mousey > 0 && window.mousex < window.width && window.mousey < window.height;
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
     }
@@ -320,6 +321,8 @@ public:
 
 int main()
 {
+    Debugger::start();
+
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
     memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
@@ -335,6 +338,7 @@ int main()
     X11Window window;
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
+    Debugger::setSpinnerEnabled("loadingSpinner", true);
     std::string currentWebPage = "https://htmlyoutube.lightboxengine.com/";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
@@ -342,8 +346,9 @@ int main()
 
     WebPage *webpage = new WebPage();
     webpage->init(html, findBasePath(currentWebPage));
+    Debugger::setSpinnerEnabled("loadingSpinner", false);
 
-    while(1)
+    while(Debugger::windowIsOpen())
     {
         int scrpos = window.scrollPos*30;
         printFps();
@@ -378,6 +383,7 @@ int main()
 
         if (webpage->htmlrenderer.switchPage)
         {
+            Debugger::setSpinnerEnabled("loadingSpinner", true);
             std::string href = webpage->htmlrenderer.nextPage;
             delete webpage;
             webpage = new WebPage();
@@ -387,7 +393,26 @@ int main()
             std::string html = WebService::htmlFileDownloader(currentWebPage);
             webpage->init(html, currentWebPage);
             window.scrollPos = 0;
+            Debugger::setEntryText("UrlBox", currentWebPage);
+            Debugger::setSpinnerEnabled("loadingSpinner", false);
         }
+
+        if (Debugger::getWasGoButtonPressed())
+        {
+            Debugger::setSpinnerEnabled("loadingSpinner", true);
+            std::string href = Debugger::getEntryText("UrlBox");
+            delete webpage;
+            webpage = new WebPage();
+
+            currentWebPage = resolvePath(href, currentWebPage);
+            std::cout << "Fetching: " << currentWebPage << std::endl;
+            std::string html = WebService::htmlFileDownloader(currentWebPage);
+            webpage->init(html, currentWebPage);
+            window.scrollPos = 0;
+            Debugger::setSpinnerEnabled("loadingSpinner", false);
+        }
+
+        Debugger::loop();
 
         window.processWindowEvents();
     }
