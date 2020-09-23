@@ -113,7 +113,8 @@ public:
     int mouseY;
     bool pressed;
     /// This page switcher is TEMPORARY as well!! Should be implemented in a better way later both in .h and .cpp.
-    std::string nextPage;
+    std::string _nextPageTemp;
+    std::string nextpage;
     bool switchPage;
 
     int yScroll;

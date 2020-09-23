@@ -390,31 +390,35 @@ int main()
         if (webpage->htmlrenderer.switchPage)
         {
             Debugger::setSpinnerEnabled("loadingSpinner", true);
-            std::string href = webpage->htmlrenderer.nextPage;
+            Debugger::loop();
+            std::string href = webpage->htmlrenderer.nextpage;
             delete webpage;
             webpage = new WebPage();
-
+            Debugger::loop();
             currentWebPage = resolvePath(href, currentWebPage);
             std::cout << "Fetching: " << currentWebPage << std::endl;
             std::string html = WebService::htmlFileDownloader(currentWebPage);
             webpage->init(html, currentWebPage);
             window.scrollPos = 0;
             Debugger::setEntryText("UrlBox", currentWebPage);
+            Debugger::loop();
             Debugger::setSpinnerEnabled("loadingSpinner", false);
         }
 
         if (Debugger::getWasGoButtonPressed())
         {
             Debugger::setSpinnerEnabled("loadingSpinner", true);
+            Debugger::loop();
             std::string href = Debugger::getEntryText("UrlBox");
             delete webpage;
             webpage = new WebPage();
-
+            Debugger::loop();
             currentWebPage = resolvePath(href, currentWebPage);
             std::cout << "Fetching: " << currentWebPage << std::endl;
             std::string html = WebService::htmlFileDownloader(currentWebPage);
             webpage->init(html, currentWebPage);
             window.scrollPos = 0;
+            Debugger::loop();
             Debugger::setSpinnerEnabled("loadingSpinner", false);
         }
 

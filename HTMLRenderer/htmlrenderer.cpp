@@ -229,7 +229,7 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
             {
                 if (std::string("href") == root.element.attributes[i].name)
                 {
-                    nextPage = root.element.attributes[i].value;
+                    _nextPageTemp = root.element.attributes[i].value;
                 }
             }
         }
@@ -393,7 +393,8 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     {
                         if (activeStyle.isLink && pressed)
                         {
-                            std::cout << "Clicked link: " << nextPage << std::endl;
+                            std::cout << "Clicked link: " << _nextPageTemp << std::endl;
+                            nextpage = _nextPageTemp;
                             switchPage = true;
                         }
                         //std::cout << activeStyle.background_color.r << std::endl;
