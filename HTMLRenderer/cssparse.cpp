@@ -550,9 +550,9 @@ namespace css
                     }
                     else if (strlen(value.c_str() + chrI) == 3)/// Todo: Fix this, you have to do more than the pwoer of 2 lol @mario-132
                     {
-                        val.color.r = ((c >> 8) & 0xF) * ((c >> 8) & 0xF);
-                        val.color.g = ((c >> 4) & 0xF) * ((c >> 4) & 0xF);
-                        val.color.b = ((c) & 0xF) * ((c) & 0xF);
+                        val.color.r = ((c >> 4) & 0xF0) + ((c >> 8) & 0xF);
+                        val.color.g = ((c) & 0xF0) + ((c >> 4) & 0xF);
+                        val.color.b = ((c << 4) & 0xF0) + ((c) & 0xF);
                         val.type = CSS_TYPE_COLOR;
                     }
                     else
