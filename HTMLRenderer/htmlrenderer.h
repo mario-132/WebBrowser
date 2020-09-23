@@ -75,8 +75,8 @@ struct RItemLine
 {
     int lineX;
     int lineY;
-    int lineHTop;
-    int lineHBottom;
+    int lineH;
+    int baselineH;
     int lineW;
     std::vector<RItem*> items;// Item pointers aren't owned
 };
@@ -125,7 +125,7 @@ public:
     std::vector<RItem> RenderItems;
 
 private:
-    void changeLineHeightTop(int newHeight, RItemLine &line);
+    void changeBaselineHeight(int newHeight, RItemLine &line);
     void changeLineHeightBottom(int newHeight, RItemLine &line);
 };
 

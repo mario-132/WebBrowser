@@ -315,6 +315,12 @@ public:
         }
         htmlrenderer.pressed = window.mousePressed && window.mousex > 0 && window.mousey > 0 && window.mousex < window.width && window.mousey < window.height;
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
+        /*std::string a;
+        for (int i = 0; i < rootDomItem.element.style.cssdbg.matchingSelectorStrings.size(); i++)
+        {
+            a += rootDomItem.element.style.cssdbg.matchingSelectorStrings[i];
+        }
+        Debugger::setTextBoxText("NodeInfoTextBox", a);*/
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
     }
 };

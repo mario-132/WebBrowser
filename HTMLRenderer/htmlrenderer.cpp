@@ -212,8 +212,8 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
     if (documentBox->itemLines.size() == 0)
     {
         RItemLine line;
-        line.lineHTop = 0;
-        line.lineHBottom = 0;
+        line.lineH = 0;
+        line.baselineH = 0;
         line.lineW = 0;
         line.lineX = documentBox->x;
         line.lineY = documentBox->y;
@@ -237,11 +237,11 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
         if (activeStyle.display == "block")
         {
             RItemLine nline;
-            nline.lineHTop = 0;
-            nline.lineHBottom = 0;
+            nline.lineH = 0;
+            nline.baselineH = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
-            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineHTop + documentBox->itemLines.back().lineHBottom;
+            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
             documentBox->itemLines.push_back(nline);
         }
 
@@ -283,14 +283,17 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
             item.position.h = imgH;
 
             RItemLine &line = documentBox->itemLines.back();
-            if (line.lineHTop < imgH)
+            if (line.baselineH < imgH)
             {
-                changeLineHeightTop(imgH, line);
-                //line.lineH = imgH;
+                changeBaselineHeight(imgH, line);
+            }
+            if (line.lineH < imgH)
+            {
+                line.lineH = imgH;
             }
 
             item.position.x = line.lineX + line.lineW;
-            item.position.y = ((line.lineY + line.lineHTop)-imgH) + yScroll;
+            item.position.y = ((line.lineY + line.baselineH)-imgH) + yScroll;
 
             line.lineW += imgW;
             RenderItems.push_back(item);
@@ -305,11 +308,11 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
         if (activeStyle.display == "block")
         {
             RItemLine nline;
-            nline.lineHTop = 0;
-            nline.lineHBottom = 0;
+            nline.lineH = 0;
+            nline.baselineH = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
-            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineHTop + documentBox->itemLines.back().lineHBottom;
+            nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
             documentBox->itemLines.push_back(nline);
         }
     }
@@ -335,24 +338,26 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                 if (cX > documentBox->w || i == wide.size()-1)
                 {
                     RItemLine &line = documentBox->itemLines.back();
-                    int lineHeightSpacing = ((activeStyle.font_size*activeStyle.line_height)-activeStyle.font_size)/2;
-                    if (line.lineHTop < activeStyle.font_size+lineHeightSpacing)
+                    int lineHeightSpacing = ((activeStyle.font_size*activeStyle.line_height)-activeStyle.font_size);
+                    if (line.lineH < activeStyle.font_size+lineHeightSpacing)
                     {
-                        changeLineHeightTop(activeStyle.font_size+lineHeightSpacing, line);
+                        line.lineH = activeStyle.font_size+lineHeightSpacing;
+                        //changeLineHeightTop(activeStyle.font_size+lineHeightSpacing, line);
                         //line.lineH = activeStyle.font_size;
                     }
-                    if (line.lineHBottom < lineHeightSpacing || line.items.size() == 0)
+                    if (line.baselineH < activeStyle.font_size+(lineHeightSpacing/2))
                     {
-                        changeLineHeightBottom(lineHeightSpacing, line);
+                        changeBaselineHeight(activeStyle.font_size+(lineHeightSpacing/2), line);
+                        line.baselineH = activeStyle.font_size+(lineHeightSpacing/2);
                         //line.lineH = activeStyle.font_size;
                     }
                     RItem item;
                     item.type = RITEM_TEXT;
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = line.lineX + line.lineW;
-                    item.position.y = line.lineY + line.lineHTop + yScroll;
+                    item.position.y = line.lineY + line.baselineH + yScroll;
                     item.position.w = cX-(line.lineX + line.lineW);
-                    item.position.h = line.lineHTop + line.lineHBottom;
+                    item.position.h = line.lineH;
                     item.text.textSize = activeStyle.font_size;
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
@@ -373,11 +378,11 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     if (cX > documentBox->w)
                     {
                         RItemLine nline;
-                        nline.lineHTop = 0;
-                        nline.lineHBottom = 0;
+                        nline.lineH = 0;
+                        nline.baselineH = 0;
                         nline.lineW = 0;
                         nline.lineX = documentBox->x;
-                        nline.lineY = line.lineY + line.lineHTop + line.lineHBottom;
+                        nline.lineY = line.lineY + line.lineH;
                         documentBox->itemLines.push_back(nline);
                         cX = nline.lineX;
                     }
@@ -532,16 +537,16 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
     }
 }
 
-void HTMLRenderer::changeLineHeightTop(int newHeight, RItemLine &line)
+void HTMLRenderer::changeBaselineHeight(int newHeight, RItemLine &line)
 {
     for (int i = 0; i < line.items.size(); i++)
     {
-        line.items[i]->position.y += (newHeight - line.lineHTop);
+        line.items[i]->position.y += (newHeight - line.baselineH);
     }
-    line.lineHTop = newHeight;
+    line.baselineH = newHeight;
 }
 
 void HTMLRenderer::changeLineHeightBottom(int newHeight, RItemLine &line)
 {
-    line.lineHBottom = newHeight;
+    //line.lineHBottom = newHeight;
 }
