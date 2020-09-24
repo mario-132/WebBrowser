@@ -207,8 +207,14 @@ HTMLRenderer::HTMLRenderer()
     //return RenderItems;
 }*/
 
-void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle activeStyle)
+RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle activeStyle)
 {
+    RPosition itempos;
+    itempos.x = 0;
+    itempos.x = 0;
+    itempos.w = 0;
+    itempos.h = 0;
+
     if (documentBox->itemLines.size() == 0)
     {
         RItemLine line;
@@ -362,13 +368,17 @@ void HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::freet
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
 
-                    item.text.color.r = activeStyle.color.r;
+                    /*item.text.color.r = activeStyle.color.r;
                     item.text.color.g = activeStyle.color.g;
                     item.text.color.b = activeStyle.color.b;
+                    item.text.color.a = activeStyle.color.a;
 
                     item.text.background_color.r = activeStyle.background_color.r;
                     item.text.background_color.g = activeStyle.background_color.g;
-                    item.text.background_color.b = activeStyle.background_color.b;
+                    item.text.background_color.b = activeStyle.background_color.b;*/
+
+                    item.text.color = activeStyle.color;
+                    item.text.background_color = activeStyle.background_color;
 
                     RenderItems.push_back(item);
                     line.lineW += cX-(line.lineX + line.lineW);
@@ -456,9 +466,12 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         }
                         else
                         {
-                            framebuffer[(y*framebufferWidth*3)+((x)*3)] =   items[i].text.background_color.r;
-                            framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = items[i].text.background_color.g;
-                            framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = items[i].text.background_color.b;
+                            //framebuffer[(y*framebufferWidth*3)+((x)*3)] =   items[i].text.background_color.r;
+                            //framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = items[i].text.background_color.g;
+                            //framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = items[i].text.background_color.b;
+                            framebuffer[(y*framebufferWidth*3)+((x)*3)+0] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+0]/255.f) * (255-items[i].text.background_color.a)) + ((items[i].text.background_color.r/255.f) * items[i].text.background_color.a);
+                            framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+1]/255.f) * (255-items[i].text.background_color.a)) + ((items[i].text.background_color.g/255.f) * items[i].text.background_color.a);
+                            framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+2]/255.f) * (255-items[i].text.background_color.a)) + ((items[i].text.background_color.b/255.f) * items[i].text.background_color.a);
                         }
                     }
                 }

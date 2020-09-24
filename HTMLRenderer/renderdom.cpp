@@ -276,6 +276,7 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
             style.color.r = item.value.color.r;
             style.color.g = item.value.color.g;
             style.color.b = item.value.color.b;
+            style.color.a = item.value.color.a;
         }
     }
     if (item.attribute.attributeAsString == "background-color")
@@ -285,6 +286,7 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
             style.background_color.r = item.value.color.r;
             style.background_color.g = item.value.color.g;
             style.background_color.b = item.value.color.b;
+            style.color.a = item.value.color.a;
         }
     }
     if (item.attribute.attributeAsString == "font-size")
@@ -451,6 +453,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         {
             style.display = "inline";
         }
+        /*style.background_color.r = 255;
+        style.background_color.g = 255;
+        style.background_color.b = 255;
+        style.background_color.a = 0;*/
 
         // Look if there are any selectors in the global stylesheets that apply to this node.
         for (int i = 0; i < css.size(); i++)

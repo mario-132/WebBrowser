@@ -20,7 +20,7 @@ struct RText
     bool isLink;
 };
 
-/// Position and dimensions of this RItem.
+/// Position and dimensions
 struct RPosition
 {
     int x;
@@ -29,6 +29,7 @@ struct RPosition
     int h;
 };
 
+/// An image
 struct RImage
 {
     bool isValid;
@@ -38,7 +39,7 @@ struct RImage
     int comp;
 };
 
-/// Contains thee type of item in a RItem. the names speak for themselves.
+/// Contains the type of item in a RItem. the names speak for themselves.
 enum RType
 {
     RITEM_UNKNOWN,
@@ -121,7 +122,7 @@ public:
 
     // Make stylebox more like a textbox and make it a reference so they can all access it, then when a div occurs you make a new stylebox/textbox and give it that.
     void assembleRenderList(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
-    void assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
+    RPosition assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
     void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items);
     std::vector<RItem> RenderItems;
 

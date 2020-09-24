@@ -546,6 +546,7 @@ namespace css
                         val.color.r = (c >> 16) & 0xFF;
                         val.color.g = (c >> 8) & 0xFF;
                         val.color.b = (c) & 0xFF;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (strlen(value.c_str() + chrI) == 3)/// Todo: Fix this, you have to do more than the pwoer of 2 lol @mario-132
@@ -553,6 +554,7 @@ namespace css
                         val.color.r = ((c >> 4) & 0xF0) + ((c >> 8) & 0xF);
                         val.color.g = ((c) & 0xF0) + ((c >> 4) & 0xF);
                         val.color.b = ((c << 4) & 0xF0) + ((c) & 0xF);
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else
@@ -573,6 +575,7 @@ namespace css
                         val.color.r = 0;
                         val.color.g = 0;
                         val.color.b = 0;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (unit == "blue")
@@ -580,6 +583,7 @@ namespace css
                         val.color.r = 0;
                         val.color.g = 0;
                         val.color.b = 255;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (unit == "green")
@@ -587,6 +591,7 @@ namespace css
                         val.color.r = 0;
                         val.color.g = 0x80;
                         val.color.b = 0;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (unit == "red")
@@ -594,6 +599,7 @@ namespace css
                         val.color.r = 255;
                         val.color.g = 0;
                         val.color.b = 0;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (unit == "aqua" || unit == "cyan")
@@ -601,6 +607,7 @@ namespace css
                         val.color.r = 0;
                         val.color.g = 255;
                         val.color.b = 255;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (unit == "lime")
@@ -608,6 +615,7 @@ namespace css
                         val.color.r = 0;
                         val.color.g = 255;
                         val.color.b = 0;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
                     else if (unit == "yellow")
@@ -615,13 +623,15 @@ namespace css
                         val.color.r = 255;
                         val.color.g = 255;
                         val.color.b = 0;
+                        val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
-                    else if (unit == "transparent")// Make transparent white
+                    else if (unit == "transparent")
                     {
                         val.color.r = 255;
                         val.color.g = 255;
                         val.color.b = 255;
+                        val.color.a = 0;
                         val.type = CSS_TYPE_COLOR;
                     }
 

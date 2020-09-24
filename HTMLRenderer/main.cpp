@@ -209,9 +209,11 @@ public:
         style.color.r = 0;
         style.color.g = 0;
         style.color.b = 0;
+        style.color.a = 255;
         style.background_color.r = 255;
         style.background_color.g = 255;
         style.background_color.b = 255;
+        style.background_color.a = 0;
 
         std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
         std::vector<std::string> stylesheetPaths;
