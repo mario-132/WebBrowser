@@ -229,6 +229,9 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
     if (root.type == RENDERDOM_ELEMENT)
     {
         activeStyle = root.element.style;
+        //activeStyle.cssdbg = root.element.style.cssdbg;
+        //activeStyle.display = root.element.style.display;
+        //activeStyle.text_align = root.element.style.text_align;
         if (activeStyle.isLink)
         {
             for (int i = 0; i < root.element.attributes.size(); i++)
