@@ -6,6 +6,7 @@
 #include <fstream>
 #include <locale>
 #include <codecvt>
+#include "debugger.h"
 
 HTMLRenderer::HTMLRenderer()
 {
@@ -45,15 +46,32 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             }
         }
 
-        if (activeStyle.display == "block")
+        if (activeStyle.display == "block" && (documentBox->itemLines.back().items.size() > 0 || root.element.tag == GUMBO_TAG_BR))
         {
             RItemLine nline;
-            nline.lineH = 0;
+            nline.lineH = activeStyle.font_size*activeStyle.line_height;
             nline.baselineH = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
             nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
             documentBox->itemLines.push_back(nline);
+        }
+
+        if (root.element.tag == GUMBO_TAG_HR)
+        {
+            RItem item;
+            item.type = RITEM_COLORED_SQUARE;
+            item.position.x = documentBox->x + 5;
+            item.position.y = documentBox->itemLines.back().lineY + yScroll;
+            item.position.w = documentBox->w - 10;
+            item.position.h = 1;
+            item.squareColor.r = 255;
+            item.squareColor.g = 255;
+            item.squareColor.b = 255;
+            item.squareColor.a = 255;
+            RenderItems.push_back(item);
+            documentBox->itemLines.back().items.push_back(&RenderItems.back());
+            documentBox->itemLines.back().lineW = item.position.w;
         }
 
         if (root.element.tag == GUMBO_TAG_IMG || root.element.tag == GUMBO_TAG_IMAGE)
@@ -108,6 +126,8 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
 
             line.lineW += imgW;
             RenderItems.push_back(item);
+            line.items.push_back(&RenderItems.back());
+
         }
 
         // Parse the child elements.
@@ -116,10 +136,10 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
         }
 
-        if (activeStyle.display == "block")
+        if (activeStyle.display == "block" && documentBox->itemLines.back().items.size() > 0)
         {
             RItemLine nline;
-            nline.lineH = 0;
+            nline.lineH = activeStyle.font_size*activeStyle.line_height;
             nline.baselineH = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
@@ -173,15 +193,6 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                     item.text.bold = activeStyle.bold;
                     item.text.isLink = activeStyle.isLink;
 
-                    /*item.text.color.r = activeStyle.color.r;
-                    item.text.color.g = activeStyle.color.g;
-                    item.text.color.b = activeStyle.color.b;
-                    item.text.color.a = activeStyle.color.a;
-
-                    item.text.background_color.r = activeStyle.background_color.r;
-                    item.text.background_color.g = activeStyle.background_color.g;
-                    item.text.background_color.b = activeStyle.background_color.b;*/
-
                     item.text.color = activeStyle.color;
                     item.text.background_color = activeStyle.background_color;
 
@@ -213,33 +224,13 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                             switchPage = true;
                         }
                         //std::cout << activeStyle.background_color.r << std::endl;
+                        std::string selectorsDebug;
                         for (unsigned int i = 0; i < activeStyle.cssdbg.matchingSelectorStrings.size(); i++)
                         {
-                            //std::cout << activeStyle.cssdbg.matchingSelectorStrings[i] << std::endl;
-                            RItem item;
-                            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-                            std::wstring wide = converter.from_bytes(activeStyle.cssdbg.matchingSelectorStrings[i]);
-                            item.text.text = wide;
-                            item.position.x = mouseX+10;
-                            item.position.y = mouseY+40+(i*20);
-                            item.position.h = 16;
-                            item.position.w = 200;
-                            item.type = RITEM_TEXT;
-
-                            item.text.color.r = 0;
-                            item.text.color.g = 0;
-                            item.text.color.b = 0;
-
-                            item.text.background_color.r = 180;
-                            item.text.background_color.g = 180;
-                            item.text.background_color.b = 150;
-
-                            item.text.textSize = 16;
-                            item.text.bold = true;
-                            item.text.isLink = false;
-
-                            RenderItems.push_back(item);
+                            selectorsDebug += activeStyle.cssdbg.matchingSelectorStrings[i] + "\n";
                         }
+                        Debugger::setTextBoxText("NodeInfoTextBox", selectorsDebug);
+                        Debugger::setTextBoxText("NodeInfoBox2", selectorsDebug);
                     }
                 }
             }
@@ -347,10 +338,29 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         {
                             continue;
                         }
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)] = 128;
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = 128;
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = 128;
+                        items[i].squareColor.a;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+0] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+0]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.r/255.f) * items[i].squareColor.a);
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+1]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.g/255.f) * items[i].squareColor.a);
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+2]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.b/255.f) * items[i].squareColor.a);
                     }
+                }
+            }
+        }
+        else if (items[i].type == RITEM_COLORED_SQUARE && items[i].position.y < framebufferHeight+items[i].position.h && items[i].position.y > 0)
+        {
+            for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
+            {
+                for (int x = items[i].position.x; x < items[i].position.x+items[i].position.w; x++)
+                {
+                    int xp = x;
+                    int yp = y;
+                    if (xp < 0 || yp < 0 || xp > framebufferWidth-1 || yp > framebufferHeight-1)
+                    {
+                        continue;
+                    }
+                    framebuffer[(y*framebufferWidth*3)+((x)*3)] = 128;
+                    framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = 128;
+                    framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = 128;
                 }
             }
         }

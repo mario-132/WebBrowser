@@ -187,6 +187,10 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "audio";
     }
+    else if (tag == GUMBO_TAG_HR)
+    {
+        name = "hr";
+    }
 
     return name;
 }
@@ -587,7 +591,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 generatedSelectorString += "(" + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.r) + ")";
                             generatedSelectorString += ";";
                         }
-                        //style.cssdbg.matchingSelectorStrings.push_back(generatedSelectorString);
+                        style.cssdbg.matchingSelectorStrings.push_back(generatedSelectorString);
                     }
                 }
             }
@@ -600,7 +604,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             {
                 std::string css = item.element.attributes[i].value;
                 std::vector<css::CSSItem> inlineItems = css::parseInlineFromString(css);
-                //item.element.style.cssdbg.matchingSelectorStrings.push_back("INLINE");
+                item.element.style.cssdbg.matchingSelectorStrings.push_back("INLINE");
                 for (unsigned int k = 0; k < inlineItems.size(); k++)
                 {
                     applyItemToStyle(inlineItems[k], style);

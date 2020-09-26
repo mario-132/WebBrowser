@@ -357,12 +357,13 @@ int main()
     WebPage *webpage = new WebPage();
     webpage->init(html, findBasePath(currentWebPage));
     Debugger::setSpinnerEnabled("loadingSpinner", false);
+    Debugger::setEntryText("UrlBox", currentWebPage);
     Debugger::loop();
     while(Debugger::windowIsOpen())
     {
         int scrpos = window.scrollPos*30;
         printFps();
-
+        Debugger::loop();
         if (scrpos > 0)
         {
             scrpos = 0;
@@ -372,13 +373,13 @@ int main()
         memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
         window.setTitle("WebBrowser - " + webpage->pageTitle);
-
+        Debugger::loop();
         //std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
         webpage->htmlrenderer.yScroll = scrpos;
         webpage->loop(window, inst);
         //std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
         //std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
-
+        Debugger::loop();
         for (int y = 0; y < window.height; y++)
         {
             for (int x = 0; x < window.width; x++)

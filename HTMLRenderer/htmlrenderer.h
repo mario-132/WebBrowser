@@ -56,6 +56,7 @@ struct RItem
     RText text;
     RImage img;
     RPosition position;
+    RenderDOMColor squareColor;
 
     RType type;
 };

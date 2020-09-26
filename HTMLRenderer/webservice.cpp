@@ -1,5 +1,6 @@
 #include "webservice.h"
 #include <iostream>
+#include "debugger.h"
 
 CURL *WebService::curl_handle;
 
@@ -16,6 +17,10 @@ size_t WebService::write_data(void *ptr, size_t size, size_t nmemb, void *stream
 
 std::string WebService::htmlFileDownloader(std::string path)
 {
+    std::string txt = Debugger::getTextBoxText("network_textview");
+    Debugger::setTextBoxText("network_textview", txt + path + "\n");
+    Debugger::loop();
+
     std::string result;
     curl_handle = curl_easy_init();
     curl_easy_setopt(curl_handle, CURLOPT_URL, path.c_str());
