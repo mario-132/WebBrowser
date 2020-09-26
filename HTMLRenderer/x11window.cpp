@@ -54,7 +54,11 @@ void X11Window::createWindow(std::string title, int width, int height)
 
 X11Window::X11Window()
 {
-
+    mousex = 0;
+    mousey = 0;
+    mousePressed = 0;
+    width = 100;
+    height = 100;
 }
 
 void X11Window::createWindow(std::string title, int width, int height, int framebufferWidth, int framebufferHeight)

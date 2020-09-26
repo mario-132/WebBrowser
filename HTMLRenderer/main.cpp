@@ -21,8 +21,9 @@ std::string htmlFileLoader(std::string path)
 
     char *fileString = (char*)malloc(size+1);
     htmlFile.read(fileString, size);
-
-    return std::string(fileString);
+    std::string out = std::string(fileString, size);
+    free(fileString);
+    return out;
 }
 
 unsigned char *framebuffer;
@@ -347,6 +348,7 @@ int main()
     window.createWindow("HTMLRenderer", 1920, 1080, 3840, 2160);
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
+    Debugger::loop();
     std::string currentWebPage = "https://htmlyoutube.lightboxengine.com/";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
@@ -355,7 +357,7 @@ int main()
     WebPage *webpage = new WebPage();
     webpage->init(html, findBasePath(currentWebPage));
     Debugger::setSpinnerEnabled("loadingSpinner", false);
-
+    Debugger::loop();
     while(Debugger::windowIsOpen())
     {
         int scrpos = window.scrollPos*30;

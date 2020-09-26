@@ -17,7 +17,7 @@ size_t WebService::write_data(void *ptr, size_t size, size_t nmemb, void *stream
 std::string WebService::htmlFileDownloader(std::string path)
 {
     std::string result;
-
+    curl_handle = curl_easy_init();
     curl_easy_setopt(curl_handle, CURLOPT_URL, path.c_str());
 
     /* Switch on full protocol/debug output while testing */
@@ -38,19 +38,19 @@ std::string WebService::htmlFileDownloader(std::string path)
     if(res != CURLE_OK)
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
-
+    curl_easy_cleanup(curl_handle);
     return result;
 }
 
 void WebService::init()
 {
     curl_global_init(CURL_GLOBAL_ALL);
-    curl_handle = curl_easy_init();
+
 }
 
 void WebService::destroy()
 {
-    curl_easy_cleanup(curl_handle);
+
     curl_global_cleanup();
 
 }
