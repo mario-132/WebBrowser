@@ -65,7 +65,7 @@ void getStyleFromDOM(GumboNode *dom, std::string &style, std::vector<std::string
         {
             std::string href;
             std::string rel;
-            for (int i = 0; i < dom->v.element.attributes.length; i++)
+            for (unsigned int i = 0; i < dom->v.element.attributes.length; i++)
             {
                 if (std::string(((GumboAttribute*)dom->v.element.attributes.data[i])->name) == "href")
                 {
@@ -81,7 +81,7 @@ void getStyleFromDOM(GumboNode *dom, std::string &style, std::vector<std::string
                 stylesheetPaths.push_back(href);
             }
         }
-        for (int i = 0; i < dom->v.element.children.length; i++)
+        for (unsigned int i = 0; i < dom->v.element.children.length; i++)
         {
             getStyleFromDOM((GumboNode*)dom->v.element.children.data[i], style, stylesheetPaths, dom->v.element.tag == GUMBO_TAG_STYLE);
         }
@@ -99,7 +99,7 @@ void getTitleFromDOM(GumboNode *dom, std::string &title, bool _isInTitle = false
 {
     if (dom->type == GUMBO_NODE_ELEMENT)
     {
-        for (int i = 0; i < dom->v.element.children.length; i++)
+        for (unsigned int i = 0; i < dom->v.element.children.length; i++)
         {
             getTitleFromDOM((GumboNode*)dom->v.element.children.data[i], title, dom->v.element.tag == GUMBO_TAG_TITLE);
         }
@@ -117,7 +117,7 @@ std::string findBasePath(std::string path)
 {
     std::string newPath;
     int slashAmount = 0;
-    for (int i = 0; i < path.size(); i++)
+    for (unsigned int i = 0; i < path.size(); i++)
     {
         if (path[i] == '/')
         {
@@ -219,7 +219,7 @@ public:
         std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
         std::vector<std::string> stylesheetPaths;
         getStyleFromDOM(output->root, css, stylesheetPaths);
-        for (int i = 0; i < stylesheetPaths.size(); i++)
+        for (unsigned int i = 0; i < stylesheetPaths.size(); i++)
         {
             std::string newsrc = resolvePath(stylesheetPaths[i], fullURL);
             css += WebService::htmlFileDownloader(newsrc);
@@ -233,7 +233,7 @@ public:
         dom.domCallStack.clear();
         rootDomItem = dom.parseGumboTree(output->root, style, fullURL, cssOut);
 
-        for (int i = 0; i < cssOut.size() && false; i++)
+        for (unsigned int i = 0; i < cssOut.size() && false; i++)
         {
             std::cout << "<";
             for (int j = 0; j < cssOut[i].selectors.size(); j++)

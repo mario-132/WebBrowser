@@ -244,7 +244,7 @@ std::vector<std::string> RenderDOM::parseSpaceSeparatedString(std::string str)
 bool RenderDOM::checkClassMatch(std::string classname, std::string items)
 {
     std::vector<std::string> classes = parseSpaceSeparatedString(items);
-    for (int l = 0; l < classes.size(); l++)
+    for (unsigned int l = 0; l < classes.size(); l++)
     {
         if (classes[l] == classname)
         {
@@ -257,7 +257,7 @@ bool RenderDOM::checkClassMatch(std::string classname, std::string items)
 bool RenderDOM::checkIDMatch(std::string idname, std::string items)
 {
     std::vector<std::string> ids = parseSpaceSeparatedString(items);
-    for (int l = 0; l < ids.size(); l++)
+    for (unsigned int l = 0; l < ids.size(); l++)
     {
         if (ids[l] == idname)
         {
@@ -372,7 +372,7 @@ std::string RenderDOM::findBasePath(std::string path)
 {
     std::string newPath;
     int slashAmount = 0;
-    for (int i = 0; i < path.size(); i++)
+    for (unsigned int i = 0; i < path.size(); i++)
     {
         if (path[i] == '/')
         {
@@ -425,7 +425,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
     {
         item.type = RENDERDOM_ELEMENT;
         item.element.tag = node->v.element.tag;
-        for (int i = 0; i < node->v.element.attributes.length; i++)
+        for (unsigned int i = 0; i < node->v.element.attributes.length; i++)
         {
             RenderDOMAttribute attr;
             attr.name = ((GumboAttribute*)node->v.element.attributes.data[i])->name;
@@ -436,7 +436,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         // Get the tag, class and id string and add them to stackItem for later use in the parsing of the css stylesheet nodes to see if they apply to this node.
         DOMStackItem stackitem;
         stackitem.tag = gumboTagToString(node->v.element.tag);
-        for (int i = 0; i < item.element.attributes.size(); i++)
+        for (unsigned int i = 0; i < item.element.attributes.size(); i++)
         {
             if (std::string("class") == item.element.attributes[i].name)
             {
@@ -459,9 +459,9 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         style.background_color.a = 0;*/
 
         // Look if there are any selectors in the global stylesheets that apply to this node.
-        for (int i = 0; i < css.size(); i++)
+        for (unsigned int i = 0; i < css.size(); i++)
         {
-            for (int j = 0; j < css[i].selectors.size(); j++)
+            for (unsigned int j = 0; j < css[i].selectors.size(); j++)
             {
                 if (checkSelectorMatch(css[i].selectors[j].additionals.back().name, stackitem))
                 {
@@ -472,7 +472,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         break;
                     }
                     // Check if the additional class or id specifiers also apply to this css selector block(e.g. make sure the .classa in div.classa{} is present in this node).
-                    for (int k = 0; k < css[i].selectors[j].additionals.back().matchingClasses.size(); k++)
+                    for (unsigned int k = 0; k < css[i].selectors[j].additionals.back().matchingClasses.size(); k++)
                     {
                         std::string sel = css[i].selectors[j].additionals.back().matchingClasses[k];
                         if (sel[0] == '.')
@@ -482,7 +482,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 match = false;
                         }
                     }
-                    for (int k = 0; k < css[i].selectors[j].additionals.back().matchingIDs.size(); k++)
+                    for (unsigned int k = 0; k < css[i].selectors[j].additionals.back().matchingIDs.size(); k++)
                     {
                         std::string sel = css[i].selectors[j].additionals.back().matchingIDs[k];
                         if (sel[0] == '#')
@@ -557,10 +557,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     if (match)
                     {
                         std::string generatedSelectorString = css[i].selectors[j].additionals.back().name + "::";
-                        for (int k = 0; k < css[i].selectors[j].additionals.size(); k++)
+                        for (unsigned int k = 0; k < css[i].selectors[j].additionals.size(); k++)
                         {
                             generatedSelectorString += css[i].selectors[j].additionals[k].name;
-                            for (int l = 0; l < css[i].selectors[j].additionals[k].matchingClasses.size(); l++)
+                            for (unsigned int l = 0; l < css[i].selectors[j].additionals[k].matchingClasses.size(); l++)
                             {
                                 generatedSelectorString += "|" + css[i].selectors[j].additionals[k].matchingClasses[l] + "|";
                             }
@@ -579,7 +579,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         }
                         //std::cout << generatedSelectorString << std::endl;
                         generatedSelectorString += ";";
-                        for (int k = 0; k < css[i].items.size(); k++)
+                        for (unsigned int k = 0; k < css[i].items.size(); k++)
                         {
                             applyItemToStyle(css[i].items[k], style);
                             generatedSelectorString += css[i].items[k].attribute.attributeAsString + "=" + css[i].items[k].value.valueAsString;
@@ -594,14 +594,14 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         }
 
         // Parse all inline style sheets
-        for (int i = 0; i < item.element.attributes.size(); i++)
+        for (unsigned int i = 0; i < item.element.attributes.size(); i++)
         {
             if (std::string("style") == item.element.attributes[i].name)
             {
                 std::string css = item.element.attributes[i].value;
                 std::vector<css::CSSItem> inlineItems = css::parseInlineFromString(css);
                 //item.element.style.cssdbg.matchingSelectorStrings.push_back("INLINE");
-                for (int k = 0; k < inlineItems.size(); k++)
+                for (unsigned int k = 0; k < inlineItems.size(); k++)
                 {
                     applyItemToStyle(inlineItems[k], style);
                 }
@@ -615,7 +615,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             int w = 0;
             int h = 0;
             std::string imgSource;
-            for (int i = 0; i < item.element.attributes.size(); i++)
+            for (unsigned int i = 0; i < item.element.attributes.size(); i++)
             {
                 if (std::string("src") == item.element.attributes[i].name)
                 {
@@ -664,7 +664,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         }
 
         domCallStack.push_back(stackitem);
-        for (int i = 0; i < node->v.element.children.length; i++)
+        for (unsigned int i = 0; i < node->v.element.children.length; i++)
         {
             item.children.push_back(parseGumboTree((GumboNode*)node->v.element.children.data[i], style, fullURL, css));
         }

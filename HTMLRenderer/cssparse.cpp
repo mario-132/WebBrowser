@@ -159,7 +159,7 @@ namespace css
         std::string newStr;
         char lastC = 0;
         bool removingBeginSpaces = true;
-        for (int i = 0; i < str.length(); i++)
+        for (unsigned int i = 0; i < str.length(); i++)
         {
             if (str[i] != ' ')
             {
@@ -207,10 +207,10 @@ namespace css
     {
         std::vector<CSSBasicSelector> out = basicParseFromString(css);
 
-        for (int i = 0; i < out.size(); i++)
+        for (unsigned int i = 0; i < out.size(); i++)
         {
             //std::cout << "<" << out[i].selectorCombo << ">" << std::endl;
-            for (int j = 0; j < out[i].items.size(); j++)
+            for (unsigned int j = 0; j < out[i].items.size(); j++)
             {
                 //std::cout << "  " << out[i].items[j].name << ":" << out[i].items[j].value << ";" << std::endl;
             }
@@ -223,7 +223,7 @@ namespace css
         return (!isChr(c) && !isNum(c) && c != ':' && c != '_' && c != '-');
     }
 
-    bool parseSingleSelector(std::string &selector, int &numChr, int &cssSize, std::vector<CSSBasicSelector> &css, int &i, bool &isFirstSelector, std::vector<CSSAdditionalSelector> &additionalOperands, CSSSelectorBlock &cssSelBlock)
+    bool parseSingleSelector(std::string &selector, unsigned int &numChr, unsigned int &cssSize, std::vector<CSSBasicSelector> &css, unsigned int &i, bool &isFirstSelector, std::vector<CSSAdditionalSelector> &additionalOperands, CSSSelectorBlock &cssSelBlock)
     {
         selector = "";
         CSSAdditionalSelector addSel;
@@ -375,10 +375,10 @@ namespace css
     std::vector<CSSSelectorBlock> parseFromBasic(std::vector<CSSBasicSelector> css)
     {
         std::vector<CSSSelectorBlock> CSSSelectorBlocks;
-        for (int i = 0; i < css.size(); i++)
+        for (unsigned int i = 0; i < css.size(); i++)
         {
-            int numChr = 0;// To remember at which character we're at.
-            int cssSize = css[i].selectorCombo.size();
+            unsigned int numChr = 0;// To remember at which character we're at.
+            unsigned int cssSize = css[i].selectorCombo.size();
             std::string selector;// Temporarily stores the selector name as it is parsed.
             std::vector<CSSAdditionalSelector> additionalOperands;// Stores parsed selectors in reverse order, has to be reversed later.
 
@@ -397,7 +397,7 @@ namespace css
             cssSelBlock.selectors.back().selector = "INVALID";
             cssSelBlock.selectors.back().additionals = additionalOperands;
             //std::cout << std::endl;
-            for (int j = 0; j < css[i].items.size(); j++)
+            for (unsigned int j = 0; j < css[i].items.size(); j++)
             {
                 CSSAttribute attr = parseSingleAttribute(css[i].items[j].name);
                 CSSValue value = parseSingleValue(css[i].items[j].value);
@@ -409,7 +409,7 @@ namespace css
             }
 
             //std::cout << std::endl;
-            for (int a = 0; a < cssSelBlock.selectors.size(); a++)
+            for (unsigned int a = 0; a < cssSelBlock.selectors.size(); a++)
             {
                 /*std::cout << "new css selectorblock item;" << std::endl;
                 for (int j = 0; j < cssSelBlock.selectors[a].additionals.size(); j++)
@@ -496,7 +496,7 @@ namespace css
         {
             std::string parsedValue;
             int i = 0;
-            for (i = 0; i < value.size(); i++)
+            for (unsigned i = 0; i < value.size(); i++)
             {
                 if (value[i] != '(')
                 {
@@ -521,7 +521,7 @@ namespace css
 
         std::string number;
         std::string unit;
-        int chrI = 0;
+        unsigned int chrI = 0;
 
         if (!isFunction)
         {
@@ -674,7 +674,7 @@ namespace css
         std::string newStr;
         char prevC = ' ';
         bool isCommenting = false;
-        for (int i = 0; i < str.size(); i++)
+        for (unsigned int i = 0; i < str.size(); i++)
         {
             if (str[i] == '/')
             {
@@ -752,7 +752,7 @@ namespace css
         }
 
         std::vector<CSSItem> parsedItems;
-        for (int i = 0; i < items.size(); i++)
+        for (unsigned int i = 0; i < items.size(); i++)
         {
             CSSAttribute attr = parseSingleAttribute(items[i].name);
             CSSValue value = parseSingleValue(items[i].value);

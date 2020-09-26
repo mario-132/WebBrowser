@@ -155,9 +155,9 @@ namespace freetypeeasy
 
             if ((inst->bold?inst->faceB:inst->face)->glyph->format == FT_GLYPH_FORMAT_BITMAP)
             {
-                for (int x = 0; x < (inst->bold?inst->faceB:inst->face)->glyph->bitmap.width; x++)
+                for (unsigned int x = 0; x < (inst->bold?inst->faceB:inst->face)->glyph->bitmap.width; x++)
                 {
-                    for (int y = 0; y < (inst->bold?inst->faceB:inst->face)->glyph->bitmap.rows; y++)
+                    for (unsigned int y = 0; y < (inst->bold?inst->faceB:inst->face)->glyph->bitmap.rows; y++)
                     {
                         if ((inst->bold?inst->faceB:inst->face)->glyph->bitmap.buffer[(y*(inst->bold?inst->faceB:inst->face)->glyph->bitmap.width)+x])
                         {
@@ -202,13 +202,13 @@ namespace freetypeeasy
 
     glyphInfo drawCharacter(freetypeInst* inst, char character, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight)
     {
-        drawCharacter(inst, character, xPos, yPos, framebuffer, bufferWidth, bufferHeight, false);
+        return drawCharacter(inst, character, xPos, yPos, framebuffer, bufferWidth, bufferHeight, false);
     }
 
     void drawString(freetypeInst* inst, char* str, int xPos, int yPos, unsigned char* framebuffer, int bufferWidth, int bufferHeight)
     {
         int xOffset = xPos;
-        for (int i = 0; i < strlen(str); i++)
+        for (unsigned int i = 0; i < strlen(str); i++)
         {
             xOffset += drawCharacter(inst, str[i], xOffset, yPos, framebuffer, bufferWidth, bufferHeight).advanceX/64;
         }
