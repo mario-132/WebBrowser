@@ -267,7 +267,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             {
                 for (int x = items[i].position.x; x < items[i].position.x + items[i].position.w; x++)
                 {
-                    for (int y = items[i].position.y; y >= items[i].position.y - items[i].position.h; y--)
+                    for (int y = items[i].position.y+(items[i].text.textSize/8); y >= items[i].position.y - items[i].position.h; y--)
                     {
                         if (x < 0 || y < 0 || x > framebufferWidth-1 || y > framebufferHeight-1)
                         {

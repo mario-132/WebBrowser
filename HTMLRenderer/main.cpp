@@ -65,6 +65,7 @@ void getStyleFromDOM(GumboNode *dom, std::string &style, std::vector<std::string
         {
             std::string href;
             std::string rel;
+            std::string media;
             for (unsigned int i = 0; i < dom->v.element.attributes.length; i++)
             {
                 if (std::string(((GumboAttribute*)dom->v.element.attributes.data[i])->name) == "href")
@@ -75,8 +76,12 @@ void getStyleFromDOM(GumboNode *dom, std::string &style, std::vector<std::string
                 {
                     rel = ((GumboAttribute*)dom->v.element.attributes.data[i])->value;
                 }
+                if (std::string(((GumboAttribute*)dom->v.element.attributes.data[i])->name) == "media")
+                {
+                    media = ((GumboAttribute*)dom->v.element.attributes.data[i])->value;
+                }
             }
-            if (rel == "stylesheet")
+            if ((rel == "stylesheet" || rel == "Stylesheet" || rel == "STYLESHEET") && media != "print" && media != "projection")
             {
                 stylesheetPaths.push_back(href);
             }
@@ -301,10 +306,10 @@ public:
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
         RDocumentBox documentBox;
-        documentBox.x = 0;
-        documentBox.y = 0;//window.height/3;
-        documentBox.w = window.width;
-        documentBox.h = 0;
+        documentBox.x = 10;
+        documentBox.y = 10;//window.height/3;
+        documentBox.w = window.width-20;
+        documentBox.h = 110;
         //documentBox.textStartX = 0;
         //documentBox.textStartY = 0;//window.height/3;
 
@@ -325,6 +330,46 @@ public:
         }
         Debugger::setTextBoxText("NodeInfoTextBox", a);*/
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
+
+        // Draws a square outline on the document box for debug
+        srand(2);
+        unsigned char r = rand()%255;
+        unsigned char g = rand()%255;
+        unsigned char b = rand()%255;
+        for (int x = documentBox.x; x < documentBox.x + documentBox.w; x++)
+        {
+            for (int y = documentBox.y + htmlrenderer.yScroll; y < documentBox.y + documentBox.h + htmlrenderer.yScroll; y++)
+            {
+                if (x == documentBox.x || y == documentBox.y ||
+                        x == (documentBox.x + documentBox.w) - 1 ||
+                        y == (documentBox.y + documentBox.h) - 1)
+                {
+                    framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)] = r;
+                    framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+1] = g;
+                    framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+2] = b;
+                }
+            }
+        }
+        for (unsigned int i = 0; i < documentBox.childBoxes.size(); i++)
+        {
+            r = rand()%255;
+            g = rand()%255;
+            b = rand()%255;
+            for (int x = documentBox.childBoxes[i].x; x < documentBox.childBoxes[i].x + documentBox.childBoxes[i].w; x++)
+            {
+                for (int y = documentBox.childBoxes[i].y + htmlrenderer.yScroll; y < documentBox.childBoxes[i].y + documentBox.childBoxes[i].h + htmlrenderer.yScroll; y++)
+                {
+                    if (x == documentBox.childBoxes[i].x || y == documentBox.childBoxes[i].y ||
+                            x == documentBox.childBoxes[i].x + documentBox.childBoxes[i].w - 1 ||
+                            y == documentBox.childBoxes[i].y + documentBox.childBoxes[i].h - 1)
+                    {
+                        framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)] = r;
+                        framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+1] = g;
+                        framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+2] = b;
+                    }
+                }
+            }
+        }
     }
 };
 

@@ -96,6 +96,8 @@ struct RDocumentBox
     //int textStartX;
     //int textStartY;
 
+    std::vector<RDocumentBox> childBoxes;
+
     std::vector<RItemLine> itemLines;
 };
 
