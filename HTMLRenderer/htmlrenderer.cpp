@@ -17,7 +17,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
 {
     RPosition itempos;
     itempos.x = 0;
-    itempos.x = 0;
+    itempos.y = 0;
     itempos.w = 0;
     itempos.h = 0;
 
@@ -65,9 +65,9 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             item.position.y = documentBox->itemLines.back().lineY + yScroll;
             item.position.w = documentBox->w - 10;
             item.position.h = 1;
-            item.squareColor.r = 255;
-            item.squareColor.g = 255;
-            item.squareColor.b = 255;
+            item.squareColor.r = 0;
+            item.squareColor.g = 0;
+            item.squareColor.b = 0;
             item.squareColor.a = 255;
             RenderItems.push_back(item);
             documentBox->itemLines.back().items.push_back(&RenderItems.back());
@@ -116,15 +116,22 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             {
                 changeBaselineHeight(imgH, line);
             }
+
+
+            item.position.x = line.lineX + line.lineW;
+            item.position.y = ((line.lineY + line.baselineH)-imgH) + yScroll;
+
+            /*itempos.x = line.lineX + line.lineW;
+            itempos.y = ((line.lineY + line.baselineH)-imgH) + yScroll;
+            itempos.w = imgW;
+            itempos.h = imgH;*/
+
+            line.lineW += imgW;
             if (line.lineH < imgH)
             {
                 line.lineH = imgH;
             }
 
-            item.position.x = line.lineX + line.lineW;
-            item.position.y = ((line.lineY + line.baselineH)-imgH) + yScroll;
-
-            line.lineW += imgW;
             RenderItems.push_back(item);
             line.items.push_back(&RenderItems.back());
 
@@ -133,7 +140,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
         // Parse the child elements.
         for (unsigned int i = 0; i < root.children.size(); i++)
         {
-            assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
+            RPosition pos = assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
         }
 
         if (activeStyle.display == "block" && documentBox->itemLines.back().items.size() > 0)
@@ -196,6 +203,11 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                     item.text.color = activeStyle.color;
                     item.text.background_color = activeStyle.background_color;
 
+                    /*itempos.x = line.lineX + line.lineW;
+                    itempos.y = (line.lineY + line.baselineH + yScroll)-line.lineH;
+                    itempos.w = cX-(line.lineX + line.lineW);
+                    itempos.h = line.lineH;*/
+
                     RenderItems.push_back(item);
                     line.lineW += cX-(line.lineX + line.lineW);
 
@@ -251,7 +263,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
             //fte::setTextColor(inst, (255-items[i].text.color.r)/255.0f, (255-items[i].text.color.g)/255.0f, (255-items[i].text.color.b)/255.0f);
             fte::setTextColor(inst, (items[i].text.color.r)/255.0f, (items[i].text.color.g)/255.0f, (items[i].text.color.b)/255.0f);
 
-            if ((items[i].text.background_color.r != 255 || items[i].text.background_color.g != 255 || items[i].text.background_color.b != 255))
+            if (items[i].text.background_color.a != 0)
             {
                 for (int x = items[i].position.x; x < items[i].position.x + items[i].position.w; x++)
                 {
@@ -338,10 +350,9 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         {
                             continue;
                         }
-                        items[i].squareColor.a;
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+0] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+0]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.r/255.f) * items[i].squareColor.a);
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+1]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.g/255.f) * items[i].squareColor.a);
-                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+2]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.b/255.f) * items[i].squareColor.a);
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)] = 128;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = 128;
+                        framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = 128;
                     }
                 }
             }
@@ -358,9 +369,9 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                     {
                         continue;
                     }
-                    framebuffer[(y*framebufferWidth*3)+((x)*3)] = 128;
-                    framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = 128;
-                    framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = 128;
+                    framebuffer[(y*framebufferWidth*3)+((x)*3)+0] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+0]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.r/255.f) * items[i].squareColor.a);
+                    framebuffer[(y*framebufferWidth*3)+((x)*3)+1] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+1]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.g/255.f) * items[i].squareColor.a);
+                    framebuffer[(y*framebufferWidth*3)+((x)*3)+2] = ((framebuffer[(y*framebufferWidth*3)+((x)*3)+2]/255.f) * (255-items[i].squareColor.a)) + ((items[i].squareColor.b/255.f) * items[i].squareColor.a);
                 }
             }
         }

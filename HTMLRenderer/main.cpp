@@ -304,7 +304,7 @@ public:
         documentBox.x = 0;
         documentBox.y = 0;//window.height/3;
         documentBox.w = window.width;
-        documentBox.h = window.height;
+        documentBox.h = 0;
         //documentBox.textStartX = 0;
         //documentBox.textStartY = 0;//window.height/3;
 
@@ -349,7 +349,7 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    std::string currentWebPage = "https://htmlyoutube.lightboxengine.com/";
+    std::string currentWebPage = "http://htmlyoutube.lightboxengine.com/";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
     //WebPage webpage;

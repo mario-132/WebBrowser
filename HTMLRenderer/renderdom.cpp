@@ -290,7 +290,7 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
             style.background_color.r = item.value.color.r;
             style.background_color.g = item.value.color.g;
             style.background_color.b = item.value.color.b;
-            style.color.a = item.value.color.a;
+            style.background_color.a = item.value.color.a;
         }
     }
     if (item.attribute.attributeAsString == "font-size")
@@ -457,10 +457,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         {
             style.display = "inline";
         }
-        /*style.background_color.r = 255;
+        style.background_color.r = 255;
         style.background_color.g = 255;
         style.background_color.b = 255;
-        style.background_color.a = 0;*/
+        style.background_color.a = 0;
 
         // Look if there are any selectors in the global stylesheets that apply to this node.
         for (unsigned int i = 0; i < css.size(); i++)
@@ -588,7 +588,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             applyItemToStyle(css[i].items[k], style);
                             generatedSelectorString += css[i].items[k].attribute.attributeAsString + "=" + css[i].items[k].value.valueAsString;
                             if (css[i].items[k].value.type == css::CSS_TYPE_COLOR)
-                                generatedSelectorString += "(" + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.r) + ")";
+                                generatedSelectorString += "(" + std::to_string((int)css[i].items[k].value.color.r) + "," + std::to_string((int)css[i].items[k].value.color.g) + "," + std::to_string((int)css[i].items[k].value.color.b) + "," + std::to_string((int)css[i].items[k].value.color.a) + ")";
                             generatedSelectorString += ";";
                         }
                         style.cssdbg.matchingSelectorStrings.push_back(generatedSelectorString);
@@ -604,11 +604,20 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
             {
                 std::string css = item.element.attributes[i].value;
                 std::vector<css::CSSItem> inlineItems = css::parseInlineFromString(css);
-                item.element.style.cssdbg.matchingSelectorStrings.push_back("INLINE");
+
+                std::string generatedSelectorString = "INLINE:";
                 for (unsigned int k = 0; k < inlineItems.size(); k++)
                 {
-                    applyItemToStyle(inlineItems[k], style);
+                    if (inlineItems[k].attribute.attributeAsString != "")
+                    {
+                        applyItemToStyle(inlineItems[k], style);
+                        generatedSelectorString += inlineItems[k].attribute.attributeAsString + "=" + inlineItems[k].value.valueAsString;
+                        if (inlineItems[k].value.type == css::CSS_TYPE_COLOR)
+                            generatedSelectorString += "(" + std::to_string((int)inlineItems[k].value.color.r) + "," + std::to_string((int)inlineItems[k].value.color.g) + "," + std::to_string((int)inlineItems[k].value.color.b) + "," + std::to_string((int)inlineItems[k].value.color.a) + ")";
+                        generatedSelectorString += ";";
+                    }
                 }
+                style.cssdbg.matchingSelectorStrings.push_back(generatedSelectorString);
             }
         }
 
