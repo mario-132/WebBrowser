@@ -484,6 +484,8 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         {
             for (unsigned int j = 0; j < css[i].selectors.size(); j++)
             {
+                if (css[i].selectors[j].additionals.size() == 0)
+                    continue;
                 if (checkSelectorMatch(css[i].selectors[j].additionals.back().name, stackitem))
                 {
                     bool match = true;

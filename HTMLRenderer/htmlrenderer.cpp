@@ -145,11 +145,15 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
         // Parse the child elements.
         if (activeStyle.display == "block")
         {
+            unsigned int _off = 0;
+            if (Debugger::getCheckboxEnabled("debug_docbox_1px"))
+                _off = 1;
             RDocumentBox docBox;
-            docBox.x = documentBox->x+1;
-            docBox.y = documentBox->y+1+documentBox->h;
-            docBox.w = documentBox->w-2;
-            docBox.h = 1;
+            docBox.x = documentBox->x+_off;
+            docBox.y = documentBox->y+_off+documentBox->h;
+            docBox.w = documentBox->w-_off-_off;
+            docBox.h = _off;
+
             documentBox->childBoxes.push_back(docBox);
             for (unsigned int i = 0; i < root.children.size(); i++)
             {
@@ -321,9 +325,9 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
 
             if (items[i].text.background_color.a != 0)
             {
-                for (int x = items[i].position.x; x < items[i].position.x + items[i].position.w; x++)
+                for (int y = items[i].position.y+(items[i].text.textSize/3); y >= (items[i].position.y - items[i].position.h)+(items[i].text.textSize/3); y--)
                 {
-                    for (int y = items[i].position.y+(items[i].text.textSize/8); y >= items[i].position.y - items[i].position.h; y--)
+                    for (int x = items[i].position.x; x < items[i].position.x + items[i].position.w; x++)
                     {
                         if (x < 0 || y < 0 || x > framebufferWidth-1 || y > framebufferHeight-1)
                         {
@@ -368,7 +372,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                         }
                         if (items[i].img.comp == 3)
                         {
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)] =   items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)];
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0] = items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)];
                             framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)+1];
                             framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*3)+((x)*3)+2];
                         }
@@ -381,9 +385,9 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                                 framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2];
                             }*/
                             // Lol wtf is this blending my guy
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+0]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
-                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+4]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+0]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+3])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+0]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+3]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+1]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+3])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+1]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+3]);
+                            framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2] = ((framebuffer[(yp*framebufferWidth*3)+((xp)*3)+2]/255.f) * (255-items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+3])) + ((items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+2]/255.f) * items[i].img.imageData[(y*items[i].img.w*4)+((x)*4)+3]);
                         }
                         /*if (x == 0 || y == 0 || x == items[i].img.w-1 || y == items[i].img.h-1)
                         {
@@ -413,7 +417,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                 }
             }
         }
-        else if (items[i].type == RITEM_COLORED_SQUARE && items[i].position.y < framebufferHeight+items[i].position.h && items[i].position.y > 0)
+        else if (items[i].type == RITEM_COLORED_SQUARE && items[i].position.y < framebufferHeight+items[i].position.h && items[i].position.y+items[i].position.h > 0)
         {
             for (int y = items[i].position.y; y < items[i].position.y+items[i].position.h; y++)
             {

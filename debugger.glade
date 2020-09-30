@@ -233,6 +233,22 @@
                     <property name="y">83</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkCheckButton" id="useragent_chrome">
+                    <property name="label" translatable="yes">Use Chrome User Agent</property>
+                    <property name="width_request">185</property>
+                    <property name="height_request">22</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="x">12</property>
+                    <property name="y">109</property>
+                  </packing>
+                </child>
               </object>
             </child>
             <child type="label">

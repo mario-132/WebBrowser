@@ -626,6 +626,14 @@ namespace css
                         val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
+                    else if (unit == "purple")
+                    {
+                        val.color.r = 0x80;
+                        val.color.g = 00;
+                        val.color.b = 0x80;
+                        val.color.a = 255;
+                        val.type = CSS_TYPE_COLOR;
+                    }
                     else if (unit == "transparent")
                     {
                         val.color.r = 255;
