@@ -634,6 +634,14 @@ namespace css
                         val.color.a = 0;
                         val.type = CSS_TYPE_COLOR;
                     }
+                    else if (unit == "white")
+                    {
+                        val.color.r = 255;
+                        val.color.g = 255;
+                        val.color.b = 255;
+                        val.color.a = 255;
+                        val.type = CSS_TYPE_COLOR;
+                    }
 
 
                     if (unit == "px")

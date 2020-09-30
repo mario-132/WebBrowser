@@ -293,6 +293,16 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
             style.background_color.a = item.value.color.a;
         }
     }
+    if (item.attribute.attributeAsString == "background")/// Todo: @mario-132 Fix, as this is not correct.
+    {
+        if (item.value.type == css::CSS_TYPE_COLOR)
+        {
+            style.background_color.r = item.value.color.r;
+            style.background_color.g = item.value.color.g;
+            style.background_color.b = item.value.color.b;
+            style.background_color.a = item.value.color.a;
+        }
+    }
     if (item.attribute.attributeAsString == "font-size")
     {
         if (item.value.type == css::CSS_TYPE_PX)
@@ -402,7 +412,14 @@ std::string RenderDOM::resolvePath(std::string path, std::string fullURL)
     }
     else if (path[0] == '/')
     {
-        newPath = findBasePath(fullURL) + path;
+        if (path[1] == '/')
+        {
+            newPath = "https:" + path;
+        }
+        else
+        {
+            newPath = findBasePath(fullURL) + path;
+        }
     }
     else
     {
@@ -485,6 +502,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             if (!checkClassMatch(sel, stackitem.unparsedClasses))
                                 match = false;
                         }
+                        else
+                        {
+                            std::cout << "Error, class in matchingClasses did not start with a ." << std::endl;
+                        }
                     }
                     for (unsigned int k = 0; k < css[i].selectors[j].additionals.back().matchingIDs.size(); k++)
                     {
@@ -556,6 +577,35 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECTLY_ADJECENT_TO)
                         {
                             match = false;
+                        }
+
+                        if (match)// Now check the additionals for match
+                        {
+                            // Check if the additional class or id specifiers also apply to this css selector block(e.g. make sure the .classa in div.classa{} is present in this node).
+                            for (unsigned int l = 0; l < css[i].selectors[j].additionals[k].matchingClasses.size(); l++)
+                            {
+                                std::string sel = css[i].selectors[j].additionals[k].matchingClasses[l];
+                                if (sel[0] == '.')
+                                {
+                                    sel.erase(0, 1);
+                                    if (!checkClassMatch(sel, domCallStack[selectorOffset].unparsedClasses))
+                                        match = false;
+                                }
+                                else
+                                {
+                                    std::cout << "Error, class in matchingClasses did not start with a ." << std::endl;
+                                }
+                            }
+                            for (unsigned int l = 0; l < css[i].selectors[j].additionals[k].matchingIDs.size(); l++)
+                            {
+                                std::string sel = css[i].selectors[j].additionals[k].matchingIDs[l];
+                                if (sel[0] == '#')
+                                {
+                                    sel.erase(0, 1);
+                                    if (!checkIDMatch(sel, domCallStack[selectorOffset].unparsedIDs))
+                                        match = false;
+                                }
+                            }
                         }
                     }
                     if (match)

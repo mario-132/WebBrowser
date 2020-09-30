@@ -19,6 +19,8 @@ namespace Debugger
 
     bool getCheckboxEnabled(std::string name);
 
+    float getAdjustmentGetValue(std::string name);
+
     bool getWasGoButtonPressed();
 
     bool windowIsOpen();

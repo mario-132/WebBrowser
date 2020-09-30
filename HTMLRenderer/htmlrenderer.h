@@ -125,7 +125,7 @@ public:
 
     // Make stylebox more like a textbox and make it a reference so they can all access it, then when a div occurs you make a new stylebox/textbox and give it that.
     void assembleRenderList(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
-    RPosition assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);
+    RPosition assembleRenderListV2(RenderDOMItem &root, fte::freetypeInst *inst, RDocumentBox *documentBox, RenderDOMStyle style);// Returns the position of the element
     void renderRenderList(fte::freetypeInst *inst, std::vector<RItem> items);
     std::vector<RItem> RenderItems;
 

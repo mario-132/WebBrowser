@@ -148,7 +148,14 @@ std::string resolvePath(std::string path, std::string fullURL)
     }
     else if (path[0] == '/')
     {
-        newPath = findBasePath(fullURL) + path;
+        if (path[1] == '/')
+        {
+            newPath = "https:" + path;
+        }
+        else
+        {
+            newPath = findBasePath(fullURL) + path;
+        }
     }
     else
     {
@@ -164,6 +171,33 @@ std::string resolvePath(std::string path, std::string fullURL)
     }
 
     return newPath;
+}
+
+void renderDocumentBox(RDocumentBox &documentBox, int yScroll)
+{
+    unsigned char r = rand()%255;
+    unsigned char g = rand()%255;
+    unsigned char b = rand()%255;
+    for (int x = documentBox.x; x < documentBox.x + documentBox.w; x++)
+    {
+        for (int y = documentBox.y + yScroll; y < documentBox.y + documentBox.h + yScroll; y++)
+        {
+            if (x == documentBox.x || y == documentBox.y + yScroll ||
+                    x == (documentBox.x + documentBox.w) - 1 ||
+                    y == (documentBox.y + documentBox.h + yScroll) - 1)
+            {
+                if (x < 0 || y < 0 || x >= FRAMEBUFFER_WIDTH || y >= FRAMEBUFFER_HEIGHT)
+                    continue;
+                framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)] = r;
+                framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+1] = g;
+                framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+2] = b;
+            }
+        }
+    }
+    for (int i = 0; i < documentBox.childBoxes.size(); i++)
+    {
+        renderDocumentBox(documentBox.childBoxes[i], yScroll);
+    }
 }
 
 class WebPage
@@ -208,7 +242,7 @@ public:
 
         RenderDOMStyle style;
         style.display = "inline";
-        style.font_size = 16;
+        style.font_size = Debugger::getAdjustmentGetValue("textsize_drag");
         style.line_height = 1.2;
         style.bold = false;
         style.isLink = false;
@@ -309,7 +343,7 @@ public:
         documentBox.x = 10;
         documentBox.y = 10;//window.height/3;
         documentBox.w = window.width-20;
-        documentBox.h = 110;
+        documentBox.h = 1;
         //documentBox.textStartX = 0;
         //documentBox.textStartY = 0;//window.height/3;
 
@@ -321,7 +355,7 @@ public:
             htmlrenderer.mouseX = window.mousex;
             htmlrenderer.mouseY = window.mousey;
         }
-        htmlrenderer.pressed = window.mousePressed && window.mousex > 0 && window.mousey > 0 && window.mousex < window.width && window.mousey < window.height;
+        htmlrenderer.pressed = window.mousePressed && window.mousex > 0 && window.mousey > 0 && window.mousex < window.width && window.mousey < window.height && !Debugger::getCheckboxEnabled("debug_link_disable");
         htmlrenderer.assembleRenderListV2(rootDomItem, inst, &documentBox, RenderDOMStyle());
         /*std::string a;
         for (int i = 0; i < rootDomItem.element.style.cssdbg.matchingSelectorStrings.size(); i++)
@@ -333,17 +367,21 @@ public:
 
         // Draws a square outline on the document box for debug
         srand(2);
-        unsigned char r = rand()%255;
+        if (Debugger::getCheckboxEnabled("debug_docbox"))
+            renderDocumentBox(documentBox, htmlrenderer.yScroll);
+        /*unsigned char r = rand()%255;
         unsigned char g = rand()%255;
         unsigned char b = rand()%255;
         for (int x = documentBox.x; x < documentBox.x + documentBox.w; x++)
         {
             for (int y = documentBox.y + htmlrenderer.yScroll; y < documentBox.y + documentBox.h + htmlrenderer.yScroll; y++)
             {
-                if (x == documentBox.x || y == documentBox.y ||
+                if (x == documentBox.x || y == documentBox.y + htmlrenderer.yScroll ||
                         x == (documentBox.x + documentBox.w) - 1 ||
-                        y == (documentBox.y + documentBox.h) - 1)
+                        y == (documentBox.y + documentBox.h + htmlrenderer.yScroll) - 1)
                 {
+                    if (x < 0 || y < 0 || x >= FRAMEBUFFER_WIDTH || y >= FRAMEBUFFER_HEIGHT)
+                        continue;
                     framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)] = r;
                     framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+1] = g;
                     framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+2] = b;
@@ -359,17 +397,19 @@ public:
             {
                 for (int y = documentBox.childBoxes[i].y + htmlrenderer.yScroll; y < documentBox.childBoxes[i].y + documentBox.childBoxes[i].h + htmlrenderer.yScroll; y++)
                 {
-                    if (x == documentBox.childBoxes[i].x || y == documentBox.childBoxes[i].y ||
+                    if (x == documentBox.childBoxes[i].x || y == documentBox.childBoxes[i].y + htmlrenderer.yScroll ||
                             x == documentBox.childBoxes[i].x + documentBox.childBoxes[i].w - 1 ||
-                            y == documentBox.childBoxes[i].y + documentBox.childBoxes[i].h - 1)
+                            y == documentBox.childBoxes[i].y + documentBox.childBoxes[i].h + htmlrenderer.yScroll - 1)
                     {
+                        if (x < 0 || y < 0 || x >= FRAMEBUFFER_WIDTH || y >= FRAMEBUFFER_HEIGHT)
+                            continue;
                         framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)] = r;
                         framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+1] = g;
                         framebuffer[(y*FRAMEBUFFER_WIDTH*3)+(x*3)+2] = b;
                     }
                 }
             }
-        }
+        }*/
     }
 };
 
@@ -394,7 +434,8 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    std::string currentWebPage = "http://htmlyoutube.lightboxengine.com/";
+    //std::string currentWebPage = "https://i.reddit.com/";
+    std::string currentWebPage = "https://lightboxengine.com/wbtests/";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
     //WebPage webpage;

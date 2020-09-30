@@ -55,6 +55,9 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             nline.lineX = documentBox->x;
             nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
             documentBox->itemLines.push_back(nline);
+
+            if (documentBox->y + documentBox->h < nline.lineY + nline.lineH)
+                documentBox->h = (nline.lineY + nline.lineH)-documentBox->y;
         }
 
         if (root.element.tag == GUMBO_TAG_HR)
@@ -121,10 +124,10 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             item.position.x = line.lineX + line.lineW;
             item.position.y = ((line.lineY + line.baselineH)-imgH) + yScroll;
 
-            /*itempos.x = line.lineX + line.lineW;
+            itempos.x = line.lineX + line.lineW;
             itempos.y = ((line.lineY + line.baselineH)-imgH) + yScroll;
             itempos.w = imgW;
-            itempos.h = imgH;*/
+            itempos.h = imgH;
 
             line.lineW += imgW;
             if (line.lineH < imgH)
@@ -135,23 +138,72 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             RenderItems.push_back(item);
             line.items.push_back(&RenderItems.back());
 
+            if (documentBox->y + documentBox->h < line.lineY + line.lineH)
+                documentBox->h = (line.lineY + line.lineH)-documentBox->y;
         }
 
         // Parse the child elements.
-        for (unsigned int i = 0; i < root.children.size(); i++)
+        if (activeStyle.display == "block")
         {
-            RPosition pos = assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
+            RDocumentBox docBox;
+            docBox.x = documentBox->x+1;
+            docBox.y = documentBox->y+1+documentBox->h;
+            docBox.w = documentBox->w-2;
+            docBox.h = 1;
+            documentBox->childBoxes.push_back(docBox);
+            for (unsigned int i = 0; i < root.children.size(); i++)
+            {
+                RPosition pos = assembleRenderListV2(root.children[i], inst, &documentBox->childBoxes.back(), activeStyle);
+            }
+
+            RItemLine nline;
+            nline.lineH = documentBox->childBoxes.back().h;
+            nline.baselineH = 0;
+            nline.lineW = 0;
+            nline.lineX = documentBox->x;
+            nline.lineY = documentBox->y+1+documentBox->h;//documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
+            documentBox->itemLines.push_back(nline);
+            if (documentBox->y + documentBox->h < nline.lineY + nline.lineH)
+                documentBox->h = (nline.lineY + nline.lineH)-documentBox->y;
+            RItem item;
+            item.type = RITEM_NONE;
+            if (activeStyle.background_color.a != 0)
+            {
+
+                item.type = RITEM_COLORED_SQUARE;
+                item.position.x = documentBox->childBoxes.back().x;
+                item.position.y = documentBox->childBoxes.back().y + yScroll;
+                item.position.w = documentBox->childBoxes.back().w;
+                item.position.h = documentBox->childBoxes.back().h;
+                item.squareColor.r = activeStyle.background_color.r;
+                item.squareColor.g = activeStyle.background_color.g;
+                item.squareColor.b = activeStyle.background_color.b;
+                item.squareColor.a = activeStyle.background_color.a;
+                //RenderItems.push_back(item);
+            }
+            RenderItems.insert(RenderItems.begin(), item);
+            documentBox->itemLines.back().items.push_back(&RenderItems.front());// We add the bg item(even if RITEM_NONE) to the line containing the block so that it causes a newline by the code below.
+        }
+        else
+        {
+            for (unsigned int i = 0; i < root.children.size(); i++)
+            {
+                RPosition pos = assembleRenderListV2(root.children[i], inst, documentBox, activeStyle);
+            }
         }
 
         if (activeStyle.display == "block" && documentBox->itemLines.back().items.size() > 0)
         {
             RItemLine nline;
-            nline.lineH = activeStyle.font_size*activeStyle.line_height;
+            nline.lineH = 0;
             nline.baselineH = 0;
             nline.lineW = 0;
             nline.lineX = documentBox->x;
             nline.lineY = documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
             documentBox->itemLines.push_back(nline);
+
+            if (documentBox->y + documentBox->h < nline.lineY + nline.lineH)
+                documentBox->h = (nline.lineY + nline.lineH)-documentBox->y;
         }
     }
     else if (root.type == RENDERDOM_TEXT)
@@ -183,6 +235,8 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                         //changeLineHeightTop(activeStyle.font_size+lineHeightSpacing, line);
                         //line.lineH = activeStyle.font_size;
                     }
+                    if (documentBox->y + documentBox->h < line.lineY + line.lineH)
+                        documentBox->h = (line.lineY + line.lineH)-documentBox->y;
                     if (line.baselineH < activeStyle.font_size+(lineHeightSpacing/2))
                     {
                         changeBaselineHeight(activeStyle.font_size+(lineHeightSpacing/2), line);
@@ -193,7 +247,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                     item.type = RITEM_TEXT;
                     item.text.text = std::wstring((&wide[0])+charactersPreWritten, (i+1)-charactersPreWritten);
                     item.position.x = line.lineX + line.lineW;
-                    item.position.y = line.lineY + line.baselineH + yScroll;
+                    item.position.y = (line.lineY + line.baselineH + yScroll);
                     item.position.w = cX-(line.lineX + line.lineW);
                     item.position.h = line.lineH;
                     item.text.textSize = activeStyle.font_size;
@@ -203,10 +257,10 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                     item.text.color = activeStyle.color;
                     item.text.background_color = activeStyle.background_color;
 
-                    /*itempos.x = line.lineX + line.lineW;
+                    itempos.x = line.lineX + line.lineW;
                     itempos.y = (line.lineY + line.baselineH + yScroll)-line.lineH;
                     itempos.w = cX-(line.lineX + line.lineW);
-                    itempos.h = line.lineH;*/
+                    itempos.h = line.lineH;
 
                     RenderItems.push_back(item);
                     line.lineW += cX-(line.lineX + line.lineW);
@@ -223,6 +277,9 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                         nline.lineY = line.lineY + line.lineH;
                         documentBox->itemLines.push_back(nline);
                         cX = nline.lineX;
+
+                        if (documentBox->y + documentBox->h < nline.lineY + nline.lineH)
+                            documentBox->h = (nline.lineY + nline.lineH)-documentBox->y;
                     }
 
                     charactersPreWritten = i+1;
@@ -241,7 +298,6 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                         {
                             selectorsDebug += activeStyle.cssdbg.matchingSelectorStrings[i] + "\n";
                         }
-                        Debugger::setTextBoxText("NodeInfoTextBox", selectorsDebug);
                         Debugger::setTextBoxText("NodeInfoBox2", selectorsDebug);
                     }
                 }

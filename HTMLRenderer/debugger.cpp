@@ -118,3 +118,13 @@ bool Debugger::windowIsOpen()
 {
     return windowOpen;
 }
+
+bool Debugger::getCheckboxEnabled(std::string name)
+{
+    return gtk_toggle_button_get_active(&GTK_CHECK_BUTTON(gtk_builder_get_object(builder, name.c_str()))->toggle_button);
+}
+
+float Debugger::getAdjustmentGetValue(std::string name)
+{
+    return (float)gtk_adjustment_get_value(GTK_ADJUSTMENT(gtk_builder_get_object(builder, name.c_str())));
+}

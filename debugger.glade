@@ -2,20 +2,22 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkAdjustment" id="adjustment1">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-redo</property>
   </object>
+  <object class="GtkAdjustment" id="textsize_drag">
+    <property name="lower">1</property>
+    <property name="upper">128</property>
+    <property name="value">14</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkApplicationWindow" id="window_main">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">WebBrowser Debugger</property>
-    <property name="default_width">691</property>
+    <property name="default_width">730</property>
     <property name="default_height">615</property>
     <property name="icon_name">applications-internet</property>
     <signal name="destroy" handler="on_gtk_window_destroy" swapped="no"/>
@@ -55,6 +57,38 @@
                     </child>
                   </object>
                 </child>
+                <child>
+                  <object class="GtkMenuItem">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Go</property>
+                    <property name="use_underline">True</property>
+                    <child type="submenu">
+                      <object class="GtkMenu">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkMenuItem" id="go_google">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">https://www.google.com</property>
+                            <property name="label" translatable="yes">Google</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem" id="go_mangadex">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">https://mangadex.org/</property>
+                            <property name="label" translatable="yes">Mangadex</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
@@ -67,7 +101,7 @@
         <property name="can_focus">False</property>
         <child>
           <object class="GtkEntry" id="UrlBox">
-            <property name="width_request">530</property>
+            <property name="width_request">579</property>
             <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -94,7 +128,7 @@
             <signal name="clicked" handler="on_btn_go_clicked" swapped="no"/>
           </object>
           <packing>
-            <property name="x">551</property>
+            <property name="x">596</property>
             <property name="y">17</property>
           </packing>
         </child>
@@ -107,13 +141,117 @@
             <property name="active">True</property>
           </object>
           <packing>
-            <property name="x">636</property>
-            <property name="y">13</property>
+            <property name="x">681</property>
+            <property name="y">14</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame">
+            <property name="width_request">231</property>
+            <property name="height_request">496</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">False</property>
+            <property name="vexpand">False</property>
+            <property name="label_xalign">0.10000000149011612</property>
+            <property name="shadow_type">etched-out</property>
+            <child>
+              <object class="GtkFixed">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkCheckButton" id="debug_docbox">
+                    <property name="label" translatable="yes">Debug Documentbox</property>
+                    <property name="width_request">112</property>
+                    <property name="height_request">22</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="x">12</property>
+                    <property name="y">9</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScale" id="text_scale">
+                    <property name="width_request">133</property>
+                    <property name="height_request">34</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="adjustment">textsize_drag</property>
+                    <property name="show_fill_level">True</property>
+                    <property name="round_digits">1</property>
+                    <property name="value_pos">right</property>
+                  </object>
+                  <packing>
+                    <property name="x">91</property>
+                    <property name="y">27</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="width_request">70</property>
+                    <property name="height_request">20</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Text Scale:</property>
+                  </object>
+                  <packing>
+                    <property name="x">18</property>
+                    <property name="y">34</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="debug_link_disable">
+                    <property name="label" translatable="yes">Disable Links</property>
+                    <property name="width_request">124</property>
+                    <property name="height_request">22</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="x">12</property>
+                    <property name="y">56</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="debug_docbox_1px">
+                    <property name="label" translatable="yes">Documentbox 1p min height</property>
+                    <property name="width_request">214</property>
+                    <property name="height_request">22</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="x">12</property>
+                    <property name="y">83</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Debug Features:</property>
+                <property name="track_visited_links">False</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="x">18</property>
+            <property name="y">75</property>
           </packing>
         </child>
         <child>
           <object class="GtkNotebook">
-            <property name="width_request">444</property>
+            <property name="width_request">459</property>
             <property name="height_request">501</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -151,6 +289,30 @@
               <object class="GtkFixed">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="width_request">425</property>
+                    <property name="height_request">432</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTreeView">
+                        <property name="width_request">100</property>
+                        <property name="height_request">80</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="x">18</property>
+                    <property name="y">15</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -219,79 +381,8 @@
             </child>
           </object>
           <packing>
-            <property name="x">228</property>
-            <property name="y">69</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="check_node_selector">
-            <property name="label" translatable="yes">Node Selector</property>
-            <property name="width_request">124</property>
-            <property name="height_request">22</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="active">True</property>
-            <property name="draw_indicator">True</property>
-          </object>
-          <packing>
-            <property name="x">16</property>
-            <property name="y">543</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame">
-            <property name="width_request">201</property>
-            <property name="height_request">456</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">False</property>
-            <property name="vexpand">False</property>
-            <property name="label_xalign">0.10000000149011612</property>
-            <property name="shadow_type">etched-out</property>
-            <child>
-              <object class="GtkAlignment">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="hexpand">False</property>
-                <property name="vexpand">False</property>
-                <property name="top_padding">1</property>
-                <property name="bottom_padding">1</property>
-                <property name="left_padding">1</property>
-                <property name="right_padding">1</property>
-                <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
-                    <child>
-                      <object class="GtkTextView" id="NodeInfoTextBox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="hadjustment">adjustment1</property>
-                        <property name="hscroll_policy">natural</property>
-                        <property name="editable">False</property>
-                        <property name="cursor_visible">False</property>
-                        <property name="accepts_tab">False</property>
-                        <property name="input_purpose">terminal</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child type="label">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Node info:</property>
-                <property name="track_visited_links">False</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="x">18</property>
-            <property name="y">75</property>
+            <property name="x">258</property>
+            <property name="y">70</property>
           </packing>
         </child>
       </object>
