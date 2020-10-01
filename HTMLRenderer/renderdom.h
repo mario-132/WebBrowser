@@ -38,6 +38,9 @@ struct RenderDOMStyle
     float line_height;
     std::string text_align;
 
+    css::CSSValue width;
+    css::CSSValue height;
+
     RenderDOMColor color;
     RenderDOMColor background_color;
 

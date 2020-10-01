@@ -192,6 +192,14 @@ std::string gumboTagToString(GumboTag tag)
     {
         name = "hr";
     }
+    else if (tag == GUMBO_TAG_TEXTAREA)
+    {
+        name = "textarea";
+    }
+    else if (tag == GUMBO_TAG_PRE)
+    {
+        name = "pre";
+    }
 
     return name;
 }
@@ -315,7 +323,7 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
             style.font_size = style.font_size*item.value.numberValue;
         }
     }
-    if (item.attribute.attributeAsString == "display")
+    if (item.attribute.attributeAsString == "display" && style.display != "none")
     {
         if (item.value.valueAsString == "block")
         {
@@ -380,6 +388,14 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
         {
             style.line_height = item.value.numberValue;
         }
+    }
+    if (item.attribute.attributeAsString == "width")
+    {
+        style.width = item.value;
+    }
+    if (item.attribute.attributeAsString == "height")
+    {
+        style.height = item.value;
     }
 }
 
@@ -543,9 +559,13 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         //    std::cout << gumboTagToString(node->v.element.tag) << "=" << domCallStack[selectorOffset] << ", " << css[i].selectors[j].additionals[k].name << std::endl;
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECT_CHILD_OF)
                         {
-                            if (!checkSelectorMatch(css[i].selectors[j].additionals[k].name, domCallStack[selectorOffset]))
+                            if (!checkSelectorMatch(css[i].selectors[j].additionals[k].name, domCallStack[selectorOffset]))/// Todo: @mario-132 FIXX
                             {
                                 match = false;
+                                if (selectorOffset > 0)
+                                {
+                                    selectorOffset--;
+                                }
                                 break;
                             }
                             if (selectorOffset > 0)
@@ -591,7 +611,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 if (sel[0] == '.')
                                 {
                                     sel.erase(0, 1);
-                                    if (!checkClassMatch(sel, domCallStack[selectorOffset].unparsedClasses))
+                                    if (!checkClassMatch(sel, domCallStack[selectorOffset+1].unparsedClasses))
                                         match = false;
                                 }
                                 else
@@ -605,7 +625,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 if (sel[0] == '#')
                                 {
                                     sel.erase(0, 1);
-                                    if (!checkIDMatch(sel, domCallStack[selectorOffset].unparsedIDs))
+                                    if (!checkIDMatch(sel, domCallStack[selectorOffset+1].unparsedIDs))
                                         match = false;
                                 }
                             }
@@ -696,6 +716,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                     h = std::stoi(item.element.attributes[i].value);
                 }
             }
+            if (style.width.type == css::CSS_TYPE_PX)
+                w = style.width.numberValue;
+            if (style.height.type == css::CSS_TYPE_PX)
+                h = style.height.numberValue;
             std::string newsrc = resolvePath(imgSource, fullURL);
 
             int imgW, imgH, comp;
