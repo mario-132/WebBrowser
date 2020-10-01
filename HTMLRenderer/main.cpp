@@ -432,7 +432,7 @@ int main()
             for (int x = 0; x < window.width; x++)
             {
                 int ys = y;
-                window.displayBuffer[(y*3840*4)+(x*4)+4] = 0;
+                window.displayBuffer[(y*3840*4)+(x*4)+3] = 0;
                 window.displayBuffer[(y*3840*4)+(x*4)+2] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+0];
                 window.displayBuffer[(y*3840*4)+(x*4)+1] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+1];
                 window.displayBuffer[(y*3840*4)+(x*4)+0] = framebuffer[(ys*FRAMEBUFFER_WIDTH*3)+(x*3)+2];

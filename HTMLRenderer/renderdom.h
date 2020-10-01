@@ -5,6 +5,17 @@
 #include <iostream>
 #include "cssparse.h"
 
+/// What to use is set in the cmake
+//#define USEMAGICK true
+//#define USESTBI true
+
+#ifdef USESTBI
+#include "stb_image.h"
+#endif
+#ifdef USEMAGICK
+#include <ImageMagick-6/Magick++.h>
+#endif
+
 struct RenderDOMColor
 {
     unsigned int r;

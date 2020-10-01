@@ -1,10 +1,11 @@
 #include "renderdom.h"
 #include "webservice.h"
-#include "stb_image.h"
-
+#include <memory.h>
 RenderDOM::RenderDOM()
 {
-
+#ifdef USEMAGICK
+    Magick::InitializeMagick(0);
+#endif
 }
 
 std::string gumboTagToString(GumboTag tag)
@@ -704,6 +705,8 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                 std::cout << "Downloading: " << newsrc << std::endl;
                 out = WebService::htmlFileDownloader(newsrc);
             }
+
+#ifdef USESTBI
             unsigned char* data = stbi_load_from_memory((unsigned char*)&out[0], out.size(), &imgW, &imgH, &comp, 0);
             if (data != 0)
             {
@@ -721,6 +724,51 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                 item.element.image.downloaded = false;
                 item.element.image.decoded = false;
             }
+#else
+#ifdef USEMAGICK
+            item.element.image.downloaded = false;
+            item.element.image.decoded = false;
+            if (out.size()>0)
+            {
+                try {
+                    Magick::Blob imageDataBlob(out.c_str(), out.size());
+                    Magick::Image image(imageDataBlob);
+                    imgW = image.columns();
+                    imgH = image.rows();
+                    if (w == 0)
+                        w = imgW;
+                    if (h == 0)
+                        h = imgH;
+                    comp = 4;
+                    image.resize(Magick::Geometry(w, h));
+
+                    item.element.image.downloaded = true;
+                    item.element.image.decoded = true;
+
+                    item.element.image.imgH = h;
+                    item.element.image.imgW = w;
+                    item.element.image.comp = comp;
+                    item.element.image.imageData = (unsigned char*)malloc(w * h * comp);
+                    if (item.element.image.imageData != 0)
+                    {
+                        image.write(0, 0, w, h, "RGBA", Magick::CharPixel, &item.element.image.imageData[0]);
+                    }
+                    else
+                    {
+                        //item.element.image.downloaded = false;
+                        item.element.image.decoded = false;
+                    }
+
+                } catch (Magick::Exception &error_) {
+                    std::cout << "Caught exception: " << error_.what() << std::endl;
+                }
+            }
+
+#else
+#error "Please select an image decoding library to use in renderdom.cpp"
+#endif
+#endif
+
             if (w == 0 || h == 0)
             {
                 w = 100;
