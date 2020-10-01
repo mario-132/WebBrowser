@@ -64,7 +64,9 @@ jobs:
     #    uses a compiled language
 
     - run: |
+       sudo apt-get install -y libx11-dev libmagick++-6.q16-dev libcurl4-gnutls-dev
        mkdir Build
+       cd Build
        cmake ..
        make -j4
 
