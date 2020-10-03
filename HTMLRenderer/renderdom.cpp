@@ -507,10 +507,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                 {
                     bool match = true;
                     int selectorOffset = domCallStack.size()-1;
-                    if (selectorOffset < 0)
-                    {
-                        break;
-                    }
+
                     // Check if the additional class or id specifiers also apply to this css selector block(e.g. make sure the .classa in div.classa{} is present in this node).
                     for (unsigned int k = 0; k < css[i].selectors[j].additionals.back().matchingClasses.size(); k++)
                     {
@@ -536,6 +533,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 match = false;
                         }
                     }
+                    if (selectorOffset < 0)
+                    {
+                        break;
+                    }
                     //css[i].selectors[j].additionals.back().matchingClasses
 
                     /*for (int i = 0; i < domCallStack.size(); i++)
@@ -553,6 +554,9 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         if (selectorOffset < 0)// The ammount of additionals is bigger than we have selectorOffsets, so the selector doesn't match.
                         {
                             match = false;
+                        }
+                        if (match == false)
+                        {
                             break;
                         }
                         //if (selectorOffset >= 0)
@@ -562,13 +566,13 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                             if (!checkSelectorMatch(css[i].selectors[j].additionals[k].name, domCallStack[selectorOffset]))/// Todo: @mario-132 FIXX
                             {
                                 match = false;
-                                if (selectorOffset > 0)
+                                if (selectorOffset >= 0)
                                 {
                                     selectorOffset--;
                                 }
                                 break;
                             }
-                            if (selectorOffset > 0)
+                            if (selectorOffset >= 0)
                             {
                                 selectorOffset--;
                             }
@@ -581,7 +585,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                 if (checkSelectorMatch(css[i].selectors[j].additionals[k].name, domCallStack[selectorOffset]))
                                 {
                                     found = true;
-                                    if (selectorOffset > 0)
+                                    if (selectorOffset >= 0)
                                     {
                                         selectorOffset--;
                                     }
@@ -596,10 +600,12 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_ADJECENT_TO)/// Todo: @mario-132 Implement these 2 selectors
                         {
                             match = false;
+                            break;
                         }
                         if (css[i].selectors[j].additionals[k].selectorOp == css::CSS_DIRECTLY_ADJECENT_TO)
                         {
                             match = false;
+                            break;
                         }
 
                         if (match)// Now check the additionals for match
@@ -627,6 +633,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
                                     sel.erase(0, 1);
                                     if (!checkIDMatch(sel, domCallStack[selectorOffset+1].unparsedIDs))
                                         match = false;
+                                }
+                                else
+                                {
+                                    std::cout << "Error, id in matchingClasses did not start with a #" << std::endl;
                                 }
                             }
                         }
