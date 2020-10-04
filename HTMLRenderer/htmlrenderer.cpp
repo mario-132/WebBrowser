@@ -229,7 +229,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 fte::makeBold(inst, activeStyle.bold);
                 fte::glyphInfo inf = fte::getCharacterBounds(inst, wide[i]);
                 cX += inf.advanceX/64;
-                if (cX > documentBox->w || i == wide.size()-1 || wide[i] == '\n')
+                if (cX > documentBox->w || i == wide.size()-1/* || wide[i] == '\n'*/)
                 {
                     RItemLine &line = documentBox->itemLines.back();
                     int lineHeightSpacing = ((activeStyle.font_size*activeStyle.line_height)-activeStyle.font_size);

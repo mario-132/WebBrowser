@@ -332,7 +332,10 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style)
         if (item.value.valueAsString == "table-row")
         {
             style.display = "block";
-            std::cout << "TR" << std::endl;
+        }
+        if (item.value.valueAsString == "table-cell")
+        {
+            style.display = "inline";
         }
         if (item.value.valueAsString == "flex")
         {
@@ -495,7 +498,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle style, s
         style.background_color.g = 255;
         style.background_color.b = 255;
         style.background_color.a = 0;
-
+        style.cssdbg.matchingSelectorStrings.push_back("#############################################################################");
         // Look if there are any selectors in the global stylesheets that apply to this node.
         for (unsigned int i = 0; i < css.size(); i++)
         {

@@ -272,7 +272,7 @@ public:
         dom.domCallStack.clear();
         rootDomItem = dom.parseGumboTree(output->root, style, fullURL, cssOut);
 
-        for (unsigned int i = 0; i < cssOut.size() && false; i++)
+        for (unsigned int i = 0; i < cssOut.size() && true; i++)
         {
             std::cout << "<";
             for (int j = 0; j < cssOut[i].selectors.size(); j++)

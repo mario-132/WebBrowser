@@ -54,7 +54,7 @@ namespace css
         return selectors;// Return the results for further parsing by another function
     }
 
-    bool getValue(std::string css, int cssLength, bool &isFinal, bool &isFinalAttribute, int &curChr, std::string &value)// Returns wether to break
+    bool getValue(std::string css, int cssLength, bool &isFinal, bool &isFinalAttribute, int &curChr, std::string &value)// Returns whether to break
     {
         while (!isValidValueStart(css[curChr]) && curChr < cssLength)// Read and discard till we reach the value's start.(skipping spaces and stuff)
         {
@@ -118,10 +118,11 @@ namespace css
             attribContinue = true;
             return false;
         }
-        while (css[curChr] != ':' && curChr < cssLength)
+        /// Todo: @mario-132 I don't think this should be here so I commented it out, but please check!
+        /*while (css[curChr] != ':' && curChr < cssLength)
         {
             curChr++;
-        }
+        }*/
         return false;
     }
 
@@ -586,6 +587,14 @@ namespace css
                         val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
+                    else if (unit == "mediumblue")
+                    {
+                        val.color.r = 0;
+                        val.color.g = 0;
+                        val.color.b = 0xcd;
+                        val.color.a = 255;
+                        val.type = CSS_TYPE_COLOR;
+                    }
                     else if (unit == "green")
                     {
                         val.color.r = 0;
@@ -599,6 +608,14 @@ namespace css
                         val.color.r = 255;
                         val.color.g = 0;
                         val.color.b = 0;
+                        val.color.a = 255;
+                        val.type = CSS_TYPE_COLOR;
+                    }
+                    else if (unit == "crimson")
+                    {
+                        val.color.r = 0xed;
+                        val.color.g = 0x14;
+                        val.color.b = 0x3d;
                         val.color.a = 255;
                         val.type = CSS_TYPE_COLOR;
                     }
