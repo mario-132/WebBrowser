@@ -58,7 +58,8 @@ namespace css
 
     enum CSSValueType
     {
-        CSS_TYPE_UNKNOWN,
+        CSS_TYPE_UNKNOWN,// Unknown means there was a value but it doesn't know what it is
+        CSS_TYPE_NONE,// None means it hasn't found any value attributes.
         CSS_TYPE_PX,
         CSS_TYPE_EM,
         CSS_TYPE_PERCENT,

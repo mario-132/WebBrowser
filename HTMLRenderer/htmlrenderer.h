@@ -58,6 +58,8 @@ struct RItem
     RPosition position;
     RenderDOMColor squareColor;
 
+    AdditionalDebuggingCSSInfo cssdbg;// Extra debug info
+
     RType type;
 };
 
@@ -88,10 +90,12 @@ struct RItemLine
 /// render generator know where to put the elements.
 struct RDocumentBox
 {
-    int x;
-    int y;
-    int w;
-    int h;
+    int X = -1;
+    int Y = -1;
+    int W = 0;
+    int H = 0;
+    bool wLocked = false;
+    bool hLocked = false;
 
     //int textStartX;
     //int textStartY;

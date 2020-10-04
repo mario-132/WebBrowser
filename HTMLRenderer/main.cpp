@@ -178,13 +178,13 @@ void renderDocumentBox(RDocumentBox &documentBox, int yScroll)
     unsigned char r = rand()%255;
     unsigned char g = rand()%255;
     unsigned char b = rand()%255;
-    for (int x = documentBox.x; x < documentBox.x + documentBox.w; x++)
+    for (int x = documentBox.X; x < documentBox.X + documentBox.W; x++)
     {
-        for (int y = documentBox.y + yScroll; y < documentBox.y + documentBox.h + yScroll; y++)
+        for (int y = documentBox.Y + yScroll; y < documentBox.Y + documentBox.H + yScroll; y++)
         {
-            if (x == documentBox.x || y == documentBox.y + yScroll ||
-                    x == (documentBox.x + documentBox.w) - 1 ||
-                    y == (documentBox.y + documentBox.h + yScroll) - 1)
+            if (x == documentBox.X || y == documentBox.Y + yScroll ||
+                    x == (documentBox.X + documentBox.W) - 1 ||
+                    y == (documentBox.Y + documentBox.H + yScroll) - 1)
             {
                 if (x < 0 || y < 0 || x >= FRAMEBUFFER_WIDTH || y >= FRAMEBUFFER_HEIGHT)
                     continue;
@@ -272,7 +272,7 @@ public:
         dom.domCallStack.clear();
         rootDomItem = dom.parseGumboTree(output->root, style, fullURL, cssOut);
 
-        for (unsigned int i = 0; i < cssOut.size() && true; i++)
+        for (unsigned int i = 0; i < cssOut.size() && false; i++)
         {
             std::cout << "<";
             for (int j = 0; j < cssOut[i].selectors.size(); j++)
@@ -340,12 +340,12 @@ public:
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
         RDocumentBox documentBox;
-        documentBox.x = 10;
-        documentBox.y = 10;//window.height/3;
-        documentBox.w = window.width-20;
-        documentBox.h = 0;
+        documentBox.X = 10;
+        documentBox.Y = 10;//window.height/3;
+        documentBox.W = window.width-20;
+        documentBox.H = 0;
         if (Debugger::getCheckboxEnabled("debug_docbox_1px"))
-            documentBox.h = 1;
+            documentBox.H = 1;
         //documentBox.textStartX = 0;
         //documentBox.textStartY = 0;//window.height/3;
 
@@ -365,6 +365,27 @@ public:
             a += rootDomItem.element.style.cssdbg.matchingSelectorStrings[i];
         }
         Debugger::setTextBoxText("NodeInfoTextBox", a);*/
+        /*if (window.mousePressed && window.mousex > 0 && window.mousey > 0 && window.mousex < window.width && window.mousey < window.height)
+        {
+            for (unsigned int i = 0; i < htmlrenderer.RenderItems.size(); i++)
+            {
+                if (    window.mousex > htmlrenderer.RenderItems[i].position.x &&
+                        window.mousey < htmlrenderer.RenderItems[i].position.y &&
+                        window.mousex < htmlrenderer.RenderItems[i].position.x + htmlrenderer.RenderItems[i].position.w &&
+                        window.mousey > htmlrenderer.RenderItems[i].position.y - htmlrenderer.RenderItems[i].position.h
+                        )
+                {
+                    //std::cout << activeStyle.background_color.r << std::endl;
+                    std::string selectorsDebug;
+                    for (unsigned int i = 0; i < htmlrenderer.RenderItems[i].cssdbg.matchingSelectorStrings.size(); i++)
+                    {
+                        selectorsDebug += htmlrenderer.RenderItems[i].cssdbg.matchingSelectorStrings[i] + "\n";
+                    }
+                    Debugger::setTextBoxText("NodeInfoBox2", selectorsDebug);
+                }
+            }
+        }*/
+
         htmlrenderer.renderRenderList(inst, htmlrenderer.RenderItems);
 
         // Draws a square outline on the document box for debug
