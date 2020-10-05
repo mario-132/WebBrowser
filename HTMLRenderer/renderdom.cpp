@@ -347,7 +347,7 @@ void RenderDOM::applyItemToStyle(css::CSSItem item, RenderDOMStyle &style, Rende
         }
         if (item.value.valueAsString == "inline-block")
         {
-            style.display = "inline";
+            style.display = "inline-block";
         }
         if (item.value.valueAsString == "none")
         {

@@ -157,16 +157,27 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
         }
 
         // Parse the child elements.
-        if (activeStyle.display == "block")
+        if (activeStyle.display == "block" || activeStyle.display == "inline-block")
         {
             unsigned int _off = 0;
             if (Debugger::getCheckboxEnabled("debug_docbox_1px"))
                 _off = 1;
-            RDocumentBox docBox;
-            docBox.X = documentBox->X+_off;
-            docBox.Y = documentBox->Y+_off+documentBox->H;
-            docBox.W = documentBox->W-_off-_off;
-            docBox.H = _off;
+            documentBox->childBoxes.push_back(RDocumentBox());
+            RDocumentBox &docBox = documentBox->childBoxes.back();
+            if (activeStyle.display == "block")
+            {
+                docBox.X = documentBox->X+_off;
+                docBox.Y = documentBox->Y+_off+documentBox->H;
+                docBox.W = documentBox->W-_off-_off;
+                docBox.H = _off;
+            }
+            else
+            {
+                docBox.X = documentBox->itemLines.back().lineW + documentBox->itemLines.back().lineX+_off;
+                docBox.Y = documentBox->itemLines.back().lineY;//nvm lol 0;// We set y to 0 and move it to the correct position later.
+                docBox.W = ((documentBox->X+documentBox->W) - documentBox->itemLines.back().lineX)-_off;
+                docBox.H = _off;
+            }
 
             if (activeStyle.width.type != css::CSS_TYPE_NONE && activeStyle.width.type != css::CSS_TYPE_UNKNOWN)
             {
@@ -199,21 +210,34 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 }
             }
 
-            documentBox->childBoxes.push_back(docBox);
+            //documentBox->childBoxes.push_back(docBox);
             for (unsigned int i = 0; i < root.children.size(); i++)
             {
                 RPosition pos = assembleRenderListV2(root.children[i], inst, &documentBox->childBoxes.back(), activeStyle);
             }
-
-            RItemLine nline;
-            nline.lineH = documentBox->childBoxes.back().H;
-            nline.baselineH = 0;
-            nline.lineW = 0;
-            nline.lineX = documentBox->X;
-            nline.lineY = documentBox->Y+1+documentBox->H;//documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
-            documentBox->itemLines.push_back(nline);
-            if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)
-                documentBox->H = (nline.lineY + nline.lineH)-documentBox->Y;
+            if (activeStyle.display == "inline-block")
+            {
+                RItemLine &line = documentBox->itemLines.back();
+                if (line.baselineH < docBox.H)
+                    changeBaselineHeight(docBox.H, line);
+                if (line.lineH < docBox.H)
+                    line.lineH = docBox.H;
+                line.lineW += docBox.W;
+                if (documentBox->Y + documentBox->H < line.lineY + line.lineH && !documentBox->hLocked)
+                    documentBox->H = (line.lineY + line.lineH)-documentBox->Y;
+            }
+            if (activeStyle.display == "block")
+            {
+                RItemLine nline;
+                nline.lineH = documentBox->childBoxes.back().H;
+                nline.baselineH = 0;
+                nline.lineW = 0;
+                nline.lineX = documentBox->X;
+                nline.lineY = documentBox->Y+1+documentBox->H;//documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
+                documentBox->itemLines.push_back(nline);
+                if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)
+                    documentBox->H = (nline.lineY + nline.lineH)-documentBox->Y;
+            }
             RItem item;
             item.type = RITEM_NONE;
             if (activeStyle.background_color.a != 0)
@@ -255,6 +279,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 item.text.text = wide;
                 RenderItems.push_back(item);
             }
+
         }
         else
         {
@@ -297,7 +322,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 fte::makeBold(inst, activeStyle.bold);
                 fte::glyphInfo inf = fte::getCharacterBounds(inst, wide[i]);
                 cX += inf.advanceX/64;
-                if (cX > documentBox->W || i == wide.size()-1/* || wide[i] == '\n'*/)
+                if (cX > documentBox->X + documentBox->W || i == wide.size()-1/* || wide[i] == '\n'*/)
                 {
                     RItemLine &line = documentBox->itemLines.back();
 
