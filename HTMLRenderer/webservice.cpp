@@ -3,6 +3,7 @@
 #include "debugger.h"
 
 CURL *WebService::curl_handle;
+std::vector<WebCache> WebService::webCaches;
 
 WebService::WebService()
 {
@@ -17,8 +18,21 @@ size_t WebService::write_data(void *ptr, size_t size, size_t nmemb, void *stream
 
 std::string WebService::htmlFileDownloader(std::string path)
 {
+    if (Debugger::getCheckboxEnabled("use_webcache"))
+    {
+        for (int i = 0; i < webCaches.size(); i++)
+        {
+            if (webCaches[i].path == path)
+            {
+                std::string txt = Debugger::getTextBoxText("network_textview");
+                Debugger::setTextBoxText("network_textview", txt + "Cached: " + path + "\n");
+                Debugger::loop();
+                return webCaches[i].data;
+            }
+        }
+    }
     std::string txt = Debugger::getTextBoxText("network_textview");
-    Debugger::setTextBoxText("network_textview", txt + path + "\n");
+    Debugger::setTextBoxText("network_textview", txt + "Download: " + path + "\n");
     Debugger::loop();
 
     std::string result;
@@ -47,6 +61,15 @@ std::string WebService::htmlFileDownloader(std::string path)
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
     curl_easy_cleanup(curl_handle);
+
+    if (Debugger::getCheckboxEnabled("use_webcache"))
+    {
+        WebCache cache;
+        cache.path = path;
+        cache.data = result;
+        webCaches.push_back(cache);
+    }
+
     return result;
 }
 
