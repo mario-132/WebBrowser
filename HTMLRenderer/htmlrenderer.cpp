@@ -451,7 +451,7 @@ void HTMLRenderer::renderRenderList(freetypeeasy::freetypeInst *inst, std::vecto
                 }
             }
         }
-        else if (items[i].type == RITEM_IMAGE && items[i].position.y < framebufferHeight && items[i].position.y > -items[i].position.h)
+        else if (items[i].type == RITEM_IMAGE && items[i].position.y < framebufferHeight && items[i].position.y > -items[i].position.h && !Debugger::getCheckboxEnabled("debug_disable_image_rendering"))
         {
             if (items[i].img.isValid)
             {

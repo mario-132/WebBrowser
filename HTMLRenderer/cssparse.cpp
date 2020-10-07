@@ -186,7 +186,7 @@ namespace css
 
     bool isValidAttributeName(char c)
     {
-        return isChr(c) || isNum(c) || c == '-';
+        return isChr(c) || isNum(c) || c == '-' || c == '*' || c == '.';
     }
 
     bool isValidSelectorNameStart(char c)

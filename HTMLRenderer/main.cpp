@@ -272,64 +272,69 @@ public:
         dom.domCallStack.clear();
         rootDomItem = dom.parseGumboTree(output->root, style, fullURL, cssOut);
 
-        for (unsigned int i = 0; i < cssOut.size() && false; i++)
+        if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
-            std::cout << "<";
-            for (int j = 0; j < cssOut[i].selectors.size(); j++)
+            std::string cssString;
+            for (unsigned int i = 0; i < cssOut.size(); i++)
             {
-                std::cout << cssOut[i].selectors[j].additionals.back().name;
-                if (cssOut[i].selectors[j].additionals.back().matchingClasses.size())
+                cssString += "<";
+                for (int j = 0; j < cssOut[i].selectors.size(); j++)
                 {
-                    std::cout << "(";
-                    for (int k = 0; k < cssOut[i].selectors[j].additionals.back().matchingClasses.size(); k++)
+                    cssString += cssOut[i].selectors[j].additionals.back().name;
+                    if (cssOut[i].selectors[j].additionals.back().matchingClasses.size())
                     {
-                        std::cout << cssOut[i].selectors[j].additionals.back().matchingClasses[k];
+                        cssString += "(";
+                        for (int k = 0; k < cssOut[i].selectors[j].additionals.back().matchingClasses.size(); k++)
+                        {
+                            cssString += cssOut[i].selectors[j].additionals.back().matchingClasses[k];
+                        }
+                        cssString += ")";
                     }
-                    std::cout << ")";
+                    cssString += ", ";
                 }
-                std::cout << ", ";
-            }
-            std::cout << ">\n";
-            for (int j = 0; j < cssOut[i].items.size(); j++)
-            {
-                std::cout << "  " << cssOut[i].items[j].attribute.attributeAsString;
-                if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
-                    std::cout << " " << cssOut[i].items[j].value.numberValue << "px" << std::endl;
-                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
-                    std::cout << " " << cssOut[i].items[j].value.numberValue << "em" << std::endl;
-                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
-                    std::cout << " " << cssOut[i].items[j].value.numberValue << "%" << std::endl;
+                cssString += ">\n";
+                for (int j = 0; j < cssOut[i].items.size(); j++)
+                {
+                    cssString += "  " + cssOut[i].items[j].attribute.attributeAsString;
+                    if (cssOut[i].items[j].value.type == css::CSS_TYPE_PX)
+                        cssString += " " + std::to_string(cssOut[i].items[j].value.numberValue) + "px" + "\n";
+                    else if (cssOut[i].items[j].value.type == css::CSS_TYPE_EM)
+                        cssString += " " + std::to_string(cssOut[i].items[j].value.numberValue) + "em" + "\n";
+                    else if (cssOut[i].items[j].value.type == css::CSS_TYPE_PERCENT)
+                        cssString += " " + std::to_string(cssOut[i].items[j].value.numberValue) + "%" + "\n";
 
-                else if (cssOut[i].items[j].attribute.attributeAsString == "display")
-                {
-                    if (cssOut[i].items[j].value.valueAsString == "block")
+                    else if (cssOut[i].items[j].attribute.attributeAsString == "display")
                     {
-                        std::cout << " block" << std::endl;
+                        if (cssOut[i].items[j].value.valueAsString == "block")
+                        {
+                            cssString += " block\n";
+                        }
+                        else if (cssOut[i].items[j].value.valueAsString == "inline")
+                        {
+                            cssString += " inline\n";
+                        }
+                        else if (cssOut[i].items[j].value.valueAsString == "inline-block")
+                        {
+                            cssString += " inline-block\n";
+                        }
+                        else if (cssOut[i].items[j].value.valueAsString == "none")
+                        {
+                            cssString += " none\n";
+                        }
+                        else
+                        {
+                            cssString += " UNKNOWN\n";
+                        }
                     }
-                    else if (cssOut[i].items[j].value.valueAsString == "inline")
-                    {
-                        std::cout << " inline" << std::endl;
-                    }
-                    else if (cssOut[i].items[j].value.valueAsString == "inline-block")
-                    {
-                        std::cout << " inline-block" << std::endl;
-                    }
-                    else if (cssOut[i].items[j].value.valueAsString == "none")
-                    {
-                        std::cout << " none" << std::endl;
-                    }
-                    else
-                    {
-                        std::cout << " UNKNOWN" << std::endl;
-                    }
+                    else if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
+                        cssString += " UNKNOWN\n";
+                    else if (cssOut[i].items[j].value.type == css::CSS_TYPE_NUMBER)
+                        cssString += " " + std::to_string(cssOut[i].items[j].value.numberValue) + "\n";
+                    else if (cssOut[i].items[j].value.type == css::CSS_TYPE_COLOR)
+                        cssString += " " + std::to_string((int)cssOut[i].items[j].value.color.r) + "," + std::to_string((int)cssOut[i].items[j].value.color.g) + "," + std::to_string((int)cssOut[i].items[j].value.color.b) + "\n";
                 }
-                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_UNKNOWN)
-                    std::cout << " UNKNOWN" << std::endl;
-                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_NUMBER)
-                    std::cout << " " << cssOut[i].items[j].value.numberValue << std::endl;
-                else if (cssOut[i].items[j].value.type == css::CSS_TYPE_COLOR)
-                    std::cout << " " << (int)cssOut[i].items[j].value.color.r << "," << (int)cssOut[i].items[j].value.color.g << "," << (int)cssOut[i].items[j].value.color.b << std::endl;
             }
+            Debugger::setTextBoxText("css_textview", cssString);
         }
 
 
@@ -340,9 +345,9 @@ public:
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
         RDocumentBox documentBox;
-        documentBox.X = 10;
-        documentBox.Y = 10;//window.height/3;
-        documentBox.W = window.width-20;
+        documentBox.X = Debugger::getAdjustmentGetValue("docbox_offset");
+        documentBox.Y = Debugger::getAdjustmentGetValue("docbox_offset");//window.height/3;
+        documentBox.W = window.width-(Debugger::getAdjustmentGetValue("docbox_offset")*2);
         documentBox.H = 0;
         if (Debugger::getCheckboxEnabled("debug_docbox_1px"))
             documentBox.H = 1;
@@ -400,7 +405,7 @@ int main()
     Debugger::start();
 
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
-    memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
+    memset(framebuffer, 110, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
     //fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
     //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
@@ -438,7 +443,7 @@ int main()
             window.scrollPos = 0;
         }
         //int memsetPos = scrpos;
-        memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
+        memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 110, FRAMEBUFFER_WIDTH * window.height * 3);
 
         window.setTitle("WebBrowser - " + webpage->pageTitle);
         Debugger::loop();

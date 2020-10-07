@@ -501,7 +501,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, RenderDOMStyle lstyle, 
         style.background_color.a = 0;
         style.width.type = css::CSS_TYPE_NONE;
         style.height.type = css::CSS_TYPE_NONE;
-        style.cssdbg.matchingSelectorStrings.push_back("#############################################################################");
+        style.cssdbg.matchingSelectorStrings.push_back("##" + gumboTagToString(node->v.element.tag) + "/" + stackitem.unparsedClasses + "\\" + stackitem.unparsedIDs + "#############################################################################");
         // Look if there are any selectors in the global stylesheets that apply to this node.
         for (unsigned int i = 0; i < css.size(); i++)
         {
