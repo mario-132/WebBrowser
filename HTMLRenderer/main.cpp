@@ -405,7 +405,7 @@ int main()
     Debugger::start();
 
     framebuffer = (unsigned char*)malloc(FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
-    memset(framebuffer, 110, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
+    memset(framebuffer, 255, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 3);
 
     //fte::freetypeInst *inst =  fte::initFreetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
     //fte::freetypeInst *inst =  fte::initFreetype("/home/tim/Downloads/KosugiMaru-Regular.ttf", "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 16);// Initialize with 16 as default size, will be changed if needed anyways.
@@ -443,7 +443,7 @@ int main()
             window.scrollPos = 0;
         }
         //int memsetPos = scrpos;
-        memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 110, FRAMEBUFFER_WIDTH * window.height * 3);
+        memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
         window.setTitle("WebBrowser - " + webpage->pageTitle);
         Debugger::loop();

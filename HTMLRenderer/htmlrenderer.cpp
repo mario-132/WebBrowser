@@ -101,6 +101,31 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 }
             }
 
+            if (activeStyle.width.type != css::CSS_TYPE_NONE && activeStyle.width.type != css::CSS_TYPE_UNKNOWN)
+            {
+                if (activeStyle.width.type == css::CSS_TYPE_PX){
+                    imgW = activeStyle.width.numberValue;
+                }
+                if (activeStyle.width.type == css::CSS_TYPE_PERCENT){
+                    imgW = (activeStyle.width.numberValue/100.0f) * documentBox->W;
+                }
+                if (activeStyle.width.type == css::CSS_TYPE_EM){
+                    imgW = activeStyle.width.numberValue * activeStyle.font_size;
+                }
+            }
+            if (activeStyle.height.type != css::CSS_TYPE_NONE && activeStyle.height.type != css::CSS_TYPE_UNKNOWN)
+            {
+                if (activeStyle.height.type == css::CSS_TYPE_PX){
+                    imgH = activeStyle.height.numberValue;
+                }
+                if (activeStyle.height.type == css::CSS_TYPE_PERCENT){
+                    imgH = (activeStyle.height.numberValue/100.0f) * documentBox->H;
+                }
+                if (activeStyle.height.type == css::CSS_TYPE_EM){
+                    imgH = activeStyle.height.numberValue * activeStyle.font_size;
+                }
+            }
+
             if (root.element.image.decoded)// If image has been downloaded and decoded
             {
                 imgW = root.element.image.imgW;
