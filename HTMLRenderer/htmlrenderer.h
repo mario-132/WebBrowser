@@ -93,6 +93,7 @@ struct RDocumentBox
     int X = -1;
     int Y = -1;
     int W = 0;
+    int maxW = 0;
     int H = 0;
     bool wLocked = false;
     bool hLocked = false;

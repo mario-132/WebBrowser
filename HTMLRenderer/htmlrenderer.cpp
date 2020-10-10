@@ -58,6 +58,8 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
 
             if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)
                 documentBox->H = (nline.lineY + nline.lineH)-documentBox->Y;
+            if (documentBox->X + documentBox->W < nline.lineX + nline.lineW && !documentBox->wLocked)// W
+                documentBox->W = (nline.lineX + nline.lineW)-documentBox->X;
         }
 
         if (root.element.tag == GUMBO_TAG_HR)
@@ -107,7 +109,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                     imgW = activeStyle.width.numberValue;
                 }
                 if (activeStyle.width.type == css::CSS_TYPE_PERCENT){
-                    imgW = (activeStyle.width.numberValue/100.0f) * documentBox->W;
+                    imgW = (activeStyle.width.numberValue/100.0f) * documentBox->maxW;
                 }
                 if (activeStyle.width.type == css::CSS_TYPE_EM){
                     imgW = activeStyle.width.numberValue * activeStyle.font_size;
@@ -168,6 +170,8 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
 
             if (documentBox->Y + documentBox->H < line.lineY + line.lineH && !documentBox->hLocked)
                 documentBox->H = (line.lineY + line.lineH)-documentBox->Y;
+            if (documentBox->X + documentBox->W < line.lineX + line.lineW && !documentBox->wLocked)// W
+                documentBox->W = (line.lineX + line.lineW)-documentBox->X;
 
             if (mouseX > item.position.x && mouseY > item.position.y && mouseX < item.position.x + item.position.w && mouseY < item.position.y + item.position.h)
             {
@@ -191,16 +195,23 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
             RDocumentBox &docBox = documentBox->childBoxes.back();
             if (activeStyle.display == "block")
             {
+                docBox.wLocked = documentBox->wLocked;// Static width, block doesn't expand with content in the X
                 docBox.X = documentBox->X+_off;
                 docBox.Y = documentBox->Y+_off+documentBox->H;
-                docBox.W = documentBox->W-_off-_off;
+                if (docBox.wLocked)
+                    docBox.W = documentBox->maxW-_off;
+                else
+                    docBox.W = _off;
+                docBox.maxW = documentBox->maxW-_off;
                 docBox.H = _off;
             }
             else
             {
-                docBox.X = documentBox->itemLines.back().lineW + documentBox->itemLines.back().lineX+_off;
-                docBox.Y = documentBox->itemLines.back().lineY;//nvm lol 0;// We set y to 0 and move it to the correct position later.
-                docBox.W = ((documentBox->X+documentBox->W) - documentBox->itemLines.back().lineX)-_off;
+                docBox.wLocked = false;// For clarity
+                docBox.X = documentBox->itemLines.back().lineW + documentBox->itemLines.back().lineX + _off;
+                docBox.Y = documentBox->itemLines.back().lineY+_off;//nvm lol 0;// We set y to 0 and move it to the correct position later.
+                docBox.W = _off;// Set to 0 as it expands with the content in it//((documentBox->X+documentBox->W) - documentBox->itemLines.back().lineX)-_off;
+                docBox.maxW = (documentBox->maxW - docBox.X)-_off;
                 docBox.H = _off;
             }
 
@@ -235,10 +246,13 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 }
             }
 
+            if (docBox.wLocked)
+                docBox.maxW = docBox.W-_off-_off;
+
             //documentBox->childBoxes.push_back(docBox);
             for (unsigned int i = 0; i < root.children.size(); i++)
             {
-                RPosition pos = assembleRenderListV2(root.children[i], inst, &documentBox->childBoxes.back(), activeStyle);
+                RPosition pos = assembleRenderListV2(root.children[i], inst, &docBox, activeStyle);
             }
             if (activeStyle.display == "inline-block")
             {
@@ -248,20 +262,24 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 if (line.lineH < docBox.H)
                     line.lineH = docBox.H;
                 line.lineW += docBox.W;
-                if (documentBox->Y + documentBox->H < line.lineY + line.lineH && !documentBox->hLocked)
+                if (documentBox->Y + documentBox->H < line.lineY + line.lineH && !documentBox->hLocked)// H
                     documentBox->H = (line.lineY + line.lineH)-documentBox->Y;
+                if (documentBox->X + documentBox->W < line.lineX + line.lineW && !documentBox->wLocked)// W
+                    documentBox->W = (line.lineX + line.lineW)-documentBox->X;
             }
             if (activeStyle.display == "block")
             {
                 RItemLine nline;
                 nline.lineH = documentBox->childBoxes.back().H;
                 nline.baselineH = 0;
-                nline.lineW = 0;
+                nline.lineW = docBox.W;
                 nline.lineX = documentBox->X;
                 nline.lineY = documentBox->Y+1+documentBox->H;//documentBox->itemLines.back().lineY + documentBox->itemLines.back().lineH;
                 documentBox->itemLines.push_back(nline);
-                if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)
+                if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)// H
                     documentBox->H = (nline.lineY + nline.lineH)-documentBox->Y;
+                if (documentBox->X + documentBox->W < nline.lineX + nline.lineW && !documentBox->wLocked)// W
+                    documentBox->W = (nline.lineX + nline.lineW)-documentBox->X;
             }
             RItem item;
             item.type = RITEM_NONE;
@@ -347,7 +365,7 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                 fte::makeBold(inst, activeStyle.bold);
                 fte::glyphInfo inf = fte::getCharacterBounds(inst, wide[i]);
                 cX += inf.advanceX/64;
-                if (cX > documentBox->X + documentBox->W || i == wide.size()-1/* || wide[i] == '\n'*/)
+                if (cX > documentBox->X + documentBox->maxW || i == wide.size()-1/* || wide[i] == '\n'*/)
                 {
                     RItemLine &line = documentBox->itemLines.back();
 
@@ -392,7 +410,10 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
 
                     line.items.push_back(&RenderItems.back());
 
-                    if (cX > documentBox->W)
+                    if (documentBox->X + documentBox->W < line.lineX + line.lineW && !documentBox->wLocked)// W
+                        documentBox->W = (line.lineX + line.lineW)-documentBox->X;
+
+                    if (cX > documentBox->X + documentBox->maxW)
                     {
                         RItemLine nline;
                         nline.lineH = 0;
@@ -403,8 +424,10 @@ RPosition HTMLRenderer::assembleRenderListV2(RenderDOMItem &root, freetypeeasy::
                         documentBox->itemLines.push_back(nline);
                         cX = nline.lineX;
 
-                        if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)
+                        if (documentBox->Y + documentBox->H < nline.lineY + nline.lineH && !documentBox->hLocked)// H
                             documentBox->H = (nline.lineY + nline.lineH)-documentBox->Y;
+                        if (documentBox->X + documentBox->W < nline.lineX + nline.lineW && !documentBox->wLocked)// W
+                            documentBox->W = (nline.lineX + nline.lineW)-documentBox->X;
                     }
 
                     charactersPreWritten = i+1;

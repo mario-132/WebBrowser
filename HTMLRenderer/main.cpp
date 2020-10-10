@@ -348,6 +348,9 @@ public:
         documentBox.X = Debugger::getAdjustmentGetValue("docbox_offset");
         documentBox.Y = Debugger::getAdjustmentGetValue("docbox_offset");//window.height/3;
         documentBox.W = window.width-(Debugger::getAdjustmentGetValue("docbox_offset")*2);
+        documentBox.maxW = documentBox.W;
+        documentBox.wLocked = true;
+        documentBox.hLocked = false;
         documentBox.H = 0;
         if (Debugger::getCheckboxEnabled("debug_docbox_1px"))
             documentBox.H = 1;
