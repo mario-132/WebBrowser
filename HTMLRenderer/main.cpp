@@ -6,6 +6,7 @@
 #include "webservice.h"
 #include "renderdom.h"
 #include "debugger.h"
+#include "css.h"
 #include <chrono>
 
 #define FRAMEBUFFER_WIDTH 3840
@@ -176,6 +177,7 @@ class WebPage
 public:
     std::string pageTitle;// Temporary way to get page title.
     RenderDOM dom;
+    CSS css;
 
     GumboOutput* output;
     ~WebPage()
@@ -193,21 +195,23 @@ public:
 
         getTitleFromDOM(output->root, pageTitle, false);
 
-        std::string css = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
+        std::string tcss = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
         std::vector<std::string> stylesheetPaths;
-        getStyleFromDOM(output->root, css, stylesheetPaths);
+        getStyleFromDOM(output->root, tcss, stylesheetPaths);
         for (unsigned int i = 0; i < stylesheetPaths.size(); i++)
         {
             std::string newsrc = resolvePath(stylesheetPaths[i], fullURL);
-            css += WebService::htmlFileDownloader(newsrc);
+            tcss += WebService::htmlFileDownloader(newsrc);
             std::cout << "Downloaded stylesheet: " << newsrc << std::endl;
         }
 
-        findAndReplaceAll(css, "!important", "");
+        css.init(output->root, tcss);
 
-        if (Debugger::getCheckboxEnabled("debug_log_css"))
+        css.printNode(((GumboNode**)((GumboNode**)output->root->v.element.children.data)[2]->v.element.children.data)[1]);
+
+        //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
-            Debugger::setTextBoxText("css_textview", "unavailable");
+            Debugger::setTextBoxText("css_textview", tcss);
         }
     }
     void loop(X11Window &window, fte::freetypeInst *inst)

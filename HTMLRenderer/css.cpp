@@ -1,4 +1,5 @@
 #include "css.h"
+#include <iostream>
 
 CSS::CSS()
 {
@@ -11,10 +12,10 @@ void CSS::init(GumboNode *root, std::string css)
     css_stylesheet *sheet;
     size_t size;
 
-    css_select_ctx *select_ctx;
+
     uint32_t count;
-    css_stylesheet_params params;
-    css_media media = {
+
+    media = {
         .type = CSS_MEDIA_SCREEN,
     };
 
@@ -43,10 +44,9 @@ void CSS::init(GumboNode *root, std::string css)
         die("css_stylesheet_size", code);
     printf("created stylesheet, size %zu\n", size);
 
-
     /* parse some CSS source */
     code = css_stylesheet_append_data(sheet, (const uint8_t *) css.c_str(),
-            css.length());
+            css.size());
     if (code != CSS_OK && code != CSS_NEEDDATA)
         die("css_stylesheet_append_data", code);
     code = css_stylesheet_data_done(sheet);
@@ -72,8 +72,279 @@ void CSS::init(GumboNode *root, std::string css)
     printf("created selection context with %i sheets\n", count);
 }
 
+void CSS::printNode(GumboNode *node)
+{
+    std::cout << gumboTagToString(node->v.element.tag) << std::endl;
+
+    css_error code;
+
+    css_select_results *style;
+    lwc_string *url;
+    uint8_t color_type;
+    css_color color_shade;
+
+    code = css_select_style(select_ctx, node,
+            &media, NULL,
+            &select_handler, 0,
+            &style);
+    if (code != CSS_OK)
+        die("css_select_style", code);
+
+    color_type = css_computed_color(
+            style->styles[CSS_PSEUDO_ELEMENT_NONE],
+            &color_shade);
+
+    lwc_intern_string("a", 1, &url);
+    if (css_computed_background_image(style->styles[CSS_PSEUDO_ELEMENT_NONE], &url) && url!=0)
+    {
+        printf("bg: ");
+        printf(lwc_string_data(url));
+    }
+
+    css_fixed flength;
+    css_unit funit;
+    if (css_computed_font_size(style->styles[CSS_PSEUDO_ELEMENT_NONE], &flength, &funit) != 0x0)
+    {
+       printf(" size: %f", FIXTOFLT(flength));
+       printunit(&funit);
+    }
+
+    if (color_type == CSS_COLOR_INHERIT)
+        printf(" color: 'inherit'\n");
+    else
+        printf(" color: %x\n", color_shade);
+
+
+
+    code = css_select_results_destroy(style);
+    if (code != CSS_OK)
+        die("css_computed_style_destroy", code);
+}
+
+void CSS::printunit(css_unit *unit)
+{
+    switch (*unit)
+    {
+    case CSS_UNIT_PX:
+        printf("px");
+        break;
+
+    case CSS_UNIT_EX:
+        printf("ex");
+        break;
+
+    case CSS_UNIT_EM:
+        printf("em");
+        break;
+
+    case CSS_UNIT_PT:
+        printf("pt");
+        break;
+
+    default:
+        std::cout << "/?" << *unit << "/";
+        break;
+    }
+}
+
+std::string CSS::gumboTagToString(GumboTag tag)
+{
+    std::string name;
+
+    if (tag == GUMBO_TAG_P)
+    {
+        name = "p";
+    }
+    else if (tag == GUMBO_TAG_IMG)
+    {
+        name = "img";
+    }
+    else if (tag == GUMBO_TAG_H1)
+    {
+        name = "h1";
+    }
+    else if (tag == GUMBO_TAG_H2)
+    {
+        name = "h2";
+    }
+    else if (tag == GUMBO_TAG_H3)
+    {
+        name = "h3";
+    }
+    else if (tag == GUMBO_TAG_H4)
+    {
+        name = "h4";
+    }
+    else if (tag == GUMBO_TAG_H5)
+    {
+        name = "h5";
+    }
+    else if (tag == GUMBO_TAG_H6)
+    {
+        name = "h6";
+    }
+    else if (tag == GUMBO_TAG_BODY)
+    {
+        name = "body";
+    }
+    else if (tag == GUMBO_TAG_HTML)
+    {
+        name = "html";
+    }
+    else if (tag == GUMBO_TAG_B)
+    {
+        name = "b";
+    }
+    else if (tag == GUMBO_TAG_BR)
+    {
+        name = "br";
+    }
+    else if (tag == GUMBO_TAG_DIV)
+    {
+        name = "div";
+    }
+    else if (tag == GUMBO_TAG_SPAN)
+    {
+        name = "span";
+    }
+    else if (tag == GUMBO_TAG_A)
+    {
+        name = "a";
+    }
+    else if (tag == GUMBO_TAG_HEAD)
+    {
+        name = "head";
+    }
+    else if (tag == GUMBO_TAG_STYLE)
+    {
+        name = "style";
+    }
+    else if (tag == GUMBO_TAG_CENTER)
+    {
+        name = "center";
+    }
+    else if (tag == GUMBO_TAG_BIG)
+    {
+        name = "big";
+    }
+    else if (tag == GUMBO_TAG_STRONG)
+    {
+        name = "strong";
+    }
+    else if (tag == GUMBO_TAG_SCRIPT)
+    {
+        name = "script";
+    }
+    else if (tag == GUMBO_TAG_FORM)
+    {
+        name = "form";
+    }
+    else if (tag == GUMBO_TAG_BUTTON)
+    {
+        name = "button";
+    }
+    else if (tag == GUMBO_TAG_SECTION)
+    {
+        name = "section";
+    }
+    else if (tag == GUMBO_TAG_LINK)
+    {
+        name = "link";
+    }
+    else if (tag == GUMBO_TAG_UL)
+    {
+        name = "ul";
+    }
+    else if (tag == GUMBO_TAG_LI)
+    {
+        name = "li";
+    }
+    else if (tag == GUMBO_TAG_OL)
+    {
+        name = "ol";
+    }
+    else if (tag == GUMBO_TAG_TABLE)
+    {
+        name = "table";
+    }
+    else if (tag == GUMBO_TAG_TBODY)
+    {
+        name = "tbody";
+    }
+    else if (tag == GUMBO_TAG_TR)
+    {
+        name = "tr";
+    }
+    else if (tag == GUMBO_TAG_TD)
+    {
+        name = "td";
+    }
+    else if (tag == GUMBO_TAG_NOSCRIPT)
+    {
+        name = "noscript";
+    }
+    else if (tag == GUMBO_TAG_NOFRAMES)
+    {
+        name = "noframes";
+    }
+    else if (tag == GUMBO_TAG_HEADER)
+    {
+        name = "header";
+    }
+    else if (tag == GUMBO_TAG_NAV)
+    {
+        name = "nav";
+    }
+    else if (tag == GUMBO_TAG_ARTICLE)
+    {
+        name = "article";
+    }
+    else if (tag == GUMBO_TAG_ASIDE)
+    {
+        name = "aside";
+    }
+    else if (tag == GUMBO_TAG_FOOTER)
+    {
+        name = "footer";
+    }
+    else if (tag == GUMBO_TAG_DETAILS)
+    {
+        name = "details";
+    }
+    else if (tag == GUMBO_TAG_SUMMARY)
+    {
+        name = "summary";
+    }
+    else if (tag == GUMBO_TAG_META)
+    {
+        name = "meta";
+    }
+    else if (tag == GUMBO_TAG_VIDEO)
+    {
+        name = "video";
+    }
+    else if (tag == GUMBO_TAG_AUDIO)
+    {
+        name = "audio";
+    }
+    else if (tag == GUMBO_TAG_HR)
+    {
+        name = "hr";
+    }
+    else if (tag == GUMBO_TAG_TEXTAREA)
+    {
+        name = "textarea";
+    }
+    else if (tag == GUMBO_TAG_PRE)
+    {
+        name = "pre";
+    }
+
+    return name;
+}
+
 css_error resolve_url(void *pw,
-        const char *base, lwc_string *rel, lwc_string **abs)
+                      const char *base, lwc_string *rel, lwc_string **abs)
 {
     UNUSED(pw);
     UNUSED(base);
@@ -92,25 +363,25 @@ void die(const char *text, css_error code)
     exit(EXIT_FAILURE);
 }
 
-
-
 /* Select handlers. Our "document tree" is actually just a single node, which is
  * a libwapcaplet string containing the element name. Therefore all the
  * functions below except those getting or testing the element name return empty
  * data or false attributes. */
 css_error node_name(void *pw, void *n, css_qname *qname)
 {
-    lwc_string *node = (lwc_string*)n;
+    GumboNode *node = (GumboNode*)n;
 
     UNUSED(pw);
-
-    qname->name = lwc_string_ref(node);
+    if (node->type != GUMBO_NODE_ELEMENT)
+        return CSS_INVALID;
+    std::string name = CSS::gumboTagToString(node->v.element.tag);
+    lwc_intern_string(name.c_str(), name.size(), &qname->name);
 
     return CSS_OK;
 }
 
 css_error node_classes(void *pw, void *n,
-        lwc_string ***classes, uint32_t *n_classes)
+                       lwc_string ***classes, uint32_t *n_classes)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -128,8 +399,8 @@ css_error node_id(void *pw, void *n, lwc_string **id)
 }
 
 css_error named_ancestor_node(void *pw, void *n,
-        const css_qname *qname,
-        void **ancestor)
+                              const css_qname *qname,
+                              void **ancestor)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -139,8 +410,8 @@ css_error named_ancestor_node(void *pw, void *n,
 }
 
 css_error named_parent_node(void *pw, void *n,
-        const css_qname *qname,
-        void **parent)
+                            const css_qname *qname,
+                            void **parent)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -150,8 +421,8 @@ css_error named_parent_node(void *pw, void *n,
 }
 
 css_error named_generic_sibling_node(void *pw, void *n,
-        const css_qname *qname,
-        void **sibling)
+                                     const css_qname *qname,
+                                     void **sibling)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -161,8 +432,8 @@ css_error named_generic_sibling_node(void *pw, void *n,
 }
 
 css_error named_sibling_node(void *pw, void *n,
-        const css_qname *qname,
-        void **sibling)
+                             const css_qname *qname,
+                             void **sibling)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -188,19 +459,26 @@ css_error sibling_node(void *pw, void *n, void **sibling)
 }
 
 css_error node_has_name(void *pw, void *n,
-        const css_qname *qname,
-        bool *match)
+                        const css_qname *qname,
+                        bool *match)
 {
-    lwc_string *node = (lwc_string*)n;
+    GumboNode *node = (GumboNode*)n;
+
     UNUSED(pw);
-    assert(lwc_string_caseless_isequal(node, qname->name, match) ==
-            lwc_error_ok);
+    if (node->type != GUMBO_NODE_ELEMENT)
+        return CSS_INVALID;
+    std::string name = CSS::gumboTagToString(node->v.element.tag);
+    lwc_string *str;
+    lwc_intern_string(name.c_str(), name.size(), &str);
+
+    assert(lwc_string_caseless_isequal(str, qname->name, match) == lwc_error_ok);
+
     return CSS_OK;
 }
 
 css_error node_has_class(void *pw, void *n,
-        lwc_string *name,
-        bool *match)
+                         lwc_string *name,
+                         bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -210,8 +488,8 @@ css_error node_has_class(void *pw, void *n,
 }
 
 css_error node_has_id(void *pw, void *n,
-        lwc_string *name,
-        bool *match)
+                      lwc_string *name,
+                      bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -221,8 +499,8 @@ css_error node_has_id(void *pw, void *n,
 }
 
 css_error node_has_attribute(void *pw, void *n,
-        const css_qname *qname,
-        bool *match)
+                             const css_qname *qname,
+                             bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -232,9 +510,9 @@ css_error node_has_attribute(void *pw, void *n,
 }
 
 css_error node_has_attribute_equal(void *pw, void *n,
-        const css_qname *qname,
-        lwc_string *value,
-        bool *match)
+                                   const css_qname *qname,
+                                   lwc_string *value,
+                                   bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -245,9 +523,9 @@ css_error node_has_attribute_equal(void *pw, void *n,
 }
 
 css_error node_has_attribute_dashmatch(void *pw, void *n,
-        const css_qname *qname,
-        lwc_string *value,
-        bool *match)
+                                       const css_qname *qname,
+                                       lwc_string *value,
+                                       bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -258,9 +536,9 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 }
 
 css_error node_has_attribute_includes(void *pw, void *n,
-        const css_qname *qname,
-        lwc_string *value,
-        bool *match)
+                                      const css_qname *qname,
+                                      lwc_string *value,
+                                      bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -271,9 +549,9 @@ css_error node_has_attribute_includes(void *pw, void *n,
 }
 
 css_error node_has_attribute_prefix(void *pw, void *n,
-        const css_qname *qname,
-        lwc_string *value,
-        bool *match)
+                                    const css_qname *qname,
+                                    lwc_string *value,
+                                    bool *match)
 {
     UNUSED(pw);
     UNUSED(n);
@@ -284,9 +562,9 @@ css_error node_has_attribute_prefix(void *pw, void *n,
 }
 
 css_error node_has_attribute_suffix(void *pw, void *n,
-        const css_qname *qname,
-        lwc_string *value,
-        bool *match)
+                                    const css_qname *qname,
+                                    lwc_string *value,
+                                    bool *match)
 {
     UNUSED(pw);
     UNUSED(n);

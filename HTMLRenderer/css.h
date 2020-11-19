@@ -144,6 +144,13 @@ public:
     CSS();
 
     void init(GumboNode* root, std::string css);
+    void printNode(GumboNode* node);
+    void printunit(css_unit *unit);
+    static std::string gumboTagToString(GumboTag tag);
+private:
+    css_media media;
+    css_select_ctx *select_ctx;
+    css_stylesheet_params params;
 };
 
 #endif // CSS_H
