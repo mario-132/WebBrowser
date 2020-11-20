@@ -4,7 +4,7 @@ cd ext
 
 git clone git://git.netsurf-browser.org/libwapcaplet.git
 git clone git://git.netsurf-browser.org/libparserutils.git
-git clone git://git.netsurf-browser.org/libcss.git
+#git clone git://git.netsurf-browser.org/libcss.git
 git clone https://github.com/pcwalton/netsurf-buildsystem
 
 cd netsurf-buildsystem

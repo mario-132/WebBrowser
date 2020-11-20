@@ -3,3 +3,4 @@ CMakeLists.txt.user
 build-*/
 *.glade~
 HTMLRenderer/ext/*
+!HTMLRenderer/ext/libcss*
