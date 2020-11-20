@@ -8,10 +8,51 @@ CSS::CSS()
 
 void CSS::init(GumboNode *root, std::string css)
 {
+    select_handler = {
+        CSS_SELECT_HANDLER_VERSION_1,
+
+        node_name,
+        node_classes,
+        node_id,
+        named_ancestor_node,
+        named_parent_node,
+        named_sibling_node,
+        named_generic_sibling_node,
+        parent_node,
+        sibling_node,
+        node_has_name,
+        node_has_class,
+        node_has_id,
+        node_has_attribute,
+        node_has_attribute_equal,
+        node_has_attribute_dashmatch,
+        node_has_attribute_includes,
+        node_has_attribute_prefix,
+        node_has_attribute_suffix,
+        node_has_attribute_substring,
+        node_is_root,
+        node_count_siblings,
+        node_is_empty,
+        node_is_link,
+        node_is_visited,
+        node_is_hover,
+        node_is_active,
+        node_is_focus,
+        node_is_enabled,
+        node_is_disabled,
+        node_is_checked,
+        node_is_target,
+        node_is_lang,
+        node_presentational_hint,
+        ua_default_for_property,
+        compute_font_size,
+        set_libcss_node_data,
+        get_libcss_node_data
+    };
+
     css_error code;
     css_stylesheet *sheet;
     size_t size;
-
 
     uint32_t count;
 
@@ -743,7 +784,7 @@ css_error ua_default_for_property(void *pw, uint32_t property, css_hint *hint)
 
 css_error compute_font_size(void *pw, const css_hint *parent, css_hint *size)
 {
-    static css_hint_length sizes[] = {
+    css_hint_length sizes[] = {
         { FLTTOFIX(6.75), CSS_UNIT_PT },
         { FLTTOFIX(7.50), CSS_UNIT_PT },
         { FLTTOFIX(9.75), CSS_UNIT_PT },
@@ -803,7 +844,7 @@ css_error compute_font_size(void *pw, const css_hint *parent, css_hint *size)
     return CSS_OK;
 }
 
-static css_error set_libcss_node_data(void *pw, void *n,
+css_error set_libcss_node_data(void *pw, void *n,
         void *libcss_node_data)
 {
     UNUSED(pw);
@@ -816,7 +857,7 @@ static css_error set_libcss_node_data(void *pw, void *n,
     return CSS_OK;
 }
 
-static css_error get_libcss_node_data(void *pw, void *n,
+css_error get_libcss_node_data(void *pw, void *n,
         void **libcss_node_data)
 {
     UNUSED(pw);
