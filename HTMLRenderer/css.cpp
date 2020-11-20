@@ -6,6 +6,8 @@ CSS::CSS()
 
 }
 
+css_select_handler CSS::select_handler;
+
 void CSS::init(GumboNode *root, std::string css)
 {
     select_handler = {
@@ -64,7 +66,7 @@ void CSS::init(GumboNode *root, std::string css)
     params.level = CSS_LEVEL_21;
     params.charset = "UTF-8";
     params.url = "foo";
-    params.title = "foo";
+    params.title = "bar";
     params.allow_quirks = false;
     params.inline_style = false;
     params.resolve = resolve_url;
@@ -144,18 +146,51 @@ void CSS::printNode(GumboNode *node)
 
     css_fixed flength;
     css_unit funit;
-    if (css_computed_font_size(style->styles[CSS_PSEUDO_ELEMENT_NONE], &flength, &funit) != 0x0)
+    int fret = css_computed_font_size(style->styles[CSS_PSEUDO_ELEMENT_NONE], &flength, &funit);
+    if (fret != 0x0)
     {
        printf(" size: %f", FIXTOFLT(flength));
        printunit(&funit);
     }
+    else if (fret == CSS_FONT_SIZE_INHERIT)
+    {
+        printf(" size: inherit");
+    }
 
     if (color_type == CSS_COLOR_INHERIT)
-        printf(" color: 'inherit'\n");
+        printf("\n color: 'inherit'\n");
     else
-        printf(" color: %x\n", color_shade);
+        printf("\n color: %x\n", color_shade);
 
+    uint8_t display = css_computed_display(style->styles[CSS_PSEUDO_ELEMENT_NONE], false);
+    std::cout << " display: ";
+    switch (display)
+    {
+    case CSS_DISPLAY_NONE:
+    std::cout << "none";
+        break;
 
+    case CSS_DISPLAY_BLOCK:
+    std::cout << "block";
+        break;
+
+    case CSS_DISPLAY_FLEX:
+    std::cout << "flex";
+        break;
+
+    case CSS_DISPLAY_INLINE:
+    std::cout << "inline";
+        break;
+
+    case CSS_DISPLAY_INLINE_BLOCK:
+    std::cout << "inline-block";
+        break;
+
+    default:
+        std::cout << "unknown" << std::endl;
+        break;
+    }
+    std::cout << "\n";
 
     code = css_select_results_destroy(style);
     if (code != CSS_OK)
@@ -380,8 +415,23 @@ std::string CSS::gumboTagToString(GumboTag tag)
     {
         name = "pre";
     }
+    else
+    {
+        name = "unknown";
+    }
 
     return name;
+}
+
+bool CSS::iequals(const std::string &a, const std::string &b)
+{
+    unsigned int sz = a.size();
+    if (b.size() != sz)
+        return false;
+    for (unsigned int i = 0; i < sz; ++i)
+        if (tolower(a[i]) != tolower(b[i]))
+            return false;
+    return true;
 }
 
 css_error resolve_url(void *pw,
@@ -414,9 +464,14 @@ css_error node_name(void *pw, void *n, css_qname *qname)
 
     UNUSED(pw);
     if (node->type != GUMBO_NODE_ELEMENT)
+    {
+        std::cerr << "[node_name]Not an element!" << std::endl;
+        qname->name = 0;
         return CSS_INVALID;
+    }
     std::string name = CSS::gumboTagToString(node->v.element.tag);
     lwc_intern_string(name.c_str(), name.size(), &qname->name);
+    std::cout << "Get node name: " << name << std::endl;
 
     return CSS_OK;
 }
@@ -444,9 +499,24 @@ css_error named_ancestor_node(void *pw, void *n,
                               void **ancestor)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(qname);
-    *ancestor = NULL;
+    GumboNode *node = (GumboNode*)n;
+    GumboNode *p = node->parent;
+    while (p != 0 && p->type == GUMBO_NODE_DOCUMENT)
+    {
+        if (CSS::iequals(CSS::gumboTagToString(p->v.element.tag), lwc_string_data(qname->name)))
+        {
+            *ancestor = p;
+            break;
+        }
+        *ancestor = NULL;
+        p = p->parent;
+    }
+    std::string ans;
+    if (p != 0)
+        ans = CSS::gumboTagToString(p->v.element.tag);
+    else
+        ans = "0";
+    std::cout << "got named ancestor: " << ans << " expected: " << lwc_string_data(qname->name) << std::endl;
     return CSS_OK;
 }
 
@@ -455,9 +525,24 @@ css_error named_parent_node(void *pw, void *n,
                             void **parent)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(qname);
+    GumboNode *node = (GumboNode*)n;
+    GumboNode *p = node->parent;
     *parent = NULL;
+    if (p->type == GUMBO_NODE_DOCUMENT)
+    {
+        std::cout << "got named parent: 0 expected: " << lwc_string_data(qname->name) << std::endl;
+        return CSS_OK;
+    }
+    if (CSS::iequals(CSS::gumboTagToString(p->v.element.tag), lwc_string_data(qname->name)))
+    {
+        *parent = p;
+    }
+    std::string ans;
+    if (p != 0)
+        ans = CSS::gumboTagToString(p->v.element.tag);
+    else
+        ans = "0";
+    std::cout << "got named parent: " << ans << " expected: " << lwc_string_data(qname->name) << std::endl;
     return CSS_OK;
 }
 
@@ -485,9 +570,19 @@ css_error named_sibling_node(void *pw, void *n,
 
 css_error parent_node(void *pw, void *n, void **parent)
 {
+    GumboNode *node = (GumboNode*)n;
     UNUSED(pw);
-    UNUSED(n);
-    *parent = NULL;
+    if (node->parent->type == GUMBO_NODE_ELEMENT)
+    {
+        *parent = node->parent;
+        std::cout << "got parent: " << CSS::gumboTagToString(((GumboNode*)*parent)->v.element.tag) << std::endl;
+    }
+    else
+    {
+        *parent = 0;
+        std::cout << "got parent: " << "0(not an element)" << std::endl;
+    }
+
     return CSS_OK;
 }
 
@@ -507,12 +602,16 @@ css_error node_has_name(void *pw, void *n,
 
     UNUSED(pw);
     if (node->type != GUMBO_NODE_ELEMENT)
+    {
+        std::cerr << "[node_has_name]Not an element!" << std::endl;
         return CSS_INVALID;
+    }
     std::string name = CSS::gumboTagToString(node->v.element.tag);
     lwc_string *str;
     lwc_intern_string(name.c_str(), name.size(), &str);
 
-    assert(lwc_string_caseless_isequal(str, qname->name, match) == lwc_error_ok);
+    lwc_string_caseless_isequal(str, qname->name, match);
+    std::cout << "is equal: " << lwc_string_data(str) << "/" << lwc_string_data(qname->name) << ":" << &match << std::endl;
 
     return CSS_OK;
 }
@@ -639,8 +738,9 @@ css_error node_is_first_child(void *pw, void *n, bool *match)
 css_error node_is_root(void *pw, void *n, bool *match)
 {
     UNUSED(pw);
-    UNUSED(n);
-    *match = false;
+    GumboNode *node = (GumboNode*)n;
+    *match = (node->parent->type == GUMBO_NODE_DOCUMENT);
+    std::cout << "is root: " << *match << std::endl;
     return CSS_OK;
 }
 
@@ -851,7 +951,7 @@ css_error set_libcss_node_data(void *pw, void *n,
     UNUSED(n);
 
     /* Since we're not storing it, ensure node data gets deleted */
-    css_libcss_node_data_handler(&select_handler, CSS_NODE_DELETED,
+    css_libcss_node_data_handler(&CSS::select_handler, CSS_NODE_DELETED,
             pw, n, NULL, libcss_node_data);
 
     return CSS_OK;

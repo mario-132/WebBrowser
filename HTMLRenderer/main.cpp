@@ -187,6 +187,7 @@ public:
 
     void init(std::string html, std::string fullURL)
     {
+        std::cout << "Webpage init" << std::endl;
         std::string htmlFile = html;
 
         findAndReplaceAll( htmlFile, "&nbsp;", " ");
@@ -195,7 +196,7 @@ public:
 
         getTitleFromDOM(output->root, pageTitle, false);
 
-        std::string tcss = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
+        std::string tcss = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default2.css");
         std::vector<std::string> stylesheetPaths;
         getStyleFromDOM(output->root, tcss, stylesheetPaths);
         for (unsigned int i = 0; i < stylesheetPaths.size(); i++)
@@ -206,8 +207,10 @@ public:
         }
 
         css.init(output->root, tcss);
-        GumboNode *node2 = ((GumboNode**)((GumboNode**)output->root->v.element.children.data)[2]->v.element.children.data)[1];
-        css.printNode(((GumboNode**)node2->v.element.children.data)[1]);
+        //GumboNode *node2;
+        //node2 = ((GumboNode**)((GumboNode**)output->root->v.element.children.data)[4]->v.element.children.data)[2];
+        //css.printNode(((GumboNode**)node2->v.element.children.data)[1]);
+        css.printNode(((GumboNode**)((GumboNode**)output->root->v.element.children.data)[2]->v.element.children.data)[3]);
 
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
@@ -241,8 +244,8 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    //std::string currentWebPage = "https://i.reddit.com/";
-    std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
+    std::string currentWebPage = "https://www.reddit.com/";
+    //std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
     //WebPage webpage;

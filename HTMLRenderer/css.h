@@ -93,8 +93,6 @@ css_error set_libcss_node_data(void *pw, void *n,
 css_error get_libcss_node_data(void *pw, void *n,
         void **libcss_node_data);
 
-static css_select_handler select_handler;
-
 class CSS
 {
 public:
@@ -104,6 +102,9 @@ public:
     void printNode(GumboNode* node);
     void printunit(css_unit *unit);
     static std::string gumboTagToString(GumboTag tag);
+
+    static css_select_handler select_handler;
+    static bool iequals(const std::string& a, const std::string& b);
 private:
     css_media media;
     css_select_ctx *select_ctx;
