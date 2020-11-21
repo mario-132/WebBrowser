@@ -223,6 +223,18 @@ void CSS::printunit(css_unit *unit)
     }
 }
 
+void CSS::selectNode(GumboNode *node, css_select_results **style)
+{
+    css_error code;
+
+    code = css_select_style(select_ctx, node,
+            &media, NULL,
+            &select_handler, 0,
+            style);
+    if (code != CSS_OK)
+        die("css_select_style", code);
+}
+
 std::string CSS::gumboTagToString(GumboTag tag)
 {
     std::string name;
@@ -528,7 +540,7 @@ css_error named_parent_node(void *pw, void *n,
     GumboNode *node = (GumboNode*)n;
     GumboNode *p = node->parent;
     *parent = NULL;
-    if (p->type == GUMBO_NODE_DOCUMENT)
+    if (p->type == GUMBO_NODE_DOCUMENT || p == 0)
     {
         std::cout << "got named parent: 0 expected: " << lwc_string_data(qname->name) << std::endl;
         return CSS_OK;
@@ -572,7 +584,7 @@ css_error parent_node(void *pw, void *n, void **parent)
 {
     GumboNode *node = (GumboNode*)n;
     UNUSED(pw);
-    if (node->parent->type == GUMBO_NODE_ELEMENT)
+    if (node->parent->type == GUMBO_NODE_ELEMENT && node->parent != 0)
     {
         *parent = node->parent;
         std::cout << "got parent: " << CSS::gumboTagToString(((GumboNode*)*parent)->v.element.tag) << std::endl;
@@ -601,7 +613,7 @@ css_error node_has_name(void *pw, void *n,
     GumboNode *node = (GumboNode*)n;
 
     UNUSED(pw);
-    if (node->type != GUMBO_NODE_ELEMENT)
+    if (node != 0 && node->type != GUMBO_NODE_ELEMENT)
     {
         std::cerr << "[node_has_name]Not an element!" << std::endl;
         return CSS_INVALID;
@@ -739,7 +751,7 @@ css_error node_is_root(void *pw, void *n, bool *match)
 {
     UNUSED(pw);
     GumboNode *node = (GumboNode*)n;
-    *match = (node->parent->type == GUMBO_NODE_DOCUMENT);
+    *match = (node->parent == 0 || node->parent->type == GUMBO_NODE_DOCUMENT);
     std::cout << "is root: " << *match << std::endl;
     return CSS_OK;
 }

@@ -210,7 +210,11 @@ public:
         //GumboNode *node2;
         //node2 = ((GumboNode**)((GumboNode**)output->root->v.element.children.data)[4]->v.element.children.data)[2];
         //css.printNode(((GumboNode**)node2->v.element.children.data)[1]);
-        css.printNode(((GumboNode**)((GumboNode**)output->root->v.element.children.data)[2]->v.element.children.data)[3]);
+        //css.printNode(((GumboNode**)((GumboNode**)output->root->v.element.children.data)[2]->v.element.children.data)[3]);
+
+        RenderDOMItem item = dom.parseGumboTree(output->root, &css, RenderDOMStyle());
+
+        std::cout << "Hi" << std::endl;
 
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {

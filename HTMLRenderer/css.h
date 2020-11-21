@@ -101,11 +101,12 @@ public:
     void init(GumboNode* root, std::string css);
     void printNode(GumboNode* node);
     void printunit(css_unit *unit);
+    void selectNode(GumboNode* node, css_select_results **style);
     static std::string gumboTagToString(GumboTag tag);
 
     static css_select_handler select_handler;
     static bool iequals(const std::string& a, const std::string& b);
-private:
+
     css_media media;
     css_select_ctx *select_ctx;
     css_stylesheet_params params;
