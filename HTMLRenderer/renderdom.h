@@ -33,9 +33,10 @@ enum RenderDOMType
 
 enum RenderDOMCSSProp
 {
-    RENDERDOM_NONE,
-    RENDERDOM_VALUE,
-    RENDERDOM_INHERIT
+    RENDERDOM_NONE,     // Unknown value/value doesn't apply here
+    RENDERDOM_VALUE,    // px value
+    //RENDERDOM_INHERIT,  // Take value from previous element
+    RENDERDOM_AUTO      // Resize with content
 };
 
 struct RenderDOMStyle
@@ -44,12 +45,20 @@ struct RenderDOMStyle
 
     RenderDOMColor color;// Color
     RenderDOMCSSProp color_type;
+    css_color_e _was_color;
 
     RenderDOMColor background_color;// Background-color
     RenderDOMCSSProp background_color_type;
+    css_background_color_e _was_bg_color;
 
     int font_size;// Font-size, in px
     RenderDOMCSSProp font_size_type;
+
+    int height;// height, in px
+    RenderDOMCSSProp height_type;
+
+    int width;// width, in px
+    RenderDOMCSSProp width_type;
 };
 
 struct RenderDOMItem
@@ -66,6 +75,7 @@ class RenderDOM/// Takes the html dom and css and puts it together
 public:
     RenderDOM();
     RenderDOMItem parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyle prev);
+    int unitToPx(css_fixed fixed, css_unit unit, int prev);
 };
 
 #endif // RENDERDOM_H

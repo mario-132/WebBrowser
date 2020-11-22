@@ -211,10 +211,24 @@ public:
         //node2 = ((GumboNode**)((GumboNode**)output->root->v.element.children.data)[4]->v.element.children.data)[2];
         //css.printNode(((GumboNode**)node2->v.element.children.data)[1]);
         //css.printNode(((GumboNode**)((GumboNode**)output->root->v.element.children.data)[2]->v.element.children.data)[3]);
+        RenderDOMStyle def;
+        def.color_type = RENDERDOM_VALUE;
+        def.color = {255, 255, 255, 255};
 
-        RenderDOMItem item = dom.parseGumboTree(output->root, &css, RenderDOMStyle());
+        def.background_color_type = RENDERDOM_VALUE;
+        def.background_color = {0, 0, 0, 0};
 
-        std::cout << "Hi" << std::endl;
+        def.width_type = RENDERDOM_AUTO;
+        def.width = -1;
+
+        def.height_type = RENDERDOM_AUTO;
+        def.height = -1;
+
+        def.display = CSS_DISPLAY_BLOCK;
+
+        def.font_size_type = RENDERDOM_VALUE;
+        def.font_size = 16;
+        RenderDOMItem item = dom.parseGumboTree(output->root, &css, def);
 
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
@@ -248,8 +262,8 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    std::string currentWebPage = "https://www.reddit.com/";
-    //std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
+    //std::string currentWebPage = "https://www.reddit.com/";
+    std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
     //WebPage webpage;
