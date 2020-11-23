@@ -68,6 +68,8 @@ struct RenderDOMItem
 
     RenderDOMStyle style;
     std::string tag;
+
+    std::string text;// if RENDERDOM_TEXT
 };
 
 class RenderDOM/// Takes the html dom and css and puts it together

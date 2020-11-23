@@ -7,6 +7,7 @@
 #include "renderdom.h"
 #include "debugger.h"
 #include "css.h"
+#include "htmlrenderer.h"
 #include <chrono>
 
 #define FRAMEBUFFER_WIDTH 3840
@@ -230,6 +231,10 @@ public:
         def.font_size = 16;
         RenderDOMItem item = dom.parseGumboTree(output->root, &css, def);
 
+        HTMLRenderer htmlRenderer;
+        std::vector<RItem> renderItems;
+        htmlRenderer.assembleRenderList(&renderItems, 0, item);
+
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
             Debugger::setTextBoxText("css_textview", tcss);
@@ -262,8 +267,8 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    //std::string currentWebPage = "https://www.reddit.com/";
-    std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
+    std::string currentWebPage = "https://www.reddit.com/";
+    //std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
     //WebPage webpage;

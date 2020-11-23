@@ -131,7 +131,10 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
     }
     else if (node->type == GUMBO_NODE_TEXT)
     {
+        item.style = prev;/// Todo: Give text its own style class and always make this one the style of its parent element.
         item.type = RENDERDOM_TEXT;
+
+        item.text = node->v.text.text;
     }
 
     return item;
