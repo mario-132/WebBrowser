@@ -179,6 +179,8 @@ public:
     std::string pageTitle;// Temporary way to get page title.
     RenderDOM dom;
     CSS css;
+    HTMLRenderer htmlRenderer;
+    RenderDOMItem item;
 
     GumboOutput* output;
     ~WebPage()
@@ -186,7 +188,7 @@ public:
         gumbo_destroy_output(&kGumboDefaultOptions, output);
     }
 
-    void init(std::string html, std::string fullURL)
+    void init(std::string html, std::string fullURL, fte::freetypeInst *inst)
     {
         std::cout << "Webpage init" << std::endl;
         std::string htmlFile = html;
@@ -229,11 +231,9 @@ public:
 
         def.font_size_type = RENDERDOM_VALUE;
         def.font_size = 16;
-        RenderDOMItem item = dom.parseGumboTree(output->root, &css, def);
+        item = dom.parseGumboTree(output->root, &css, def);
 
-        HTMLRenderer htmlRenderer;
-        std::vector<RItem> renderItems;
-        htmlRenderer.assembleRenderList(&renderItems, 0, item);
+
 
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
@@ -242,7 +242,15 @@ public:
     }
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
+        std::vector<RItem> renderItems;
+        RDocumentBox docbox;
+        docbox.x = 0;
+        docbox.y = 0;
+        docbox.w = window.width;
+        //docbox.h = 600;
+        htmlRenderer.assembleRenderList(&renderItems, &docbox, item, inst);
 
+        htmlRenderer.renderRenderList(renderItems, inst, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
     }
 };
 
@@ -274,7 +282,7 @@ int main()
     //WebPage webpage;
 
     WebPage *webpage = new WebPage();
-    webpage->init(html, findBasePath(currentWebPage));
+    webpage->init(html, findBasePath(currentWebPage), inst);
     Debugger::setSpinnerEnabled("loadingSpinner", false);
     Debugger::setEntryText("UrlBox", currentWebPage);
     Debugger::loop();
@@ -297,6 +305,7 @@ int main()
         webpage->loop(window, inst);
         //std::chrono::high_resolution_clock::time_point nowTime = std::chrono::high_resolution_clock::now();
         //std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
+
         Debugger::loop();
         for (int y = 0; y < window.height; y++)
         {
@@ -321,7 +330,7 @@ int main()
             currentWebPage = resolvePath(href, currentWebPage);
             std::cout << "Fetching: " << currentWebPage << std::endl;
             std::string html = WebService::htmlFileDownloader(currentWebPage);
-            webpage->init(html, currentWebPage);
+            webpage->init(html, currentWebPage, inst);
             window.scrollPos = 0;
             Debugger::loop();
             Debugger::setSpinnerEnabled("loadingSpinner", false);

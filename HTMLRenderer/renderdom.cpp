@@ -78,7 +78,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
         {
             // translate font size from whatever unit it is to px
             item.style.font_size_type = RENDERDOM_VALUE;
-            item.style.font_size = unitToPx(font_size, font_size_unit, prev.font_size);
+            item.style.font_size = unitToPx(font_size, font_size_unit, prev.font_size, prev.font_size);
         }
         else if (fret == CSS_FONT_SIZE_INHERIT)
         {
@@ -99,7 +99,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
             else if (height_type == CSS_HEIGHT_SET)
             {
                 item.style.height_type = RENDERDOM_VALUE;
-                item.style.height = unitToPx(height, height_unit, prev.height);
+                item.style.height = unitToPx(height, height_unit, prev.height, prev.font_size);
             }
             else if (height_type == CSS_HEIGHT_AUTO)
                 item.style.height_type = RENDERDOM_AUTO;
@@ -118,7 +118,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
             else if (width_type == CSS_WIDTH_SET)
             {
                 item.style.width_type = RENDERDOM_VALUE;
-                item.style.width = unitToPx(width, width_unit, prev.width);
+                item.style.width = unitToPx(width, width_unit, prev.width, prev.font_size);
             }
             else if (width_type == CSS_WIDTH_AUTO)
                 item.style.width_type = RENDERDOM_AUTO;
@@ -131,7 +131,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
     }
     else if (node->type == GUMBO_NODE_TEXT)
     {
-        item.style = prev;/// Todo: Give text its own style class and always make this one the style of its parent element.
+        item.style = prev;/// Todo: Maybe give text its own style class and always make this one the style of its parent element.
         item.type = RENDERDOM_TEXT;
 
         item.text = node->v.text.text;
@@ -140,13 +140,13 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
     return item;
 }
 
-int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev)
+int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt)
 {
     int pxRes = 0;
     if (unit == CSS_UNIT_PX)
         pxRes = FIXTOINT(fixed);
     else if (unit == CSS_UNIT_EM)
-        pxRes = prev * FIXTOFLT(fixed);
+        pxRes = prevFnt * FIXTOFLT(fixed);
     else if (unit == CSS_UNIT_PT)
         pxRes = (FIXTOFLT(fixed)*72.0)/96.0;// Convert to in, then to px
     else if (unit == CSS_UNIT_CM)
@@ -154,7 +154,7 @@ int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev)
     else if (unit == CSS_UNIT_IN)
         pxRes = FIXTOFLT(fixed)/96.0;// convert to in, then to px
     else if (unit == CSS_UNIT_PCT)
-        pxRes = (FIXTOFLT(fixed)/100) * FIXTOFLT(fixed);
+        pxRes = (FIXTOFLT(fixed)/100) * prev;
     else
     {
         std::cerr << "Unable to translate unit!" << std::endl;
