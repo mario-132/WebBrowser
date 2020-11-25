@@ -269,7 +269,7 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    std::string currentWebPage = "https://www.reddit.com/";
+    std::string currentWebPage = "https://htmlyoutube.lightboxengine.com/";
     //std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);

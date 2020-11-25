@@ -16,6 +16,14 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
     if (item.type == RENDERDOM_ELEMENT)
     {
+        if (item.tag == "br")
+        {
+            activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
+            activeDocBox->renderlines.push_back(new RRenderLine());
+            activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+            activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+            activeDocBox->renderlines.back()->lineH = item.style.font_size;
+        }
         for (int i = 0; i < item.children.size(); i++)
         {
             assembleRenderList(items, activeDocBox, item.children[i], freetypeeasy);
@@ -34,6 +42,9 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
             std::wstring textOut;
 
+            fte::makeBold(freetypeeasy, false);
+            fte::setFontSize(freetypeeasy, item.style.font_size);
+
             for (int i = 0; i < wText.size(); i++)
             {
                 auto chrret = fte::getCharacterBounds(freetypeeasy, wText[i]);
@@ -49,19 +60,25 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                     ritem.text = textOut;
                     ritem.font_size = item.style.font_size;
                     ritem.isBold = false;
+                    ritem.textcolor = {item.style.background_color.r,
+                                      item.style.background_color.g,
+                                      item.style.background_color.b,
+                                      255};
 
                     if (line->lineH < item.style.font_size)
                         line->lineHResize(item.style.font_size);
                     if (line->lineTextBaselineH < item.style.font_size)
                         line->lineTextBaselineHResize(item.style.font_size);
                     line->lineW += xP-line->lineW;
-
-                    activeDocBox->nextLineYOff += line->lineH;
-                    activeDocBox->renderlines.push_back(new RRenderLine());
-                    activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-                    activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
-                    line = activeDocBox->renderlines.back();
-                    xP = line->lineX + line->lineW;
+                    if (xP > (activeDocBox->x + activeDocBox->w))
+                    {
+                        activeDocBox->nextLineYOff += line->lineH;
+                        activeDocBox->renderlines.push_back(new RRenderLine());
+                        activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+                        activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+                        line = activeDocBox->renderlines.back();
+                        xP = line->lineX + line->lineW;
+                    }
                     textOut.clear();
                     items->push_back(ritem);
                 }
