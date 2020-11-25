@@ -7,9 +7,11 @@ HTMLRenderer::HTMLRenderer()
 
 void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *activeDocBox, RenderDOMItem &item, fte::freetypeInst *freetypeeasy)
 {
-    if (activeDocBox->activeRenderLineItemsCombo == 0)
+    if (activeDocBox->renderlines.size() == 0)
     {
-        activeDocBox->newRenderLineAndMakeActive(activeDocBox->x, activeDocBox->y);
+        activeDocBox->renderlines.push_back(new RRenderLine());
+        activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+        activeDocBox->renderlines.back()->lineY = activeDocBox->y;
     }
 
     if (item.type == RENDERDOM_ELEMENT)
@@ -24,64 +26,52 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
         if (item.style.display != CSS_DISPLAY_NONE)
         {
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            std::wstring wide = converter.from_bytes(item.text);
+            std::wstring wText = converter.from_bytes(item.text);
             std::cout << item.text;
 
-            std::wstring textToDisplay;
-            int currentX = activeDocBox->activeRenderLineItemsCombo->renderLine.lineW +
-                    activeDocBox->activeRenderLineItemsCombo->renderLine.lineX;
-            item.style.font_size*=4;
+            RRenderLine *line = activeDocBox->renderlines.back();
+            int xP = line->lineX + line->lineW;
 
-            for (int i = 0; i < wide.size(); i++)
+            std::wstring textOut;
+
+            for (int i = 0; i < wText.size(); i++)
             {
-                auto chrret = fte::getCharacterBounds(freetypeeasy, wide[i]);
-                currentX += chrret.advanceX/64;
-                textToDisplay += wide[i];
-                if (currentX > activeDocBox->w || i == wide.size()-1)
+                auto chrret = fte::getCharacterBounds(freetypeeasy, wText[i]);
+                xP += chrret.advanceX/64;
+                textOut += wText[i];
+                if (xP > (activeDocBox->x + activeDocBox->w) || i == wText.size()-1)
                 {
-                    RItem ritem;
-                    ritem.isBold = false;
+                    RItem ritem(RITEM_TEXT,
+                               line,
+                               RITEM_POS_BASELINE_RELATIVE,
+                               line->lineW,
+                               -item.style.font_size);
+                    ritem.text = textOut;
                     ritem.font_size = item.style.font_size;
-                    ritem.textcolor.a = 255;
-                    ritem.textcolor.r = 0;
-                    ritem.textcolor.g = 0;
-                    ritem.textcolor.b = 0;
-                    ritem.pos = RITEM_POS_BASELINE_RELATIVE;
+                    ritem.isBold = false;
 
-                    RInternalRenderLine *acrl = &activeDocBox->activeRenderLineItemsCombo->renderLine;
-                    ritem.type = RITEM_TEXT;
-                    ritem.renderline = &activeDocBox->activeRenderLineItemsCombo->renderLine;
-                    if (acrl->lineH < item.style.font_size)
-                        acrl->lineH = item.style.font_size;
-                    if (acrl->lineTextBaselineH < item.style.font_size)
-                        acrl->lineTextBaselineH = item.style.font_size;
+                    if (line->lineH < item.style.font_size)
+                        line->lineHResize(item.style.font_size);
+                    if (line->lineTextBaselineH < item.style.font_size)
+                        line->lineTextBaselineHResize(item.style.font_size);
+                    line->lineW += xP-line->lineW;
 
-                    ritem.x = activeDocBox->activeRenderLineItemsCombo->renderLine.lineW;
-                    acrl->lineW = currentX-activeDocBox->activeRenderLineItemsCombo->renderLine.lineX;
-
-                    ritem.y = 0;
-
-                    ritem.text = textToDisplay;
+                    activeDocBox->nextLineYOff += line->lineH;
+                    activeDocBox->renderlines.push_back(new RRenderLine());
+                    activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+                    activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+                    line = activeDocBox->renderlines.back();
+                    xP = line->lineX + line->lineW;
+                    textOut.clear();
                     items->push_back(ritem);
-                    if (currentX > activeDocBox->w)
-                    {
-                        activeDocBox->newRenderLineAndMakeActive(activeDocBox->x,
-                                                                 activeDocBox->activeRenderLineItemsCombo->renderLine.lineY +
-                                                                 activeDocBox->activeRenderLineItemsCombo->renderLine.lineH);
-                        currentX = activeDocBox->activeRenderLineItemsCombo->renderLine.lineW +
-                                activeDocBox->activeRenderLineItemsCombo->renderLine.lineX;
-                    }
-                    textToDisplay.clear();
                 }
-
             }
-            item.style.font_size/=4;
         }
     }
     else
     {
         // Unknown
-        std::cerr << "Unknown RenderDOMItem type!" << std::endl;
+        //std::cerr << "Unknown RenderDOMItem type!" << std::endl;
     }
 }
 
@@ -104,7 +94,7 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
                     int itY;
                     calcItemXY(items[i], itX, itY);
 
-                    auto inf = fte::drawCharacter(freetypeeasy, items[i].text[j], itX + x, itY-items[i].font_size, fb, w, h, false);// Draw character, saving info about it
+                    auto inf = fte::drawCharacter(freetypeeasy, items[i].text[j], itX + x, itY+items[i].font_size, fb, w, h, false);// Draw character, saving info about it
                     x += inf.advanceX/64;// Advance x position for next character
                 }
             }
@@ -122,7 +112,7 @@ void HTMLRenderer::calcItemXY(const RItem &item, int &resX, int &resY)
     else if (item.pos == RITEM_POS_BASELINE_RELATIVE)
     {
         resX = item.renderline->lineX + item.x;
-        resY = item.renderline->lineY + item.y;
+        resY = item.renderline->lineY + item.renderline->lineTextBaselineH + item.y;
     }
     else
     {

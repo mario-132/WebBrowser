@@ -20,21 +20,49 @@ enum RItemPos
     RITEM_POS_BASELINE_RELATIVE     // Position is relative to the lineX and baselineh in renderline.
 };
 
-struct RInternalRenderLine
+class RRenderLine
 {
-    int lineX;
-    int lineY;
-    int lineW;
-    int lineH;
+public:
+    int lineX = 0;
+    int lineY = 0;
+    int lineW = 0;
+    int lineH = 0;
 
-    int lineTextBaselineH;
+    int lineTextBaselineH = 0;
+
+    void lineHResize(int newH)
+    {
+        lineH = newH;
+    }
+
+    void lineTextBaselineHResize(int newtbl)
+    {
+        lineTextBaselineH = newtbl;
+        if (lineTextBaselineH > lineH)
+            lineH = lineTextBaselineH;
+    }
+
+    //bool isFull = 0;
 };
 
-struct RItem
+class RItem
 {
+public:
+    RItem(RItemType type, RRenderLine *renderline, RItemPos pos, int x, int y)
+    {
+        this->type = type;
+        this->renderline = renderline;
+        this->pos = pos;
+        this->x = x;
+        this->y = y;
+
+        font_size = 16;
+        isBold = false;
+        textcolor = {0, 0, 0, 255};
+    }
     RItemType type;
 
-    RInternalRenderLine *renderline;
+    RRenderLine *renderline;
     std::wstring text;
     int font_size;// font size in px
     bool isBold;
@@ -43,41 +71,28 @@ struct RItem
     RItemPos pos;
     int x;
     int y;
-    int w;
-    int h;
-};
-
-struct RRenderLineItemsCombo
-{
-    RInternalRenderLine renderLine;
-    std::vector<RItem*> renderItemPointers;
+    //int w;
+    //int h;
 };
 
 class RDocumentBox
 {
 public:
+    RDocumentBox(int x, int y, int w, int h)
+    {
+        this->x = x;
+        this->y = y;
+        this->w = w;
+        this->h = h;
+        nextLineYOff = 0;
+    }
     int x;
     int y;
     int w;
+    int h;
 
-    std::vector<RRenderLineItemsCombo> renderLinesCombos;
-    RRenderLineItemsCombo *activeRenderLineItemsCombo = 0;
-    void newRenderLineAndMakeActive(int x, int y)
-    {
-        RRenderLineItemsCombo rline;
-
-        rline.renderLine.lineX = x;
-        rline.renderLine.lineY = y;
-        rline.renderLine.lineW = 0;
-        rline.renderLine.lineH = 0;
-        rline.renderLine.lineTextBaselineH = 0;
-
-        renderLinesCombos.push_back(rline);
-        activeRenderLineItemsCombo = &renderLinesCombos.back();
-    }
-    std::vector<RItem*> renderItemPointers;
-
-    std::vector<RDocumentBox> childDocBoxes;
+    std::vector<RRenderLine*> renderlines;
+    int nextLineYOff;
 };
 
 class HTMLRenderer

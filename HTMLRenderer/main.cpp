@@ -233,8 +233,6 @@ public:
         def.font_size = 16;
         item = dom.parseGumboTree(output->root, &css, def);
 
-
-
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
         {
             Debugger::setTextBoxText("css_textview", tcss);
@@ -243,11 +241,7 @@ public:
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
         std::vector<RItem> renderItems;
-        RDocumentBox docbox;
-        docbox.x = 0;
-        docbox.y = 0;
-        docbox.w = window.width;
-        //docbox.h = 600;
+        RDocumentBox docbox(20, 20, window.width-40, window.height-40);
         htmlRenderer.assembleRenderList(&renderItems, &docbox, item, inst);
 
         htmlRenderer.renderRenderList(renderItems, inst, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
