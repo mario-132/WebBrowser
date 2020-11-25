@@ -897,13 +897,13 @@ css_error ua_default_for_property(void *pw, uint32_t property, css_hint *hint)
 css_error compute_font_size(void *pw, const css_hint *parent, css_hint *size)
 {
     css_hint_length sizes[] = {
-        { FLTTOFIX(6.75), CSS_UNIT_PT },
-        { FLTTOFIX(7.50), CSS_UNIT_PT },
-        { FLTTOFIX(9.75), CSS_UNIT_PT },
-        { FLTTOFIX(12.0), CSS_UNIT_PT },
-        { FLTTOFIX(13.5), CSS_UNIT_PT },
-        { FLTTOFIX(18.0), CSS_UNIT_PT },
-        { FLTTOFIX(24.0), CSS_UNIT_PT }
+        { FLTTOFIX(6.75*2), CSS_UNIT_PT },
+        { FLTTOFIX(7.50*2), CSS_UNIT_PT },
+        { FLTTOFIX(9.75*2), CSS_UNIT_PT },
+        { FLTTOFIX(12.0*2), CSS_UNIT_PT },
+        { FLTTOFIX(13.5*2), CSS_UNIT_PT },
+        { FLTTOFIX(18.0*2), CSS_UNIT_PT },
+        { FLTTOFIX(24.0*2), CSS_UNIT_PT }
     };
     const css_hint_length *parent_size;
 

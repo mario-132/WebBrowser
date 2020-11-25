@@ -230,7 +230,7 @@ public:
         def.display = CSS_DISPLAY_BLOCK;
 
         def.font_size_type = RENDERDOM_VALUE;
-        def.font_size = 16;
+        def.font_size = 32;
         item = dom.parseGumboTree(output->root, &css, def);
 
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
