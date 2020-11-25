@@ -574,9 +574,31 @@ css_error named_sibling_node(void *pw, void *n,
                              void **sibling)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(qname);
     *sibling = NULL;
+    GumboNode *node = (GumboNode*)n;
+    GumboNode *p = node->parent;
+    if (p != 0 && p->type == GUMBO_NODE_ELEMENT)
+    {
+        for (int i = 0; i < p->v.element.children.length; i++)
+        {
+            if (((GumboNode**)p->v.element.children.data)[i] == node)
+            {
+                if (i > 0 && CSS::iequals(CSS::gumboTagToString((((GumboNode**)p->v.element.children.data)[i-1])->v.element.tag), lwc_string_data(qname->name)))
+                {
+                    *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
+                }
+                break;
+            }
+        }
+    }
+    if (*sibling != 0)
+    {
+        std::cout << "Got named sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << lwc_string_data(qname->name) << std::endl;
+    }
+    else
+    {
+        std::cout << "Got named sibling: none expected: " << lwc_string_data(qname->name) << std::endl;
+    }
     return CSS_OK;
 }
 
@@ -600,9 +622,32 @@ css_error parent_node(void *pw, void *n, void **parent)
 
 css_error sibling_node(void *pw, void *n, void **sibling)
 {
-    UNUSED(pw);
-    UNUSED(n);
+    UNUSED(pw);/// Todo: make this better?
     *sibling = NULL;
+    GumboNode *node = (GumboNode*)n;
+    GumboNode *p = node->parent;
+    if (p != 0 && p->type == GUMBO_NODE_ELEMENT)
+    {
+        for (int i = 0; i < p->v.element.children.length; i++)
+        {
+            if (((GumboNode**)p->v.element.children.data)[i] == node)
+            {
+                if (i > 0)
+                {
+                    *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
+                }
+                break;
+            }
+        }
+    }
+    if (*sibling != 0)
+    {
+        std::cout << "Got sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << std::endl;
+    }
+    else
+    {
+        std::cout << "Got sibling: none" << std::endl;
+    }
     return CSS_OK;
 }
 
