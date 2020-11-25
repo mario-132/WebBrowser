@@ -35,7 +35,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
         {
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::wstring wText = converter.from_bytes(item.text);
-            std::cout << item.text;
+            //std::cout << item.text;
 
             RRenderLine *line = activeDocBox->renderlines.back();
             int xP = line->lineX + line->lineW;
@@ -60,10 +60,10 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                     ritem.text = textOut;
                     ritem.font_size = item.style.font_size;
                     ritem.isBold = false;
-                    ritem.textcolor = {item.style.background_color.r,
-                                      item.style.background_color.g,
-                                      item.style.background_color.b,
-                                      255};
+                    ritem.textcolor = {item.style.color.r,
+                                      item.style.color.g,
+                                      item.style.color.b,
+                                      item.style.color.a};
 
                     if (line->lineH < item.style.font_size)
                         line->lineHResize(item.style.font_size);
