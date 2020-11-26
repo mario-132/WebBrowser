@@ -629,18 +629,21 @@ css_error sibling_node(void *pw, void *n, void **sibling)
     *sibling = NULL;
     GumboNode *node = (GumboNode*)n;
     GumboNode *p = node->parent;
+    GumboNode *prevElem = 0;
     if (p != 0 && p->type == GUMBO_NODE_ELEMENT)
     {
         for (int i = 0; i < p->v.element.children.length; i++)
         {
             if (((GumboNode**)p->v.element.children.data)[i] == node)
             {
-                if (i > 0)
+                if (i > 0 && prevElem != 0)
                 {
                     *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
                 }
                 break;
             }
+            if (((GumboNode**)p->v.element.children.data)[i]->type == GUMBO_NODE_ELEMENT)
+                prevElem = ((GumboNode**)p->v.element.children.data)[i];
         }
     }
     if (*sibling != 0)
@@ -649,7 +652,7 @@ css_error sibling_node(void *pw, void *n, void **sibling)
     }
     else
     {
-        std::cout << "Got sibling: none" << std::endl;
+        std::cout << "Got sibling: " << "0" << std::endl;
     }
     return CSS_OK;
 }
