@@ -492,17 +492,41 @@ css_error node_classes(void *pw, void *n,
                        lwc_string ***classes, uint32_t *n_classes)
 {
     UNUSED(pw);
-    UNUSED(n);
     *classes = NULL;
     *n_classes = 0;
+    GumboNode *node = (GumboNode*)n;
+    std::string classS;
+    for (int i = 0; i < node->v.element.attributes.length; i++)
+    {
+        if (std::string("class") == ((GumboAttribute*)node->v.element.attributes.data[i])->name)
+        {
+            classS = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
+            //int Si = 0;
+            //while (Si < classS.size())
+            //{
+            //
+            //}
+        }
+    }
+    std::cout << "Gotten node classes: " << classS << " from: " << CSS::gumboTagToString(node->v.element.tag) << std::endl;
     return CSS_OK;
 }
 
 css_error node_id(void *pw, void *n, lwc_string **id)
 {
     UNUSED(pw);
-    UNUSED(n);
     *id = NULL;
+    GumboNode *node = (GumboNode*)n;
+    std::string idS;
+    for (int i = 0; i < node->v.element.attributes.length; i++)
+    {
+        if (std::string("id") == ((GumboAttribute*)node->v.element.attributes.data[i])->name)
+        {
+            idS = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
+            lwc_intern_string(idS.c_str(), idS.length(), id);
+        }
+    }
+    std::cout << "Gotten node id: " << idS << " from: " << CSS::gumboTagToString(node->v.element.tag) << std::endl;
     return CSS_OK;
 }
 

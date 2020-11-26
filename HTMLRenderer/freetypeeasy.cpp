@@ -91,6 +91,7 @@ namespace freetypeeasy
                   0 );  /* load flags, see below */
 
         glyphInfo glInf;
+
         glInf.width = (inst->bold?inst->faceB:inst->face)->glyph->bitmap.width;
         glInf.height = (inst->bold?inst->faceB:inst->face)->glyph->bitmap.rows;
         glInf.bearingX = (inst->bold?inst->faceB:inst->face)->glyph->bitmap_left;
@@ -176,10 +177,12 @@ namespace freetypeeasy
             }
             else
             {
-                std::cout << "glyph is not a bitmap!" << std::endl;
+                std::cerr << "glyph is not a bitmap!" << std::endl;
                 glyphInfo glInf;
                 glInf.width = 0;
                 glInf.height = 0;
+
+                inst->glyphCache[inst->bold][inst->fontsize][character].info = glInf;
                 return glInf;
             }
             glyphInfo glInf;

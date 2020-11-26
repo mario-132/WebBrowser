@@ -24,9 +24,25 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
             activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
             activeDocBox->renderlines.back()->lineH = item.style.font_size;
         }
+        if (item.style.display == CSS_DISPLAY_BLOCK)
+        {
+            activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
+            activeDocBox->renderlines.push_back(new RRenderLine());
+            activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+            activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+            activeDocBox->renderlines.back()->lineH = 0;//item.style.font_size;
+        }
         for (int i = 0; i < item.children.size(); i++)
         {
             assembleRenderList(items, activeDocBox, item.children[i], freetypeeasy);
+        }
+        if (item.style.display == CSS_DISPLAY_BLOCK)
+        {
+            activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
+            activeDocBox->renderlines.push_back(new RRenderLine());
+            activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+            activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+            activeDocBox->renderlines.back()->lineH = 0;//item.style.font_size;
         }
     }
     else if (item.type == RENDERDOM_TEXT)
