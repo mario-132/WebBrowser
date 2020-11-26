@@ -563,9 +563,34 @@ css_error named_generic_sibling_node(void *pw, void *n,
                                      void **sibling)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(qname);
     *sibling = NULL;
+    GumboNode *node = (GumboNode*)n;
+    GumboNode *p = node->parent;
+    if (p != 0 && p->type == GUMBO_NODE_ELEMENT)
+    {
+        for (int i = 0; i < p->v.element.children.length; i++)
+        {
+            if (((GumboNode**)p->v.element.children.data)[i] == node)
+            {
+                break;
+            }
+            if (((GumboNode**)p->v.element.children.data)[i]->type == GUMBO_NODE_ELEMENT)
+            {
+                if (CSS::iequals(CSS::gumboTagToString(((GumboNode**)p->v.element.children.data)[i]->v.element.tag), lwc_string_data(qname->name)))
+                {
+                    *sibling = ((GumboNode**)p->v.element.children.data)[i];
+                }
+            }
+        }
+    }
+    if (*sibling != 0)
+    {
+        std::cout << "Got named generic sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << lwc_string_data(qname->name) << std::endl;
+    }
+    else
+    {
+        std::cout << "Got named generic sibling: " << "0" << " expected: " << lwc_string_data(qname->name) << std::endl;
+    }
     return CSS_OK;
 }
 
