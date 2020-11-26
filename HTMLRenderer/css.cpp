@@ -577,18 +577,21 @@ css_error named_sibling_node(void *pw, void *n,
     *sibling = NULL;
     GumboNode *node = (GumboNode*)n;
     GumboNode *p = node->parent;
+    GumboNode *prevElem = 0;
     if (p != 0 && p->type == GUMBO_NODE_ELEMENT)
     {
         for (int i = 0; i < p->v.element.children.length; i++)
         {
             if (((GumboNode**)p->v.element.children.data)[i] == node)
             {
-                if (i > 0 && CSS::iequals(CSS::gumboTagToString((((GumboNode**)p->v.element.children.data)[i-1])->v.element.tag), lwc_string_data(qname->name)))
+                if (i > 0 && prevElem != 0 && CSS::iequals(CSS::gumboTagToString(prevElem->v.element.tag), lwc_string_data(qname->name)))
                 {
                     *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
                 }
                 break;
             }
+            if (((GumboNode**)p->v.element.children.data)[i]->type == GUMBO_NODE_ELEMENT)
+                prevElem = ((GumboNode**)p->v.element.children.data)[i];
         }
     }
     if (*sibling != 0)
@@ -597,7 +600,7 @@ css_error named_sibling_node(void *pw, void *n,
     }
     else
     {
-        std::cout << "Got named sibling: none expected: " << lwc_string_data(qname->name) << std::endl;
+        std::cout << "Got named sibling: " << "0" << " expected: " << lwc_string_data(qname->name) << std::endl;
     }
     return CSS_OK;
 }
