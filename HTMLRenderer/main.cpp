@@ -199,7 +199,7 @@ public:
 
         getTitleFromDOM(output->root, pageTitle, false);
 
-        std::string tcss = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
+        std::string tcss = htmlFileLoader("/home/tim/Documents/GitProjects/WebBrowser/HTMLRenderer/data/default.css");
         std::vector<std::string> stylesheetPaths;
         getStyleFromDOM(output->root, tcss, stylesheetPaths);
         for (unsigned int i = 0; i < stylesheetPaths.size(); i++)

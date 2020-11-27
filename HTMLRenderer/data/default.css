@@ -1,0 +1,55 @@
+html {
+    display: block;
+    background-color: #000000;
+    color: black;
+    width: auto;
+    height: auto;
+    font-size: 32px;
+}
+
+head, style, meta, title, script {
+    display: none;
+}
+
+body, section, div, table {
+    display: block;
+}
+
+a {
+    color: blue;
+}
+
+h1 {
+    display: block;
+    font-size: 2em;
+    font-weight: bold
+}
+
+h2 {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold
+}
+
+h3 {
+    display: block;
+    font-size: 1.17em;
+    font-weight: bold
+}
+
+h4 {
+    display: block;
+    font-weight: bold
+}
+
+h5 {
+    display: block;
+    font-size: .83em;
+    font-weight: bold
+}
+
+h6 {
+    display: block;
+    font-size: .67em;
+    font-weight: bold
+}
