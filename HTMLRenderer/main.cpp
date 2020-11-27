@@ -199,7 +199,7 @@ public:
 
         getTitleFromDOM(output->root, pageTitle, false);
 
-        std::string tcss = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default2.css");
+        std::string tcss = htmlFileLoader("/home/tim/Documents/Development/WebBrowserData/HTML/default.css");
         std::vector<std::string> stylesheetPaths;
         getStyleFromDOM(output->root, tcss, stylesheetPaths);
         for (unsigned int i = 0; i < stylesheetPaths.size(); i++)
@@ -230,7 +230,7 @@ public:
         def.display = CSS_DISPLAY_BLOCK;
 
         def.font_size_type = RENDERDOM_VALUE;
-        def.font_size = 32;
+        def.font_size = 16;
         item = dom.parseGumboTree(output->root, &css, def);
 
         //if (Debugger::getCheckboxEnabled("debug_log_css"))
@@ -269,8 +269,9 @@ int main()
 
     Debugger::setSpinnerEnabled("loadingSpinner", true);
     Debugger::loop();
-    std::string currentWebPage = "https://htmlyoutube.lightboxengine.com";
+    //std::string currentWebPage = "https://htmlyoutube.lightboxengine.com";
     //std::string currentWebPage = "http://lightboxengine.com/basiccss.html";
+    std::string currentWebPage = "https://www.w3schools.com/w3css/w3css_colors.asp";
 
     std::string html = WebService::htmlFileDownloader(currentWebPage);
     //WebPage webpage;
@@ -290,6 +291,7 @@ int main()
             scrpos = 0;
             window.scrollPos = 0;
         }
+        webpage->htmlRenderer.yScroll = scrpos;
         //int memsetPos = scrpos;
         memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
 

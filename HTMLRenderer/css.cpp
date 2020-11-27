@@ -1,5 +1,6 @@
 #include "css.h"
 #include <iostream>
+#include <vector>
 
 CSS::CSS()
 {
@@ -501,11 +502,41 @@ css_error node_classes(void *pw, void *n,
         if (std::string("class") == ((GumboAttribute*)node->v.element.attributes.data[i])->name)
         {
             classS = ((GumboAttribute*)node->v.element.attributes.data[i])->value;
-            //int Si = 0;
-            //while (Si < classS.size())
-            //{
-            //
-            //}
+            std::vector<std::string> classesStr;
+            int Si = 0;
+            while (Si < classS.size())
+            {
+                if (classesStr.size() == 0)
+                    classesStr.push_back("");
+
+                if (classS[Si] == ' ' || classS[Si] == '\t')
+                {
+                    classesStr.push_back("");
+                }
+                else
+                {
+                    classesStr.back().push_back(classS[Si]);
+                }
+                Si++;
+            }
+            for (int j = 0; j < classesStr.size();)
+            {
+                if (classesStr[j].size() == 0)
+                {
+                    classesStr.erase(classesStr.begin()+j);
+                }
+                else
+                {
+                    j++;
+                }
+            }
+            std::cout << "Got node classes: " << classS << " Size: " << classesStr.size() << "/" << classesStr[0] << std::endl;
+            *classes = new lwc_string*[classesStr.size()];
+            *n_classes = classesStr.size();
+            for (int j = 0; j < classesStr.size(); j++)
+            {
+                lwc_intern_string(classesStr[j].c_str(), classesStr[j].size(), &(*classes)[j]);
+            }
         }
     }
     std::cout << "Gotten node classes: " << classS << " from: " << CSS::gumboTagToString(node->v.element.tag) << std::endl;
@@ -736,6 +767,7 @@ css_error node_has_class(void *pw, void *n,
     UNUSED(n);
     UNUSED(name);
     *match = false;
+    std::cout << "Has class: " << lwc_string_data(name) << ": " << *match << std::endl;
     return CSS_OK;
 }
 
@@ -747,6 +779,7 @@ css_error node_has_id(void *pw, void *n,
     UNUSED(n);
     UNUSED(name);
     *match = false;
+    std::cout << "Has class: " << lwc_string_data(name) << ": " << *match << std::endl;
     return CSS_OK;
 }
 

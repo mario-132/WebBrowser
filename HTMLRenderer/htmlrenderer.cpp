@@ -127,7 +127,7 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
                     int itY;
                     calcItemXY(items[i], itX, itY);
 
-                    auto inf = fte::drawCharacter(freetypeeasy, items[i].text[j], itX + x, itY+items[i].font_size, fb, w, h, false);// Draw character, saving info about it
+                    auto inf = fte::drawCharacter(freetypeeasy, items[i].text[j], itX + x, itY+items[i].font_size+yScroll, fb, w, h, false);// Draw character, saving info about it
                     x += inf.advanceX/64;// Advance x position for next character
                 }
             }
