@@ -11,7 +11,7 @@ head, style, meta, title, script {
     display: none;
 }
 
-body, section, div, table {
+body, section, div, table, p {
     display: block;
 }
 

@@ -14,18 +14,18 @@ void CSS::init(GumboNode *root, std::string css)
     select_handler = {
         CSS_SELECT_HANDLER_VERSION_1,
 
-        node_name,
-        node_classes,
-        node_id,
-        named_ancestor_node,
-        named_parent_node,
-        named_sibling_node,
-        named_generic_sibling_node,
-        parent_node,
-        sibling_node,
-        node_has_name,
-        node_has_class,
-        node_has_id,
+        node_name,//
+        node_classes,//
+        node_id,//
+        named_ancestor_node,//
+        named_parent_node,//
+        named_sibling_node,//
+        named_generic_sibling_node,//
+        parent_node,//
+        sibling_node,//
+        node_has_name,//
+        node_has_class,//
+        node_has_id,//
         node_has_attribute,
         node_has_attribute_equal,
         node_has_attribute_dashmatch,
@@ -33,7 +33,7 @@ void CSS::init(GumboNode *root, std::string css)
         node_has_attribute_prefix,
         node_has_attribute_suffix,
         node_has_attribute_substring,
-        node_is_root,
+        node_is_root,//
         node_count_siblings,
         node_is_empty,
         node_is_link,
@@ -54,7 +54,7 @@ void CSS::init(GumboNode *root, std::string css)
     };
 
     css_error code;
-    css_stylesheet *sheet;
+
     size_t size;
 
     uint32_t count;
@@ -64,7 +64,7 @@ void CSS::init(GumboNode *root, std::string css)
     };
 
     params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
-    params.level = CSS_LEVEL_21;
+    params.level = CSS_LEVEL_3;
     params.charset = "UTF-8";
     params.url = "foo";
     params.title = "bar";
@@ -428,6 +428,10 @@ std::string CSS::gumboTagToString(GumboTag tag)
     {
         name = "pre";
     }
+    else if (tag == GUMBO_TAG_TITLE)
+    {
+        name = "title";
+    }
     else
     {
         name = "unknown";
@@ -566,23 +570,23 @@ css_error named_ancestor_node(void *pw, void *n,
 {
     UNUSED(pw);
     GumboNode *node = (GumboNode*)n;
-    GumboNode *p = node;
+    GumboNode *p = node->parent;
     *ancestor = NULL;
     while (p != 0 && p->type != GUMBO_NODE_DOCUMENT)
     {
-        p = p->parent;
-        if (CSS::iequals(CSS::gumboTagToString(p->v.element.tag), lwc_string_data(qname->name)))
+        if (CSS::iequals(CSS::gumboTagToString(p->v.element.tag), std::string(lwc_string_data(qname->name), lwc_string_length(qname->name))))
         {
             *ancestor = p;
             break;
         }
+        p = p->parent;
     }
     std::string ans;
     if (p != 0)
         ans = CSS::gumboTagToString(p->v.element.tag);
     else
         ans = "0";
-    std::cout << "got named ancestor: |" << ans << "| expected: |" << lwc_string_data(qname->name) << "| ancestor=" << *ancestor << std::endl;
+    std::cout << "got named ancestor: " << ans << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << " ancestor=" << *ancestor << std::endl;
     return CSS_OK;
 }
 
@@ -596,10 +600,10 @@ css_error named_parent_node(void *pw, void *n,
     *parent = NULL;
     if (p->type == GUMBO_NODE_DOCUMENT || p == 0)
     {
-        std::cout << "got named parent: 0 expected: " << lwc_string_data(qname->name) << std::endl;
+        std::cout << "got named parent: 0 expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
         return CSS_OK;
     }
-    if (CSS::iequals(CSS::gumboTagToString(p->v.element.tag), lwc_string_data(qname->name)))
+    if (CSS::iequals(CSS::gumboTagToString(p->v.element.tag), std::string(lwc_string_data(qname->name), lwc_string_length(qname->name))))
     {
         *parent = p;
     }
@@ -608,7 +612,7 @@ css_error named_parent_node(void *pw, void *n,
         ans = CSS::gumboTagToString(p->v.element.tag);
     else
         ans = "0";
-    std::cout << "got named parent: " << ans << " expected: " << lwc_string_data(qname->name) << std::endl;
+    std::cout << "got named parent: " << ans << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     return CSS_OK;
 }
 
@@ -630,7 +634,7 @@ css_error named_generic_sibling_node(void *pw, void *n,
             }
             if (((GumboNode**)p->v.element.children.data)[i]->type == GUMBO_NODE_ELEMENT)
             {
-                if (CSS::iequals(CSS::gumboTagToString(((GumboNode**)p->v.element.children.data)[i]->v.element.tag), lwc_string_data(qname->name)))
+                if (CSS::iequals(CSS::gumboTagToString(((GumboNode**)p->v.element.children.data)[i]->v.element.tag), std::string(lwc_string_data(qname->name), lwc_string_length(qname->name))))
                 {
                     *sibling = ((GumboNode**)p->v.element.children.data)[i];
                 }
@@ -639,11 +643,11 @@ css_error named_generic_sibling_node(void *pw, void *n,
     }
     if (*sibling != 0)
     {
-        std::cout << "Got named generic sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << lwc_string_data(qname->name) << std::endl;
+        std::cout << "Got named generic sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     }
     else
     {
-        std::cout << "Got named generic sibling: " << "0" << " expected: " << lwc_string_data(qname->name) << std::endl;
+        std::cout << "Got named generic sibling: " << "0" << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     }
     return CSS_OK;
 }
@@ -663,7 +667,7 @@ css_error named_sibling_node(void *pw, void *n,
         {
             if (((GumboNode**)p->v.element.children.data)[i] == node)
             {
-                if (i > 0 && prevElem != 0 && CSS::iequals(CSS::gumboTagToString(prevElem->v.element.tag), lwc_string_data(qname->name)))
+                if (i > 0 && prevElem != 0 && CSS::iequals(CSS::gumboTagToString(prevElem->v.element.tag), std::string(lwc_string_data(qname->name), lwc_string_length(qname->name))))
                 {
                     *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
                 }
@@ -675,11 +679,11 @@ css_error named_sibling_node(void *pw, void *n,
     }
     if (*sibling != 0)
     {
-        std::cout << "Got named sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << lwc_string_data(qname->name) << std::endl;
+        std::cout << "Got named sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     }
     else
     {
-        std::cout << "Got named sibling: " << "0" << " expected: " << lwc_string_data(qname->name) << std::endl;
+        std::cout << "Got named sibling: " << "0" << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     }
     return CSS_OK;
 }
@@ -753,7 +757,8 @@ css_error node_has_name(void *pw, void *n,
     lwc_intern_string(name.c_str(), name.size(), &str);
 
     lwc_string_caseless_isequal(str, qname->name, match);
-    std::cout << "is equal: " << lwc_string_data(str) << "/" << lwc_string_data(qname->name) << ":" << &match << std::endl;
+    std::cout << "is equal: " << std::string(lwc_string_data(str), lwc_string_length(str)) << "/" << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << ":" << &match << std::endl;
+    lwc_string_destroy(str);
 
     return CSS_OK;
 }
@@ -763,8 +768,6 @@ css_error node_has_class(void *pw, void *n,
                          bool *match)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(name);
     *match = false;
     GumboNode *node = (GumboNode*)n;
     std::string classS;
@@ -800,7 +803,7 @@ css_error node_has_class(void *pw, void *n,
             }
         }
     }
-    std::cout << "Has (" << CSS::gumboTagToString(node->v.element.tag) << ") class: " << lwc_string_data(name) << ": " << *match << std::endl;
+    std::cout << "Has (" << CSS::gumboTagToString(node->v.element.tag) << ") class: " << std::string(lwc_string_data(name), lwc_string_length(name)) << ": " << *match << std::endl;
     return CSS_OK;
 }
 
@@ -815,14 +818,14 @@ css_error node_has_id(void *pw, void *n,
     {
         if (std::string("id") == ((GumboAttribute*)node->v.element.attributes.data[i])->name)
         {
-            if (std::string(lwc_string_data(name)) == ((GumboAttribute*)node->v.element.attributes.data[i])->value)
+            if (std::string(lwc_string_data(name), lwc_string_length(name)) == ((GumboAttribute*)node->v.element.attributes.data[i])->value)
             {
                 *match = true;
                 break;
             }
         }
     }
-    std::cout << "Has class: " << lwc_string_data(name) << ": " << *match << std::endl;
+    std::cout << "Has class: " << std::string(lwc_string_data(name), lwc_string_length(name)) << ": " << *match << std::endl;
     return CSS_OK;
 }
 
@@ -933,13 +936,14 @@ css_error node_is_root(void *pw, void *n, bool *match)
 }
 
 css_error node_count_siblings(void *pw, void *n,
-        bool same_name, bool after, int32_t *count)
+        bool same_name, bool after, int32_t *count)/// Todo: FIXX!!!
 {
     UNUSED(pw);
-    UNUSED(n);
+    GumboNode *node = (GumboNode*)n;
     UNUSED(same_name);
     UNUSED(after);
-    *count = 1;
+    *count = node->index_within_parent;
+    std::cout << "Got sibling count for " << CSS::gumboTagToString(node->v.element.tag) << ": " << *count << std::endl;
     return CSS_OK;
 }
 

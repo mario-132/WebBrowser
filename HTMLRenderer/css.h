@@ -110,6 +110,7 @@ public:
     css_media media;
     css_select_ctx *select_ctx;
     css_stylesheet_params params;
+    css_stylesheet *sheet;
 };
 
 #endif // CSS_H
