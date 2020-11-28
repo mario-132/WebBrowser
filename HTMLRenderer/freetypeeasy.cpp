@@ -100,6 +100,7 @@ namespace freetypeeasy
         glInf.advanceY = (inst->bold?inst->faceB:inst->face)->glyph->advance.y;
         glInf.btop = (inst->bold?inst->faceB:inst->face)->glyph->bitmap_top;
         glInf.bleft = (inst->bold?inst->faceB:inst->face)->glyph->bitmap_left;
+
         return glInf;
     }
 
@@ -150,8 +151,12 @@ namespace freetypeeasy
             }
 
 
-            FT_Render_Glyph((inst->bold?inst->faceB:inst->face)->glyph,   /* glyph slot  */
+            int retCode = FT_Render_Glyph((inst->bold?inst->faceB:inst->face)->glyph,   /* glyph slot  */
                         FT_RENDER_MODE_NORMAL ); /* render mode */
+            if (retCode != 0)
+            {
+                std::cerr << "Failed to render glyph! Error code: 0x" << std::hex << retCode << std::dec << " glyph font size: " << inst->fontsize << std::endl;
+            }
 
 
             if ((inst->bold?inst->faceB:inst->face)->glyph->format == FT_GLYPH_FORMAT_BITMAP)
@@ -219,6 +224,8 @@ namespace freetypeeasy
 
     void setFontSize(freetypeInst* inst, int size)
     {
+        if (size < 1)
+            return;
         inst->fontsize = size;
         if (FT_Set_Pixel_Sizes( (inst->bold?inst->faceB:inst->face),
                               0,

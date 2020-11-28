@@ -11,7 +11,7 @@ head, style, meta, title, script {
     display: none;
 }
 
-body, section, div, table, p {
+body, section, div, p {
     display: block;
 }
 
@@ -52,4 +52,12 @@ h6 {
     display: block;
     font-size: .67em;
     font-weight: bold
+}
+
+table {
+    display: block;
+}
+
+tr {
+    display: block;
 }

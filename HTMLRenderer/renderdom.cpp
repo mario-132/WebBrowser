@@ -148,11 +148,15 @@ int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt)
     else if (unit == CSS_UNIT_EM)
         pxRes = prevFnt * FIXTOFLT(fixed);
     else if (unit == CSS_UNIT_PT)
-        pxRes = (FIXTOFLT(fixed)*72.0)/96.0;// Convert to in, then to px
+        pxRes = FIXTOFLT(fixed)*1.333333;
+    else if (unit == CSS_UNIT_PC)
+        pxRes = FIXTOFLT(fixed)*16;
     else if (unit == CSS_UNIT_CM)
-        pxRes = (FIXTOFLT(fixed)/2.54)/96.0;// convert to in, then to px
+        pxRes = FIXTOFLT(fixed)*37.795276;
+    else if (unit == CSS_UNIT_MM)
+        pxRes = FIXTOFLT(fixed)*3.7795276;
     else if (unit == CSS_UNIT_IN)
-        pxRes = FIXTOFLT(fixed)/96.0;// convert to in, then to px
+        pxRes = FIXTOFLT(fixed)*96;
     else if (unit == CSS_UNIT_PCT)
         pxRes = (FIXTOFLT(fixed)/100) * prev;
     else
