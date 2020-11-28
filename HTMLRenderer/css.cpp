@@ -1143,8 +1143,9 @@ css_error set_libcss_node_data(void *pw, void *n,
     UNUSED(n);
 
     /* Since we're not storing it, ensure node data gets deleted */
-    css_libcss_node_data_handler(&CSS::select_handler, CSS_NODE_DELETED,
-            pw, n, NULL, libcss_node_data);
+    //css_libcss_node_data_handler(&CSS::select_handler, CSS_NODE_DELETED, pw, n, NULL, libcss_node_data);
+    /// This(^) causes bugs in css parsing, so I commented it. But that might cause a slight memory leak now idk.
+    /// so Todo: @mario-132 Fix the memory leak?
 
     return CSS_OK;
 }
