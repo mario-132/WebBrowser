@@ -2,14 +2,9 @@
 #include <iostream>
 #include <vector>
 
-CSS::CSS()
-{
-
-}
-
 css_select_handler CSS::select_handler;
 
-void CSS::init(GumboNode *root, std::string css)
+CSS::CSS()
 {
     select_handler = {
         CSS_SELECT_HANDLER_VERSION_1,
@@ -53,15 +48,34 @@ void CSS::init(GumboNode *root, std::string css)
         get_libcss_node_data
     };
 
-    css_error code;
-
-    size_t size;
-
-    uint32_t count;
-
     media = {
         .type = CSS_MEDIA_SCREEN,
     };
+
+    css_error code;
+    uint32_t count;
+    /* prepare a selection context containing the stylesheet */
+    code = css_select_ctx_create(&select_ctx);
+    if (code != CSS_OK)
+        die("css_select_ctx_create", code);
+    //code = css_select_ctx_append_sheet(select_ctx, sheet, CSS_ORIGIN_AUTHOR,
+    //        NULL);
+    //if (code != CSS_OK)
+    //    die("css_select_ctx_append_sheet", code);
+    code = css_select_ctx_count_sheets(select_ctx, &count);
+    if (code != CSS_OK)
+        die("css_select_ctx_count_sheets", code);
+    printf("selection context now has %i sheets\n", count);
+}
+
+
+CSSStylesheet* CSS::createStylesheet(GumboNode *root, std::string css, bool isInline)
+{
+    css_stylesheet_params params;
+    css_stylesheet *sheet;
+
+    css_error code;
+    size_t size;
 
     params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
     params.level = CSS_LEVEL_3;
@@ -69,7 +83,7 @@ void CSS::init(GumboNode *root, std::string css)
     params.url = "foo";
     params.title = "bar";
     params.allow_quirks = false;
-    params.inline_style = false;
+    params.inline_style = isInline;
     params.resolve = resolve_url;
     params.resolve_pw = NULL;
     params.import = NULL;
@@ -89,7 +103,7 @@ void CSS::init(GumboNode *root, std::string css)
     printf("created stylesheet, size %zu\n", size);
 
     /* parse some CSS source */
-    code = css_stylesheet_append_data(sheet, (const uint8_t *) css.c_str(),
+    code = css_stylesheet_append_data(sheet, (const uint8_t *)css.c_str(),
             css.size());
     if (code != CSS_OK && code != CSS_NEEDDATA)
         die("css_stylesheet_append_data", code);
@@ -101,24 +115,17 @@ void CSS::init(GumboNode *root, std::string css)
         die("css_stylesheet_size", code);
     printf("appended data, size now %zu\n", size);
 
+    CSSStylesheet* sheetptr = new CSSStylesheet();
+    sheetptr->sheet = sheet;
+    sheetptr->params = params;
+    sheetptr->sheetData = css;
 
-    /* prepare a selection context containing the stylesheet */
-    code = css_select_ctx_create(&select_ctx);
-    if (code != CSS_OK)
-        die("css_select_ctx_create", code);
-    code = css_select_ctx_append_sheet(select_ctx, sheet, CSS_ORIGIN_AUTHOR,
-            NULL);
-    if (code != CSS_OK)
-        die("css_select_ctx_append_sheet", code);
-    code = css_select_ctx_count_sheets(select_ctx, &count);
-    if (code != CSS_OK)
-        die("css_select_ctx_count_sheets", code);
-    printf("created selection context with %i sheets\n", count);
+    return sheetptr;
 }
 
 void CSS::printNode(GumboNode *node)
 {
-    std::cout << gumboTagToString(node->v.element.tag) << std::endl;
+    /*std::cout << gumboTagToString(node->v.element.tag) << std::endl;
 
     css_error code;
 
@@ -195,7 +202,7 @@ void CSS::printNode(GumboNode *node)
 
     code = css_select_results_destroy(style);
     if (code != CSS_OK)
-        die("css_computed_style_destroy", code);
+        die("css_computed_style_destroy", code);*/
 }
 
 void CSS::printunit(css_unit *unit)
@@ -224,14 +231,56 @@ void CSS::printunit(css_unit *unit)
     }
 }
 
-void CSS::selectNode(GumboNode *node, css_select_results **style)
+void CSS::addToSelector(CSSStylesheet *sheet)
 {
     css_error code;
+    uint32_t count;
 
-    code = css_select_style(select_ctx, node,
-            &media, NULL,
-            &select_handler, 0,
-            style);
+    code = css_select_ctx_append_sheet(select_ctx, sheet->sheet, CSS_ORIGIN_AUTHOR, NULL);
+    if (code != CSS_OK)
+    {
+        std::cerr << "Error css:|" << sheet->sheetData << "| ";
+        die("css_select_ctx_append_sheet", code);
+    }
+
+    code = css_select_ctx_count_sheets(select_ctx, &count);
+    if (code != CSS_OK)
+        die("css_select_ctx_count_sheets", code);
+    printf("selection context now has %i sheets\n", count);
+}
+
+void CSS::removeFromSelector(CSSStylesheet *sheet)
+{
+    css_error code;
+    uint32_t count;
+
+    code = css_select_ctx_remove_sheet(select_ctx, sheet->sheet);
+    if (code != CSS_OK)
+          die("css_select_ctx_remove_sheet", code);
+
+    code = css_select_ctx_count_sheets(select_ctx, &count);
+    if (code != CSS_OK)
+        die("css_select_ctx_count_sheets", code);
+    printf("selection context now has %i sheets\n", count);
+}
+
+void CSS::selectNode(GumboNode *node, css_select_results **style, CSSStylesheet* inlineSheet)
+{
+    css_error code;
+    if (inlineSheet != 0)
+    {
+        code = css_select_style(select_ctx, node,
+                &media, inlineSheet->sheet,
+                &select_handler, 0,
+                style);
+    }
+    else
+    {
+        code = css_select_style(select_ctx, node,
+                &media, NULL,
+                &select_handler, 0,
+                style);
+    }
     if (code != CSS_OK)
         die("css_select_style", code);
 }

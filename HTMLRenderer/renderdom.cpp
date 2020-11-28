@@ -20,8 +20,28 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
 
         item.tag = CSS::gumboTagToString(node->v.element.tag);
 
+        bool hasInlineSheet = false;
+        CSSStylesheet* inlinesheet;
+        for (unsigned int i = 0; i < node->v.element.attributes.length; i++)
+        {
+            if (std::string(((GumboAttribute*)node->v.element.attributes.data[i])->name) == "style")
+            {
+                /*std::string cssData = item.tag;
+                cssData += " { ";
+                cssData += ((GumboAttribute*)node->v.element.attributes.data[i])->value;
+                cssData += " }";*/
+                inlinesheet = css->createStylesheet(0, ((GumboAttribute*)node->v.element.attributes.data[i])->value, true);
+                //css->addToSelector(inlinesheet);
+                hasInlineSheet = true;
+                break;
+            }
+        }
+
         css_select_results *style;
-        css->selectNode(node, &style);
+        if (hasInlineSheet)
+            css->selectNode(node, &style, inlinesheet);
+        else
+            css->selectNode(node, &style, 0);
 
         // display
         item.style.display = (css_display_e)css_computed_display(style->styles[CSS_PSEUDO_ELEMENT_NONE], false);

@@ -93,24 +93,39 @@ css_error set_libcss_node_data(void *pw, void *n,
 css_error get_libcss_node_data(void *pw, void *n,
         void **libcss_node_data);
 
+struct CSSStylesheet
+{
+    css_stylesheet *sheet;
+    css_stylesheet_params params;
+    std::string sheetData;
+};
+
+/*struct CSSSelectionContext
+{
+    CSSSelectionContext(const CSSSelectionContext&) = delete;
+};*/
+
 class CSS
 {
 public:
     CSS();
 
-    void init(GumboNode* root, std::string css);
+    CSSStylesheet* createStylesheet(GumboNode* root, std::string css, bool isInline);
     void printNode(GumboNode* node);
     void printunit(css_unit *unit);
-    void selectNode(GumboNode* node, css_select_results **style);
+
+    void addToSelector(CSSStylesheet* sheet);
+    void removeFromSelector(CSSStylesheet* sheet);
+
+    void selectNode(GumboNode* node, css_select_results **style, CSSStylesheet* inlineSheet);
     static std::string gumboTagToString(GumboTag tag);
+
 
     static css_select_handler select_handler;
     static bool iequals(const std::string& a, const std::string& b);
 
-    css_media media;
     css_select_ctx *select_ctx;
-    css_stylesheet_params params;
-    css_stylesheet *sheet;
+    css_media media;
 };
 
 #endif // CSS_H

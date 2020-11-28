@@ -209,7 +209,8 @@ public:
             std::cout << "Downloaded stylesheet: " << newsrc << std::endl;
         }
 
-        css.init(output->root, tcss);
+        CSSStylesheet* styleSheet = css.createStylesheet(output->root, tcss, false);
+        css.addToSelector(styleSheet);
         //GumboNode *node2;
         //node2 = ((GumboNode**)((GumboNode**)output->root->v.element.children.data)[4]->v.element.children.data)[2];
         //css.printNode(((GumboNode**)node2->v.element.children.data)[1]);
