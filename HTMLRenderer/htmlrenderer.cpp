@@ -16,33 +16,27 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
     if (item.type == RENDERDOM_ELEMENT)
     {
+        if (item.style.display == CSS_DISPLAY_BLOCK)// Make sure block starts at a new line
+        {
+            addNewEmptyRenderline(activeDocBox, 0);
+            // Give the new line no height since its not a br and we want the items to come directly after it
+        }
+
         if (item.tag == "br")
         {
-            activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
-            activeDocBox->renderlines.push_back(new RRenderLine());
-            activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-            activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
-            activeDocBox->renderlines.back()->lineH = item.style.font_size;
+            addNewEmptyRenderline(activeDocBox, item.style.font_size);
+            // br creates a new line and gives it a start height equal to font size.
         }
-        if (item.style.display == CSS_DISPLAY_BLOCK)
-        {
-            activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
-            activeDocBox->renderlines.push_back(new RRenderLine());
-            activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-            activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
-            activeDocBox->renderlines.back()->lineH = 0;//item.style.font_size;
-        }
+
         for (int i = 0; i < item.children.size(); i++)
         {
-            assembleRenderList(items, activeDocBox, item.children[i], freetypeeasy);
+            assembleRenderList(items, activeDocBox, item.children[i], freetypeeasy);// Iterate over children
         }
-        if (item.style.display == CSS_DISPLAY_BLOCK)
+
+        if (item.style.display == CSS_DISPLAY_BLOCK)// Make sure the items after block start at a new line
         {
-            activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
-            activeDocBox->renderlines.push_back(new RRenderLine());
-            activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-            activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
-            activeDocBox->renderlines.back()->lineH = 0;//item.style.font_size;
+            addNewEmptyRenderline(activeDocBox, 0);
+            // Give the new line no height since its not a br and we want the items to come directly after it
         }
     }
     else if (item.type == RENDERDOM_TEXT)
@@ -152,4 +146,13 @@ void HTMLRenderer::calcItemXY(const RItem &item, int &resX, int &resY)
         resX = -1;
         resY = -1;
     }
+}
+
+void HTMLRenderer::addNewEmptyRenderline(RDocumentBox *activeDocBox, int h)
+{
+    activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
+    activeDocBox->renderlines.push_back(new RRenderLine());
+    activeDocBox->renderlines.back()->lineX = activeDocBox->x;
+    activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+    activeDocBox->renderlines.back()->lineH = h;
 }

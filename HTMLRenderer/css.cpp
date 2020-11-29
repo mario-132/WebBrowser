@@ -2,6 +2,9 @@
 #include <iostream>
 #include <vector>
 
+/// Uncomment this to see css handler debug mesagges.
+//#define DEBUG_CSS
+
 css_select_handler CSS::select_handler;
 
 CSS::CSS()
@@ -100,7 +103,9 @@ CSSStylesheet* CSS::createStylesheet(GumboNode *root, std::string css, bool isIn
     code = css_stylesheet_size(sheet, &size);
     if (code != CSS_OK)
         die("css_stylesheet_size", code);
+#ifdef DEBUG_CSS
     printf("created stylesheet, size %zu\n", size);
+#endif
 
     /* parse some CSS source */
     code = css_stylesheet_append_data(sheet, (const uint8_t *)css.c_str(),
@@ -113,7 +118,9 @@ CSSStylesheet* CSS::createStylesheet(GumboNode *root, std::string css, bool isIn
     code = css_stylesheet_size(sheet, &size);
     if (code != CSS_OK)
         die("css_stylesheet_size", code);
+#ifdef DEBUG_CSS
     printf("appended data, size now %zu\n", size);
+#endif
 
     CSSStylesheet* sheetptr = new CSSStylesheet();
     sheetptr->sheet = sheet;
@@ -246,7 +253,9 @@ void CSS::addToSelector(CSSStylesheet *sheet)
     code = css_select_ctx_count_sheets(select_ctx, &count);
     if (code != CSS_OK)
         die("css_select_ctx_count_sheets", code);
+#ifdef DEBUG_CSS
     printf("selection context now has %i sheets\n", count);
+#endif
 }
 
 void CSS::removeFromSelector(CSSStylesheet *sheet)
@@ -261,7 +270,9 @@ void CSS::removeFromSelector(CSSStylesheet *sheet)
     code = css_select_ctx_count_sheets(select_ctx, &count);
     if (code != CSS_OK)
         die("css_select_ctx_count_sheets", code);
+#ifdef DEBUG_CSS
     printf("selection context now has %i sheets\n", count);
+#endif
 }
 
 void CSS::selectNode(GumboNode *node, css_select_results **style, CSSStylesheet* inlineSheet)
@@ -537,7 +548,9 @@ css_error node_name(void *pw, void *n, css_qname *qname)
     }
     std::string name = CSS::gumboTagToString(node->v.element.tag);
     lwc_intern_string(name.c_str(), name.size(), &qname->name);
+#ifdef DEBUG_CSS
     std::cout << "Get node name: " << name << std::endl;
+#endif
 
     return CSS_OK;
 }
@@ -591,7 +604,9 @@ css_error node_classes(void *pw, void *n,
             }
         }
     }
+#ifdef DEBUG_CSS
     std::cout << "Gotten node classes: " << classS << " from: " << CSS::gumboTagToString(node->v.element.tag) << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -609,7 +624,9 @@ css_error node_id(void *pw, void *n, lwc_string **id)
             lwc_intern_string(idS.c_str(), idS.length(), id);
         }
     }
+#ifdef DEBUG_CSS
     std::cout << "Gotten node id: " << idS << " from: " << CSS::gumboTagToString(node->v.element.tag) << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -635,7 +652,9 @@ css_error named_ancestor_node(void *pw, void *n,
         ans = CSS::gumboTagToString(p->v.element.tag);
     else
         ans = "0";
+#ifdef DEBUG_CSS
     std::cout << "got named ancestor: " << ans << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << " ancestor=" << *ancestor << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -661,7 +680,9 @@ css_error named_parent_node(void *pw, void *n,
         ans = CSS::gumboTagToString(p->v.element.tag);
     else
         ans = "0";
+#ifdef DEBUG_CSS
     std::cout << "got named parent: " << ans << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -690,6 +711,7 @@ css_error named_generic_sibling_node(void *pw, void *n,
             }
         }
     }
+#ifdef DEBUG_CSS
     if (*sibling != 0)
     {
         std::cout << "Got named generic sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
@@ -698,6 +720,7 @@ css_error named_generic_sibling_node(void *pw, void *n,
     {
         std::cout << "Got named generic sibling: " << "0" << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     }
+#endif
     return CSS_OK;
 }
 
@@ -726,6 +749,7 @@ css_error named_sibling_node(void *pw, void *n,
                 prevElem = ((GumboNode**)p->v.element.children.data)[i];
         }
     }
+#ifdef DEBUG_CSS
     if (*sibling != 0)
     {
         std::cout << "Got named sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << " Expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
@@ -734,6 +758,7 @@ css_error named_sibling_node(void *pw, void *n,
     {
         std::cout << "Got named sibling: " << "0" << " expected: " << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << std::endl;
     }
+#endif
     return CSS_OK;
 }
 
@@ -744,12 +769,16 @@ css_error parent_node(void *pw, void *n, void **parent)
     if (node->parent->type == GUMBO_NODE_ELEMENT && node->parent != 0)
     {
         *parent = node->parent;
+#ifdef DEBUG_CSS
         std::cout << "got parent: " << CSS::gumboTagToString(((GumboNode*)*parent)->v.element.tag) << std::endl;
+#endif
     }
     else
     {
         *parent = 0;
+#ifdef DEBUG_CSS
         std::cout << "got parent: " << "0(not an element)" << std::endl;
+#endif
     }
 
     return CSS_OK;
@@ -778,6 +807,7 @@ css_error sibling_node(void *pw, void *n, void **sibling)
                 prevElem = ((GumboNode**)p->v.element.children.data)[i];
         }
     }
+#ifdef DEBUG_CSS
     if (*sibling != 0)
     {
         std::cout << "Got sibling: " << CSS::gumboTagToString(((GumboNode*)*sibling)->v.element.tag) << std::endl;
@@ -786,6 +816,7 @@ css_error sibling_node(void *pw, void *n, void **sibling)
     {
         std::cout << "Got sibling: " << "0" << std::endl;
     }
+#endif
     return CSS_OK;
 }
 
@@ -806,7 +837,9 @@ css_error node_has_name(void *pw, void *n,
     lwc_intern_string(name.c_str(), name.size(), &str);
 
     lwc_string_caseless_isequal(str, qname->name, match);
+#ifdef DEBUG_CSS
     std::cout << "is equal: " << std::string(lwc_string_data(str), lwc_string_length(str)) << "/" << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << ":" << &match << std::endl;
+#endif
     lwc_string_destroy(str);
 
     return CSS_OK;
@@ -852,7 +885,9 @@ css_error node_has_class(void *pw, void *n,
             }
         }
     }
+#ifdef DEBUG_CSS
     std::cout << "Has (" << CSS::gumboTagToString(node->v.element.tag) << ") class: " << std::string(lwc_string_data(name), lwc_string_length(name)) << ": " << *match << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -874,7 +909,9 @@ css_error node_has_id(void *pw, void *n,
             }
         }
     }
+#ifdef DEBUG_CSS
     std::cout << "Has class: " << std::string(lwc_string_data(name), lwc_string_length(name)) << ": " << *match << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -980,7 +1017,9 @@ css_error node_is_root(void *pw, void *n, bool *match)
     UNUSED(pw);
     GumboNode *node = (GumboNode*)n;
     *match = (node->parent == 0 || node->parent->type == GUMBO_NODE_DOCUMENT);
+#ifdef DEBUG_CSS
     std::cout << "is root: " << *match << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -992,7 +1031,9 @@ css_error node_count_siblings(void *pw, void *n,
     UNUSED(same_name);
     UNUSED(after);
     *count = node->index_within_parent;
+#ifdef DEBUG_CSS
     std::cout << "Got sibling count for " << CSS::gumboTagToString(node->v.element.tag) << ": " << *count << std::endl;
+#endif
     return CSS_OK;
 }
 
