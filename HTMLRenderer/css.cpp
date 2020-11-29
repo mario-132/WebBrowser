@@ -3,7 +3,7 @@
 #include <vector>
 
 /// Uncomment this to see css handler debug mesagges.
-#define DEBUG_CSS
+//#define DEBUG_CSS
 
 css_select_handler CSS::select_handler;
 
@@ -540,6 +540,7 @@ css_error node_name(void *pw, void *n, css_qname *qname)
     GumboNode *node = (GumboNode*)n;
 
     UNUSED(pw);
+    qname->name = 0;
     if (node->type != GUMBO_NODE_ELEMENT)
     {
         std::cerr << "[node_name]Not an element!" << std::endl;
@@ -1016,7 +1017,7 @@ css_error node_is_root(void *pw, void *n, bool *match)
 {
     UNUSED(pw);
     GumboNode *node = (GumboNode*)n;
-    *match = (node->parent == 0 || node->parent->type == GUMBO_NODE_DOCUMENT);
+    *match = (node->parent == 0 || node->parent->type != GUMBO_NODE_ELEMENT);
 #ifdef DEBUG_CSS
     std::cout << "is root: " << *match << std::endl;
 #endif
