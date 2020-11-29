@@ -3,7 +3,7 @@
 #include <vector>
 
 /// Uncomment this to see css handler debug mesagges.
-//#define DEBUG_CSS
+#define DEBUG_CSS
 
 css_select_handler CSS::select_handler;
 
@@ -1030,7 +1030,17 @@ css_error node_count_siblings(void *pw, void *n,
     GumboNode *node = (GumboNode*)n;
     UNUSED(same_name);
     UNUSED(after);
-    *count = node->index_within_parent;
+    *count = 0;
+    if (node->parent != 0 && node->parent->type == GUMBO_NODE_ELEMENT)
+    {
+        for (int i = 0; i < node->parent->v.element.children.length; i++)
+        {
+            if (((GumboNode**)node->parent->v.element.children.data)[i] == node)
+                break;
+            if (((GumboNode**)node->parent->v.element.children.data)[i]->type == GUMBO_NODE_ELEMENT)
+                *count += 1;
+        }
+    }
 #ifdef DEBUG_CSS
     std::cout << "Got sibling count for " << CSS::gumboTagToString(node->v.element.tag) << ": " << *count << std::endl;
 #endif
