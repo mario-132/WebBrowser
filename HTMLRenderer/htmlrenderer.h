@@ -67,11 +67,12 @@ public:
     int font_size;// font size in px
     bool isBold;
     RenderDOMColor textcolor;
+    RenderDOMColor textbgcolor;
 
     RItemPos pos;
     int x;
     int y;
-    //int w;
+    int w;
     //int h;
 };
 

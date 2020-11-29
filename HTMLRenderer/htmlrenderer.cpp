@@ -74,6 +74,11 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                                       item.style.color.g,
                                       item.style.color.b,
                                       item.style.color.a};
+                    ritem.textbgcolor = {item.style.background_color.r,
+                                         item.style.background_color.g,
+                                         item.style.background_color.b,
+                                         item.style.background_color.a};
+                    ritem.w = xP-(line->lineX + line->lineW);// This is so the actual renderer knows where to render the bg
 
                     if (line->lineH < item.style.font_size)
                         line->lineHResize(item.style.font_size);
@@ -112,15 +117,32 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
             fte::setFontSize(freetypeeasy, items[i].font_size*scale);
             fte::setTextColor(freetypeeasy, (items[i].textcolor.r)/255.0f, (items[i].textcolor.g)/255.0f, (items[i].textcolor.b)/255.0f);
 
+
+
+            int itX;
+            int itY;
+            calcItemXY(items[i], itX, itY);
+            itX *= scale;
+            itY *= scale;
+
+            if (items[i].textbgcolor.a > 10)
+            {
+                for (int x = itX; x < itX+items[i].w; x++)
+                {
+                    for (int y = itY+yScroll; y < itY+items[i].font_size+yScroll; y++)
+                    {
+                        if (x < 0 || y < 0 || x > w || y > h)
+                            continue;
+                        fb[(w*y*3)+(x*3)+0] = items[i].textbgcolor.r;
+                        fb[(w*y*3)+(x*3)+1] = items[i].textbgcolor.g;
+                        fb[(w*y*3)+(x*3)+2] = items[i].textbgcolor.b;
+                    }
+                }
+            }
+
             int x = 0;
             for (unsigned int j = 0; j < items[i].text.size(); j++)
             {
-                int itX;
-                int itY;
-                calcItemXY(items[i], itX, itY);
-                itX *= scale;
-                itY *= scale;
-
                 if (itX + x > w || itY+items[i].font_size+yScroll > h)
                     continue;
 
