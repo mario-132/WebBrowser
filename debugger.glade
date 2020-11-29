@@ -13,12 +13,12 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-redo</property>
   </object>
-  <object class="GtkAdjustment" id="textsize_drag">
+  <object class="GtkAdjustment" id="page_scale_drag">
     <property name="lower">1</property>
-    <property name="upper">128</property>
-    <property name="value">14</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
+    <property name="upper">3</property>
+    <property name="value">1</property>
+    <property name="step_increment">0.25</property>
+    <property name="page_increment">1</property>
   </object>
   <object class="GtkApplicationWindow" id="window_main">
     <property name="can_focus">False</property>
@@ -182,11 +182,11 @@
                 </child>
                 <child>
                   <object class="GtkScale" id="text_scale">
-                    <property name="width_request">137</property>
+                    <property name="width_request">132</property>
                     <property name="height_request">34</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="adjustment">textsize_drag</property>
+                    <property name="adjustment">page_scale_drag</property>
                     <property name="show_fill_level">True</property>
                     <property name="round_digits">1</property>
                     <property name="value_pos">right</property>
@@ -202,7 +202,7 @@
                     <property name="height_request">20</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Text Scale:</property>
+                    <property name="label" translatable="yes">Page Scale:</property>
                   </object>
                   <packing>
                     <property name="x">18</property>
@@ -301,7 +301,7 @@
                 </child>
                 <child>
                   <object class="GtkScale" id="text_scale1">
-                    <property name="width_request">125</property>
+                    <property name="width_request">127</property>
                     <property name="height_request">34</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

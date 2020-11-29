@@ -4,7 +4,7 @@ html {
     color: black;
     width: auto;
     height: auto;
-    font-size: 32px;
+    font-size: 16px;
 }
 
 head, style, meta, title, script {
@@ -22,36 +22,36 @@ a {
 h1 {
     display: block;
     font-size: 2em;
-    font-weight: bold
+    font-weight: bold;
 }
 
 h2 {
     display: block;
     font-size: 1.5em;
-    font-weight: bold
+    font-weight: bold;
 }
 
 h3 {
     display: block;
     font-size: 1.17em;
-    font-weight: bold
+    font-weight: bold;
 }
 
 h4 {
     display: block;
-    font-weight: bold
+    font-weight: bold;
 }
 
 h5 {
     display: block;
     font-size: .83em;
-    font-weight: bold
+    font-weight: bold;
 }
 
 h6 {
     display: block;
     font-size: .67em;
-    font-weight: bold
+    font-weight: bold;
 }
 
 table {

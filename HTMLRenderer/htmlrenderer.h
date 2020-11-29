@@ -103,7 +103,7 @@ public:
     int yScroll;
 
     void assembleRenderList(std::vector<RItem> *items, RDocumentBox *activeDocBox, RenderDOMItem &item, fte::freetypeInst *freetypeeasy);
-    void renderRenderList(const std::vector<RItem> &items, fte::freetypeInst *freetypeeasy, unsigned char *fb, int w, int h);
+    void renderRenderList(const std::vector<RItem> &items, fte::freetypeInst *freetypeeasy, unsigned char *fb, int w, int h, float scale);
     void calcItemXY(const RItem &item, int &resX, int &resY);
 
 private:

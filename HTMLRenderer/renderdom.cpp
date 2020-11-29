@@ -144,6 +144,24 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
                 item.style.width_type = RENDERDOM_AUTO;
         }
 
+        // font-weight
+        {
+            int font_weight_ret = css_computed_font_weight(style->styles[CSS_PSEUDO_ELEMENT_NONE]);
+            if (font_weight_ret == CSS_FONT_WEIGHT_INHERIT)
+                item.style.font_weight = prev.font_weight;
+            else if (font_weight_ret == CSS_FONT_WEIGHT_BOLD)
+                item.style.font_weight = 700;
+            else if (font_weight_ret == CSS_FONT_WEIGHT_NORMAL)
+                item.style.font_weight = 300;
+            else if (font_weight_ret == CSS_FONT_WEIGHT_BOLDER)
+                item.style.font_weight = 900;
+            else if (font_weight_ret == CSS_FONT_WEIGHT_LIGHTER)
+                item.style.font_weight = 300;
+            else
+                item.style.font_weight = font_weight_ret;
+        }
+
+
         for (int i = 0; i < node->v.element.children.length; i++)
         {
             item.children.push_back(parseGumboTree(((GumboNode**)node->v.element.children.data)[i], css, item.style));

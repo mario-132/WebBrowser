@@ -242,12 +242,28 @@ public:
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
         std::vector<RItem> renderItems;
-        RDocumentBox docbox(20, 20, window.width-40, window.height-40);
+        RDocumentBox docbox(Debugger::getAdjustmentGetValue("docbox_offset"),
+                            Debugger::getAdjustmentGetValue("docbox_offset"),
+                            window.width-(Debugger::getAdjustmentGetValue("docbox_offset")*2),
+                            window.height-(Debugger::getAdjustmentGetValue("docbox_offset")*2)
+                            );
         htmlRenderer.assembleRenderList(&renderItems, &docbox, item, inst);
 
-        htmlRenderer.renderRenderList(renderItems, inst, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+        htmlRenderer.renderRenderList(renderItems, inst, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
+                                      Debugger::getAdjustmentGetValue("page_scale_drag"));
     }
 };
+
+void fast_unpack(char* rgba, const char* rgb, const int count) {
+    if(count==0)
+        return;
+    for(int i=count; --i; rgba+=4, rgb+=3) {
+        *(uint32_t*)(void*)rgba = *(const uint32_t*)(const void*)rgb;
+    }
+    for(int j=0; j<3; ++j) {
+        rgba[j] = rgb[j];
+    }
+}
 
 int main()
 {
@@ -282,6 +298,7 @@ int main()
     Debugger::setSpinnerEnabled("loadingSpinner", false);
     Debugger::setEntryText("UrlBox", currentWebPage);
     Debugger::loop();
+    window.setTitle("WebBrowser - " + webpage->pageTitle);
     while(Debugger::windowIsOpen())
     {
         int scrpos = window.scrollPos*30;
@@ -294,9 +311,9 @@ int main()
         }
         webpage->htmlRenderer.yScroll = scrpos;
         //int memsetPos = scrpos;
-        memset(framebuffer+(0*FRAMEBUFFER_WIDTH*3), 255, FRAMEBUFFER_WIDTH * window.height * 3);
+        memset(framebuffer, 255, FRAMEBUFFER_WIDTH * window.height * 3);
 
-        window.setTitle("WebBrowser - " + webpage->pageTitle);
+
         Debugger::loop();
         //std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
         webpage->loop(window, inst);
@@ -304,6 +321,7 @@ int main()
         //std::cout << std::fixed << std::chrono::duration_cast<std::chrono::microseconds>( nowTime - lastTime ).count()/1000.0f << "ms" << std::endl;
 
         Debugger::loop();
+        //fast_unpack(window.displayBuffer, (const char*)framebuffer, FRAMEBUFFER_WIDTH*window.height);
         for (int y = 0; y < window.height; y++)
         {
             for (int x = 0; x < window.width; x++)
@@ -331,6 +349,8 @@ int main()
             window.scrollPos = 0;
             Debugger::loop();
             Debugger::setSpinnerEnabled("loadingSpinner", false);
+
+            window.setTitle("WebBrowser - " + webpage->pageTitle);
         }
 
         Debugger::loop();

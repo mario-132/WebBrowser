@@ -59,6 +59,8 @@ struct RenderDOMStyle
 
     int width;// width, in px
     RenderDOMCSSProp width_type;
+
+    int font_weight;// Weight
 };
 
 struct RenderDOMItem

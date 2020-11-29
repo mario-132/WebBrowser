@@ -52,7 +52,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
             std::wstring textOut;
 
-            fte::makeBold(freetypeeasy, false);
+            fte::makeBold(freetypeeasy, (item.style.font_weight > 600));
             fte::setFontSize(freetypeeasy, item.style.font_size);
 
             for (int i = 0; i < wText.size(); i++)
@@ -69,7 +69,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                                -item.style.font_size);
                     ritem.text = textOut;
                     ritem.font_size = item.style.font_size;
-                    ritem.isBold = false;
+                    ritem.isBold = (item.style.font_weight > 600);
                     ritem.textcolor = {item.style.color.r,
                                       item.style.color.g,
                                       item.style.color.b,
@@ -79,7 +79,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                         line->lineHResize(item.style.font_size);
                     if (line->lineTextBaselineH < item.style.font_size)
                         line->lineTextBaselineHResize(item.style.font_size);
-                    line->lineW += xP-line->lineW;
+                    line->lineW += xP-(line->lineX + line->lineW);
                     if (xP > (activeDocBox->x + activeDocBox->w))
                     {
                         activeDocBox->nextLineYOff += line->lineH;
@@ -102,28 +102,30 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
     }
 }
 
-void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freetypeInst *freetypeeasy, unsigned char *fb, int w, int h)
+void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freetypeInst *freetypeeasy, unsigned char *fb, int w, int h, float scale)
 {
     for (int i = 0; i < items.size(); i++)
     {
         if (items[i].type == RITEM_TEXT)
         {
             fte::makeBold(freetypeeasy, items[i].isBold);
-            fte::setFontSize(freetypeeasy, items[i].font_size);
+            fte::setFontSize(freetypeeasy, items[i].font_size*scale);
             fte::setTextColor(freetypeeasy, (items[i].textcolor.r)/255.0f, (items[i].textcolor.g)/255.0f, (items[i].textcolor.b)/255.0f);
 
             int x = 0;
-            if (items[i].y < h && items[i].x < w)// Make sure we are not trying to write a character off screen
+            for (unsigned int j = 0; j < items[i].text.size(); j++)
             {
-                for (unsigned int j = 0; j < items[i].text.size(); j++)
-                {
-                    int itX;
-                    int itY;
-                    calcItemXY(items[i], itX, itY);
+                int itX;
+                int itY;
+                calcItemXY(items[i], itX, itY);
+                itX *= scale;
+                itY *= scale;
 
-                    auto inf = fte::drawCharacter(freetypeeasy, items[i].text[j], itX + x, itY+items[i].font_size+yScroll, fb, w, h, false);// Draw character, saving info about it
-                    x += inf.advanceX/64;// Advance x position for next character
-                }
+                if (itX + x > w || itY+items[i].font_size+yScroll > h)
+                    continue;
+
+                auto inf = fte::drawCharacter(freetypeeasy, items[i].text[j], itX + x, itY+items[i].font_size+yScroll, fb, w, h, false);// Draw character, saving info about it
+                x += inf.advanceX/64;// Advance x position for next character
             }
         }
     }
