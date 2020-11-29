@@ -800,7 +800,7 @@ css_error sibling_node(void *pw, void *n, void **sibling)
             {
                 if (i > 0 && prevElem != 0)
                 {
-                    *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
+                    *sibling = prevElem;
                 }
                 break;
             }
@@ -834,14 +834,11 @@ css_error node_has_name(void *pw, void *n,
         return CSS_INVALID;
     }
     std::string name = CSS::gumboTagToString(node->v.element.tag);
-    lwc_string *str;
-    lwc_intern_string(name.c_str(), name.size(), &str);
 
-    lwc_string_caseless_isequal(str, qname->name, match);
+    *match = CSS::iequals(name, lwc_string_data(qname->name));
 #ifdef DEBUG_CSS
     std::cout << "is equal: " << std::string(lwc_string_data(str), lwc_string_length(str)) << "/" << std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) << ":" << &match << std::endl;
 #endif
-    lwc_string_destroy(str);
 
     return CSS_OK;
 }

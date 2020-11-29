@@ -197,10 +197,12 @@ int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt)
         pxRes = FIXTOFLT(fixed)*96;
     else if (unit == CSS_UNIT_PCT)
         pxRes = (FIXTOFLT(fixed)/100) * prev;
+    else if (unit == CSS_UNIT_REM)
+        pxRes = FIXTOFLT(fixed)*16;
     else
     {
         std::cerr << "Unable to translate unit!" << std::endl;
-        pxRes = -1;
+        pxRes = 1;
     }
     return pxRes;
 }
