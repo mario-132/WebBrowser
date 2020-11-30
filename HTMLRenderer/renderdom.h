@@ -63,6 +63,12 @@ struct RenderDOMStyle
     int font_weight;// Weight
 };
 
+struct RenderDOMAttribute
+{
+    std::string name;
+    std::string value;
+};
+
 struct RenderDOMItem
 {
     RenderDOMType type;
@@ -72,6 +78,8 @@ struct RenderDOMItem
     std::string tag;
 
     std::string text;// if RENDERDOM_TEXT
+
+    std::vector<RenderDOMAttribute> attributes;
 };
 
 class RenderDOM/// Takes the html dom and css and puts it together

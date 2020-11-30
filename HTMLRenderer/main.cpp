@@ -245,12 +245,13 @@ public:
         RDocumentBox docbox(Debugger::getAdjustmentGetValue("docbox_offset"),
                             Debugger::getAdjustmentGetValue("docbox_offset"),
                             window.width-(Debugger::getAdjustmentGetValue("docbox_offset")*2),
-                            window.height-(Debugger::getAdjustmentGetValue("docbox_offset")*2)
-                            );
+                            window.height-(Debugger::getAdjustmentGetValue("docbox_offset")*2),
+                            true, true);
         htmlRenderer.assembleRenderList(&renderItems, &docbox, item, inst);
 
         htmlRenderer.renderRenderList(renderItems, inst, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                                       Debugger::getAdjustmentGetValue("page_scale_drag"));
+
     }
 };
 

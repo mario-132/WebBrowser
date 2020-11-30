@@ -61,3 +61,16 @@ table {
 tr {
     display: block;
 }
+
+select > option {
+    display: none;
+}
+
+select > option[selected="selected"] {
+    display: block;
+}
+
+td {
+    width: 10px;
+    height: 10px;
+}

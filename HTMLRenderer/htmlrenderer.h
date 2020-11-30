@@ -73,27 +73,39 @@ public:
     int x;
     int y;
     int w;
-    //int h;
+    int h;
 };
 
 class RDocumentBox
 {
 public:
-    RDocumentBox(int x, int y, int w, int h)
+    RDocumentBox(int x, int y, int w, int h, bool wlocked, bool hlocked)
     {
         this->x = x;
         this->y = y;
         this->w = w;
         this->h = h;
+        wLocked = wlocked;
+        hLocked = hlocked;
         nextLineYOff = 0;
     }
     int x;
     int y;
     int w;
     int h;
+    bool wLocked;
+    bool hLocked;
 
     std::vector<RRenderLine*> renderlines;
     int nextLineYOff;
+
+    void updateWandH(int w, int h)
+    {
+        if (!wLocked && w > this->w)
+            this->w = w;
+        if (!hLocked && h > this->h)
+            this->h = h;
+    }
 };
 
 class HTMLRenderer
@@ -109,6 +121,9 @@ public:
 
 private:
     void addNewEmptyRenderline(RDocumentBox *activeDocBox, int h);
+
+    void stringReplaceAll(std::string& str, const std::string& oldStr, const std::string& newStr);
+    void wstringReplaceAll(std::wstring& str, const std::wstring& oldStr, const std::wstring& newStr);
 };
 
 #endif // HTMLRENDERER_H

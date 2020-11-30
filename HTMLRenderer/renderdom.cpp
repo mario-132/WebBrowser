@@ -161,6 +161,11 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
                 item.style.font_weight = font_weight_ret;
         }
 
+        for (unsigned int i = 0; i < node->v.element.attributes.length; i++)
+        {
+            item.attributes.push_back({((GumboAttribute*)node->v.element.attributes.data[i])->name,
+                                       ((GumboAttribute*)node->v.element.attributes.data[i])->value});
+        }
 
         for (int i = 0; i < node->v.element.children.length; i++)
         {

@@ -20,19 +20,19 @@ CSS::CSS()
         named_sibling_node,//
         named_generic_sibling_node,//
         parent_node,//
-        sibling_node,//
+        sibling_node,//?
         node_has_name,//
         node_has_class,//
         node_has_id,//
-        node_has_attribute,
-        node_has_attribute_equal,
+        node_has_attribute,//?
+        node_has_attribute_equal,//?
         node_has_attribute_dashmatch,
         node_has_attribute_includes,
         node_has_attribute_prefix,
         node_has_attribute_suffix,
         node_has_attribute_substring,
         node_is_root,//
-        node_count_siblings,
+        node_count_siblings,//
         node_is_empty,
         node_is_link,
         node_is_visited,
@@ -492,6 +492,18 @@ std::string CSS::gumboTagToString(GumboTag tag)
     {
         name = "title";
     }
+    else if (tag == GUMBO_TAG_SELECT)
+    {
+        name = "select";
+    }
+    else if (tag == GUMBO_TAG_OPTION)
+    {
+        name = "option";
+    }
+    else if (tag == GUMBO_TAG_LABEL)
+    {
+        name = "label";
+    }
     else
     {
         name = "unknown";
@@ -918,9 +930,19 @@ css_error node_has_attribute(void *pw, void *n,
                              bool *match)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(qname);
     *match = false;
+    GumboNode *node = (GumboNode*)n;
+    for (int i = 0; i < node->v.element.attributes.length; i++)
+    {
+        if (std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) == ((GumboAttribute*)node->v.element.attributes.data[i])->name)
+        {
+            *match = true;
+            break;
+        }
+    }
+#ifdef DEBUG_CSS
+    std::cout << "Has " << CSS::gumboTagToString(node->v.element.tag) << " attribute " << std::string(lwc_string_data(name), lwc_string_length(name)) << ": " << *match << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -930,10 +952,22 @@ css_error node_has_attribute_equal(void *pw, void *n,
                                    bool *match)
 {
     UNUSED(pw);
-    UNUSED(n);
-    UNUSED(qname);
-    UNUSED(value);
     *match = false;
+    GumboNode *node = (GumboNode*)n;
+    for (int i = 0; i < node->v.element.attributes.length; i++)
+    {
+        if (std::string(lwc_string_data(qname->name), lwc_string_length(qname->name)) == ((GumboAttribute*)node->v.element.attributes.data[i])->name)
+        {
+            if (std::string(lwc_string_data(value), lwc_string_length(value)) == ((GumboAttribute*)node->v.element.attributes.data[i])->value)
+            {
+                *match = true;
+                break;
+            }
+        }
+    }
+#ifdef DEBUG_CSS
+    std::cout << "Has " << CSS::gumboTagToString(node->v.element.tag) << " attribute " << std::string(lwc_string_data(name), lwc_string_length(name)) << "With value " << std::string(lwc_string_data(value), lwc_string_length(value)) << ": " << *match << std::endl;
+#endif
     return CSS_OK;
 }
 
@@ -998,14 +1032,6 @@ css_error node_has_attribute_substring(void *pw, void *n,
     UNUSED(n);
     UNUSED(qname);
     UNUSED(value);
-    *match = false;
-    return CSS_OK;
-}
-
-css_error node_is_first_child(void *pw, void *n, bool *match)
-{
-    UNUSED(pw);
-    UNUSED(n);
     *match = false;
     return CSS_OK;
 }
