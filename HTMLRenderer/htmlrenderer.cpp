@@ -30,13 +30,14 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
         if (item.style.display == CSS_DISPLAY_BLOCK)
         {
-            addNewEmptyRenderline(activeDocBox, 0);
 
+
+            addNewEmptyRenderline(activeDocBox, 0);
             RDocumentBox *docBox2 = new RDocumentBox(activeDocBox, activeDocBox->renderlines.back()->lineX,
                                  activeDocBox->renderlines.back()->lineY,
+                                 activeDocBox->w - activeDocBox->renderlines.back()->lineX,
                                  0,
-                                 0,
-                                 false,
+                                 true,
                                  false);
             docBox2->docboxIsRoot = false;
             activeDocBox->childBoxes.push_back(docBox2);
