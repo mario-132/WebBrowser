@@ -242,11 +242,12 @@ public:
     void loop(X11Window &window, fte::freetypeInst *inst)
     {
         std::vector<RItem> renderItems;
-        RDocumentBox docbox(Debugger::getAdjustmentGetValue("docbox_offset"),
+        RDocumentBox docbox((RDocumentBox*)69, Debugger::getAdjustmentGetValue("docbox_offset"),
                             Debugger::getAdjustmentGetValue("docbox_offset"),
                             window.width-(Debugger::getAdjustmentGetValue("docbox_offset")*2),
                             window.height-(Debugger::getAdjustmentGetValue("docbox_offset")*2),
                             true, true);
+        docbox.docboxIsRoot = true;// Since this is the root docbox, it doesn't have a parent
         htmlRenderer.assembleRenderList(&renderItems, &docbox, item, inst);
 
         htmlRenderer.renderRenderList(renderItems, inst, framebuffer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,

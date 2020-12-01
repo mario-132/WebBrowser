@@ -9,9 +9,9 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 {
     if (activeDocBox->renderlines.size() == 0)
     {
-        activeDocBox->renderlines.push_back(new RRenderLine());
-        activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-        activeDocBox->renderlines.back()->lineY = activeDocBox->y;
+        activeDocBox->renderlines.push_back(new RRenderLine(activeDocBox,
+                                                            0,
+                                                            0));
     }
 
     if (item.type == RENDERDOM_ELEMENT)
@@ -31,30 +31,36 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
         if (item.style.display == CSS_DISPLAY_BLOCK)
         {
             addNewEmptyRenderline(activeDocBox, 0);
-            RDocumentBox docBox2(activeDocBox->renderlines.back()->lineX,
+
+            RDocumentBox *docBox2 = new RDocumentBox(activeDocBox, activeDocBox->renderlines.back()->lineX,
                                  activeDocBox->renderlines.back()->lineY,
                                  0,
                                  0,
                                  false,
                                  false);
+            docBox2->docboxIsRoot = false;
+            activeDocBox->childBoxes.push_back(docBox2);
+
             for (int i = 0; i < item.children.size(); i++)
             {
-                assembleRenderList(items, &docBox2, item.children[i], freetypeeasy);// Iterate over children
+                assembleRenderList(items, docBox2, item.children[i], freetypeeasy);// Iterate over children
             }
 
-            RItem bg(RITEM_COLORED_SQUARE, activeDocBox->renderlines.back(), RITEM_POS_FIXED, docBox2.x, docBox2.y);
-            bg.w = docBox2.w;
-            bg.h = docBox2.h;
-            bg.textcolor = {item.style.background_color.r,
+            RItem bg(RITEM_COLORED_SQUARE, activeDocBox->renderlines.back(), RITEM_POS_FIXED, getGlobX(docBox2), getGlobY(docBox2));
+            bg.w = docBox2->w;
+            bg.h = docBox2->h;
+            bg.textcolor = {  item.style.background_color.r,
                               item.style.background_color.g,
                               item.style.background_color.b,
                               item.style.background_color.a};
             items->insert(items->begin(), bg);
 
-            activeDocBox->renderlines.back()->lineHResize(docBox2.h);
-            activeDocBox->renderlines.back()->lineW = docBox2.w;
-            activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW)-activeDocBox->x,
-                                      (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH)-activeDocBox->y);
+            activeDocBox->renderlines.back()->lineHResize(docBox2->h);
+            activeDocBox->renderlines.back()->lineW = docBox2->w;
+
+            // Update current docbox size to encapsulate the child one if possible
+            activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW),
+                                      (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH));
         }
         else
         {
@@ -91,7 +97,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
             wstringReplaceAll(wText, sR2, std::wstring());
 
             RRenderLine *line = activeDocBox->renderlines.back();
-            int xP = line->lineX + line->lineW;
+            int xP = line->lineW;
 
             std::wstring textOut;
 
@@ -103,7 +109,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                 auto chrret = fte::getCharacterBounds(freetypeeasy, wText[i]);
                 xP += chrret.advanceX/64;
                 textOut += wText[i];
-                if (xP > (activeDocBox->x + activeDocBox->w) || i == wText.size()-1)
+                if (xP > (activeDocBox->w) || i == wText.size()-1)
                 {
                     RItem ritem(RITEM_TEXT,
                                line,
@@ -127,22 +133,22 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                         line->lineHResize(item.style.font_size);
                     if (line->lineTextBaselineH < item.style.font_size)
                         line->lineTextBaselineHResize(item.style.font_size);
-                    line->lineW += xP-(line->lineX + line->lineW);
+                    line->lineW += xP-(line->lineW);
 
-                    activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW)-activeDocBox->x,
-                                              (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH)-activeDocBox->y);
+                    activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW),
+                                              (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH));
 
-                    if (xP > (activeDocBox->x + activeDocBox->w))
+                    if (xP > (activeDocBox->w))
                     {
                         activeDocBox->nextLineYOff += line->lineH;
-                        activeDocBox->renderlines.push_back(new RRenderLine());
-                        activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-                        activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+                        activeDocBox->renderlines.push_back(new RRenderLine(activeDocBox,
+                                                                            0,
+                                                                            activeDocBox->nextLineYOff));
                         line = activeDocBox->renderlines.back();
                         xP = line->lineX + line->lineW;
 
-                        activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW)-activeDocBox->x,
-                                                  (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH)-activeDocBox->y);
+                        activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW),
+                                                  (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH));
                     }
                     textOut.clear();
                     items->push_back(ritem);
@@ -167,9 +173,8 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
             fte::setFontSize(freetypeeasy, items[i].font_size*scale);
             fte::setTextColor(freetypeeasy, (items[i].textcolor.r)/255.0f, (items[i].textcolor.g)/255.0f, (items[i].textcolor.b)/255.0f);
 
-            int itX;
-            int itY;
-            calcItemXY(items[i], itX, itY);
+            int itX = getGlobX(&items[i]);
+            int itY = getGlobY(&items[i]);
             itX *= scale;
             itY *= scale;
 
@@ -200,9 +205,8 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
         }
         else if (items[i].type == RITEM_COLORED_SQUARE)
         {
-            int itX;
-            int itY;
-            calcItemXY(items[i], itX, itY);
+            int itX = getGlobX(&items[i]);
+            int itY = getGlobY(&items[i]);
             itX *= scale;
             itY *= scale;
             if (items[i].textcolor.a > 10)
@@ -223,35 +227,14 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
     }
 }
 
-void HTMLRenderer::calcItemXY(const RItem &item, int &resX, int &resY)
-{
-    if (item.pos == RITEM_POS_FIXED)
-    {
-        resX = item.x;
-        resY = item.y;
-    }
-    else if (item.pos == RITEM_POS_BASELINE_RELATIVE)
-    {
-        resX = item.renderline->lineX + item.x;
-        resY = item.renderline->lineY + item.renderline->lineTextBaselineH + item.y;
-    }
-    else
-    {
-        resX = -1;
-        resY = -1;
-    }
-}
-
 void HTMLRenderer::addNewEmptyRenderline(RDocumentBox *activeDocBox, int h)
 {
     activeDocBox->nextLineYOff += activeDocBox->renderlines.back()->lineH;
-    activeDocBox->renderlines.push_back(new RRenderLine());
-    activeDocBox->renderlines.back()->lineX = activeDocBox->x;
-    activeDocBox->renderlines.back()->lineY = activeDocBox->nextLineYOff + activeDocBox->y;
+    activeDocBox->renderlines.push_back(new RRenderLine(activeDocBox, 0, activeDocBox->nextLineYOff));
     activeDocBox->renderlines.back()->lineH = h;
 
-    activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW)-activeDocBox->x,
-                              (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH)-activeDocBox->y);
+    activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW),
+                              (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH));
 }
 
 void HTMLRenderer::stringReplaceAll(std::string &str, const std::string &oldStr, const std::string &newStr)
@@ -269,5 +252,80 @@ void HTMLRenderer::wstringReplaceAll(std::wstring &str, const std::wstring &oldS
     while((pos = str.find(oldStr, pos)) != std::wstring::npos){
         str.replace(pos, oldStr.length(), newStr);
         pos += newStr.length();
+    }
+}
+
+int HTMLRenderer::getGlobX(RRenderLine *line)
+{
+    int pos = line->lineX;
+    pos += getGlobX(line->docBox);
+    return pos;
+}
+
+int HTMLRenderer::getGlobY(RRenderLine *line)
+{
+    int pos = line->lineY;
+    pos += getGlobY(line->docBox);
+    return pos;
+}
+
+int HTMLRenderer::getGlobX(RDocumentBox *db)
+{
+    int pos = 0;
+    RDocumentBox* docb = db;
+    while (true)
+    {
+        pos+=docb->x;
+
+        if (docb->docboxIsRoot)
+            break;
+
+        docb = docb->parent;
+    }
+    return pos;
+}
+
+int HTMLRenderer::getGlobY(RDocumentBox *db)
+{
+    int pos = 0;
+    RDocumentBox* docb = db;
+    while (true)
+    {
+        pos+=docb->y;
+
+        if (docb->docboxIsRoot)
+            break;
+
+        docb = docb->parent;
+    }
+    return pos;
+}
+
+int HTMLRenderer::getGlobX(const RItem *item)
+{
+    if (item->pos == RITEM_POS_FIXED)
+    {
+        return item->x;
+    }
+    else
+    {
+        int pos = getGlobX(item->renderline);
+        pos += item->x;
+        return pos;
+    }
+}
+
+int HTMLRenderer::getGlobY(const RItem *item)
+{
+    if (item->pos == RITEM_POS_FIXED)
+    {
+        return item->y;
+    }
+    else
+    {
+        int pos = item->renderline->lineTextBaselineH;
+        pos += getGlobY(item->renderline->docBox);
+        pos += item->y;
+        return pos;
     }
 }

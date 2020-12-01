@@ -20,15 +20,25 @@ enum RItemPos
     RITEM_POS_BASELINE_RELATIVE     // Position is relative to the lineX and baselineh in renderline.
 };
 
+class RDocumentBox;
+
 class RRenderLine
 {
 public:
+    RRenderLine(RDocumentBox *docBox, int x, int y)
+    {
+        this->docBox = docBox;
+        lineX = x;
+        lineY = y;
+    }
     int lineX = 0;
     int lineY = 0;
     int lineW = 0;
     int lineH = 0;
 
     int lineTextBaselineH = 0;
+
+    RDocumentBox *docBox;
 
     void lineHResize(int newH)
     {
@@ -79,7 +89,7 @@ public:
 class RDocumentBox
 {
 public:
-    RDocumentBox(int x, int y, int w, int h, bool wlocked, bool hlocked)
+    RDocumentBox(RDocumentBox *dparent, int x, int y, int w, int h, bool wlocked, bool hlocked)
     {
         this->x = x;
         this->y = y;
@@ -88,6 +98,7 @@ public:
         wLocked = wlocked;
         hLocked = hlocked;
         nextLineYOff = 0;
+        parent = dparent;
     }
     int x;
     int y;
@@ -96,8 +107,13 @@ public:
     bool wLocked;
     bool hLocked;
 
+    bool docboxIsRoot = false;
+    RDocumentBox *parent;
+
     std::vector<RRenderLine*> renderlines;
     int nextLineYOff;
+
+    std::vector<RDocumentBox*> childBoxes;
 
     void updateWandH(int w, int h)
     {
@@ -117,13 +133,23 @@ public:
 
     void assembleRenderList(std::vector<RItem> *items, RDocumentBox *activeDocBox, RenderDOMItem &item, fte::freetypeInst *freetypeeasy);
     void renderRenderList(const std::vector<RItem> &items, fte::freetypeInst *freetypeeasy, unsigned char *fb, int w, int h, float scale);
-    void calcItemXY(const RItem &item, int &resX, int &resY);
+    //void calcItemXY(const RItem &item, int &resX, int &resY);
 
 private:
     void addNewEmptyRenderline(RDocumentBox *activeDocBox, int h);
 
     void stringReplaceAll(std::string& str, const std::string& oldStr, const std::string& newStr);
     void wstringReplaceAll(std::wstring& str, const std::wstring& oldStr, const std::wstring& newStr);
+public:
+
+    int getGlobX(RRenderLine *line);
+    int getGlobY(RRenderLine *line);
+
+    int getGlobX(RDocumentBox *db);
+    int getGlobY(RDocumentBox *db);
+
+    int getGlobX(const RItem *item);
+    int getGlobY(const RItem *item);
 };
 
 #endif // HTMLRENDERER_H
