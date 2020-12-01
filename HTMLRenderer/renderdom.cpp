@@ -106,12 +106,13 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
             item.style.font_size = prev.font_size;
         }
 
-        // height
+        // height, unprocessed
         {
-            css_fixed height;
-            css_unit height_unit;
-            int height_type = css_computed_height(style->styles[CSS_PSEUDO_ELEMENT_NONE], &height, &height_unit);
-            if (height_type == CSS_HEIGHT_INHERIT)
+            //css_fixed height;
+            //css_unit height_unit;
+            int height_type = css_computed_height(style->styles[CSS_PSEUDO_ELEMENT_NONE], &item.style.height, &item.style.height_unit);
+            item.style.height_type_raw = height_type;
+            /*if (height_type == CSS_HEIGHT_INHERIT)
             {
                 item.style.height_type = prev.height_type;
                 item.style.height = prev.height;
@@ -122,15 +123,16 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
                 item.style.height = unitToPx(height, height_unit, prev.height, prev.font_size);
             }
             else if (height_type == CSS_HEIGHT_AUTO)
-                item.style.height_type = RENDERDOM_AUTO;
+                item.style.height_type = RENDERDOM_AUTO;*/
         }
 
-        // width
+        // width, unprocessed
         {
-            css_fixed width;
-            css_unit width_unit;
-            int width_type = css_computed_width(style->styles[CSS_PSEUDO_ELEMENT_NONE], &width, &width_unit);
-            if (width_type == CSS_WIDTH_INHERIT)
+            //css_fixed width;
+            //css_unit width_unit;
+            int width_type = css_computed_width(style->styles[CSS_PSEUDO_ELEMENT_NONE], &item.style.width, &item.style.width_unit);
+            item.style.width_type_raw = width_type;
+            /*if (width_type == CSS_WIDTH_INHERIT)
             {
                 item.style.width_type = prev.width_type;
                 item.style.width = prev.width;
@@ -141,7 +143,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
                 item.style.width = unitToPx(width, width_unit, prev.width, prev.font_size);
             }
             else if (width_type == CSS_WIDTH_AUTO)
-                item.style.width_type = RENDERDOM_AUTO;
+                item.style.width_type = RENDERDOM_AUTO;*/
         }
 
         // font-weight

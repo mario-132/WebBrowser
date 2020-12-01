@@ -222,11 +222,13 @@ public:
         def.background_color_type = RENDERDOM_VALUE;
         def.background_color = {0, 0, 0, 0};
 
-        def.width_type = RENDERDOM_AUTO;
-        def.width = -1;
+        //def.width_type = RENDERDOM_AUTO;
+        //def.width = -1;
+        def.width_type_raw = CSS_WIDTH_AUTO;
 
-        def.height_type = RENDERDOM_AUTO;
-        def.height = -1;
+        //def.height_type = RENDERDOM_AUTO;
+        //def.height = -1;
+        def.height_type_raw = CSS_HEIGHT_AUTO;
 
         def.display = CSS_DISPLAY_BLOCK;
 

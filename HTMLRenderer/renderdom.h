@@ -54,11 +54,17 @@ struct RenderDOMStyle
     int font_size;// Font-size, in px
     RenderDOMCSSProp font_size_type;
 
-    int height;// height, in px
-    RenderDOMCSSProp height_type;
+    //int height;// height, in px
+    //RenderDOMCSSProp height_type;
+    css_fixed height;
+    int height_type_raw;
+    css_unit height_unit;
 
-    int width;// width, in px
-    RenderDOMCSSProp width_type;
+    //int width;// width, in px
+    //RenderDOMCSSProp width_type;
+    css_fixed width;
+    int width_type_raw;
+    css_unit width_unit;
 
     int font_weight;// Weight
 };
@@ -87,7 +93,7 @@ class RenderDOM/// Takes the html dom and css and puts it together
 public:
     RenderDOM();
     RenderDOMItem parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyle prev);
-    int unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt);
+    static int unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt);
 };
 
 #endif // RENDERDOM_H

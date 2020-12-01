@@ -11,7 +11,7 @@ head, style, meta, title, script {
     display: none;
 }
 
-body, section, div, p, hr {
+body, section, div, p, hr, button, td {
     display: block;
 }
 
@@ -68,9 +68,4 @@ select > option {
 
 select > option[selected="selected"] {
     display: block;
-}
-
-td {
-    width: 10px;
-    height: 10px;
 }

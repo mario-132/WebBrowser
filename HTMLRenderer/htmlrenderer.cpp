@@ -16,7 +16,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
     if (item.type == RENDERDOM_ELEMENT)
     {
-        if (item.style.display == CSS_DISPLAY_BLOCK)// Make sure block starts at a new line
+        if (item.style.display == CSS_DISPLAY_BLOCK || item.style.display == CSS_DISPLAY_INLINE_BLOCK)// Make sure block starts at a new line
         {
             addNewEmptyRenderline(activeDocBox, 0);
             // Give the new line no height since its not a br and we want the items to come directly after it
@@ -28,15 +28,22 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
             // br creates a new line and gives it a start height equal to font size.
         }
 
-        if (item.style.display == CSS_DISPLAY_BLOCK)
+        if (item.style.display == CSS_DISPLAY_BLOCK || item.style.display == CSS_DISPLAY_INLINE_BLOCK)
         {
+            int width = activeDocBox->w - activeDocBox->renderlines.back()->lineX;
+            int height = 0;
 
+            if (item.style.width_type_raw == CSS_WIDTH_SET)
+                width = RenderDOM::unitToPx(item.style.width, item.style.width_unit, activeDocBox->w, 16);
+
+            //if (item.style.width_type_raw == CSS_HEIGHT_SET)
+            //    height = RenderDOM::unitToPx(item.style.height, item.style.height_unit, activeDocBox->h, 16);
 
             addNewEmptyRenderline(activeDocBox, 0);
             RDocumentBox *docBox2 = new RDocumentBox(activeDocBox, activeDocBox->renderlines.back()->lineX,
                                  activeDocBox->renderlines.back()->lineY,
-                                 activeDocBox->w - activeDocBox->renderlines.back()->lineX,
-                                 0,
+                                 width,
+                                 height,
                                  true,
                                  false);
             docBox2->docboxIsRoot = false;
@@ -71,7 +78,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
             }
         }
 
-        if (item.style.display == CSS_DISPLAY_BLOCK)// Make sure the items after block start at a new line
+        if (item.style.display == CSS_DISPLAY_BLOCK || item.style.display == CSS_DISPLAY_INLINE_BLOCK)// Make sure the items after block start at a new line
         {
             addNewEmptyRenderline(activeDocBox, 0);
             // Give the new line no height since its not a br and we want the items to come directly after it
@@ -141,12 +148,13 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
 
                     if (xP > (activeDocBox->w))
                     {
-                        activeDocBox->nextLineYOff += line->lineH;
+                        /*activeDocBox->nextLineYOff += line->lineH;
                         activeDocBox->renderlines.push_back(new RRenderLine(activeDocBox,
                                                                             0,
-                                                                            activeDocBox->nextLineYOff));
+                                                                            activeDocBox->nextLineYOff));*/
+                        addNewEmptyRenderline(activeDocBox, 0);
                         line = activeDocBox->renderlines.back();
-                        xP = line->lineX + line->lineW;
+                        xP = line->lineW;
 
                         activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW),
                                                   (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH));
