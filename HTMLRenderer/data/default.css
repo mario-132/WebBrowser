@@ -11,8 +11,12 @@ head, style, meta, title, script {
     display: none;
 }
 
-body, section, div, p, hr, button, td {
+body, section, div, p, hr, td {
     display: block;
+}
+
+button {
+    display: inline-block;
 }
 
 a {
