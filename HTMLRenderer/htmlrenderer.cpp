@@ -154,6 +154,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                     activeDocBox->updateWandH((activeDocBox->renderlines.back()->lineX + activeDocBox->renderlines.back()->lineW),
                                               (activeDocBox->renderlines.back()->lineY + activeDocBox->renderlines.back()->lineH));
 
+
                     if (xP > (activeDocBox->w))
                     {
                         /*activeDocBox->nextLineYOff += line->lineH;
@@ -344,7 +345,7 @@ int HTMLRenderer::getGlobY(const RItem *item)
     }
     else
     {
-        int pos = item->renderline->lineTextBaselineH;
+        int pos = item->renderline->lineTextBaselineH + item->renderline->lineY;
         pos += getGlobY(item->renderline->docBox);
         pos += item->y;
         return pos;
