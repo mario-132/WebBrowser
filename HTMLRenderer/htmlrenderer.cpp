@@ -40,7 +40,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                 width = 0;
 
             if (item.style.width_type_raw == CSS_WIDTH_SET)
-                width = RenderDOM::unitToPx(item.style.width, item.style.width_unit, activeDocBox->w-activeDocBox->renderlines.back()->lineW, 16);
+                width = RenderDOM::unitToPx(item.style.width, item.style.width_unit, activeDocBox->w-activeDocBox->renderlines.back()->lineW, 16, 1920, 1080);
 
             //if (item.style.width_type_raw == CSS_HEIGHT_SET)
             //    height = RenderDOM::unitToPx(item.style.height, item.style.height_unit, activeDocBox->h, 16);
@@ -198,9 +198,9 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
 
             if (items[i].textbgcolor.a > 10)
             {
-                for (int x = itX; x < itX+items[i].w; x++)
+                for (int y = itY+yScroll; y < itY+items[i].font_size+yScroll; y++)
                 {
-                    for (int y = itY+yScroll; y < itY+items[i].font_size+yScroll; y++)
+                    for (int x = itX; x < itX+items[i].w; x++)
                     {
                         if (x < 0 || y < 0 || x > w || y > h)
                             continue;
@@ -227,11 +227,11 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
             int itY = getGlobY(&items[i]);
             itX *= scale;
             itY *= scale;
-            if (items[i].textcolor.a > 10)
+            if (items[i].textcolor.a > 20)
             {
-                for (int x = itX; x < itX+items[i].w; x++)
+                for (int y = itY+yScroll; y < itY+items[i].h+yScroll; y++)
                 {
-                    for (int y = itY+yScroll; y < itY+items[i].h+yScroll; y++)
+                    for (int x = itX; x < itX+items[i].w; x++)
                     {
                         if (x < 0 || y < 0 || x >= w || y >= h)
                             continue;

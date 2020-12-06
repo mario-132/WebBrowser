@@ -754,7 +754,7 @@ css_error named_sibling_node(void *pw, void *n,
             {
                 if (i > 0 && prevElem != 0 && CSS::iequals(CSS::gumboTagToString(prevElem->v.element.tag), std::string(lwc_string_data(qname->name), lwc_string_length(qname->name))))
                 {
-                    *sibling = ((GumboNode**)p->v.element.children.data)[i-1];
+                    *sibling = prevElem;
                 }
                 break;
             }

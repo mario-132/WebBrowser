@@ -98,7 +98,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
         {
             // translate font size from whatever unit it is to px
             item.style.font_size_type = RENDERDOM_VALUE;
-            item.style.font_size = unitToPx(font_size, font_size_unit, prev.font_size, prev.font_size);
+            item.style.font_size = unitToPx(font_size, font_size_unit, prev.font_size, prev.font_size, 1920, 1080);
         }
         else if (fret == CSS_FONT_SIZE_INHERIT)
         {
@@ -185,7 +185,7 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
     return item;
 }
 
-int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt)
+int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt, int viewportW, int viewportH)
 {
     int pxRes = 0;
     if (unit == CSS_UNIT_PX)
@@ -204,11 +204,15 @@ int RenderDOM::unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt)
         pxRes = FIXTOFLT(fixed)*96;
     else if (unit == CSS_UNIT_PCT)
         pxRes = (FIXTOFLT(fixed)/100) * prev;
+    else if (unit == CSS_UNIT_VW)
+        pxRes = FIXTOFLT(fixed) * (viewportW/100);
+    else if (unit == CSS_UNIT_VH)
+        pxRes = FIXTOFLT(fixed) * (viewportH/100);
     else if (unit == CSS_UNIT_REM)
         pxRes = FIXTOFLT(fixed)*16;
     else
     {
-        std::cerr << "Unable to translate unit!" << std::endl;
+        std::cerr << "Unable to translate unit " << unit << "!" << std::endl;
         pxRes = 1;
     }
     return pxRes;

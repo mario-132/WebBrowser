@@ -93,7 +93,7 @@ class RenderDOM/// Takes the html dom and css and puts it together
 public:
     RenderDOM();
     RenderDOMItem parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyle prev);
-    static int unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt);
+    static int unitToPx(css_fixed fixed, css_unit unit, int prev, int prevFnt, int viewportW, int viewportH);
 };
 
 #endif // RENDERDOM_H
