@@ -142,14 +142,14 @@ private:
     void wstringReplaceAll(std::wstring& str, const std::wstring& oldStr, const std::wstring& newStr);
 public:
 
-    int getGlobX(RRenderLine *line);
-    int getGlobY(RRenderLine *line);
+    inline int getGlobX(RRenderLine *line);
+    inline int getGlobY(RRenderLine *line);
 
-    int getGlobX(RDocumentBox *db);
-    int getGlobY(RDocumentBox *db);
+    inline int getGlobX(RDocumentBox *db);
+    inline int getGlobY(RDocumentBox *db);
 
-    int getGlobX(const RItem *item);
-    int getGlobY(const RItem *item);
+    inline int getGlobX(const RItem *item);
+    inline int getGlobY(const RItem *item);
 };
 
 #endif // HTMLRENDERER_H

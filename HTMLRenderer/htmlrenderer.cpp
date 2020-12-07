@@ -33,14 +33,21 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
             if (item.style.display == CSS_DISPLAY_BLOCK || item.style.display == CSS_DISPLAY_TABLE_CELL)
                 addNewEmptyRenderline(activeDocBox, 0);
 
+            bool wLock = true;
             int width = activeDocBox->w - activeDocBox->renderlines.back()->lineX;
             int height = 0;
 
             if (item.style.display == CSS_DISPLAY_INLINE_BLOCK)
+            {
                 width = 0;
+                wLock = false;
+            }
 
             if (item.style.width_type_raw == CSS_WIDTH_SET)
+            {
                 width = RenderDOM::unitToPx(item.style.width, item.style.width_unit, activeDocBox->w-activeDocBox->renderlines.back()->lineW, 16, 1920, 1080);
+                wLock = true;
+            }
 
             //if (item.style.width_type_raw == CSS_HEIGHT_SET)
             //    height = RenderDOM::unitToPx(item.style.height, item.style.height_unit, activeDocBox->h, 16);
@@ -50,7 +57,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
                                  activeDocBox->renderlines.back()->lineY,
                                  width,
                                  height,
-                                 item.style.display == CSS_DISPLAY_BLOCK || item.style.display == CSS_DISPLAY_TABLE_CELL,
+                                 wLock,
                                  false);
             docBox2->docboxIsRoot = false;
             activeDocBox->childBoxes.push_back(docBox2);
@@ -196,6 +203,9 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
             itX *= scale;
             itY *= scale;
 
+            if ((itY+yScroll < 0 && itY+items[i].font_size+yScroll < 0) || (itY+yScroll > h && itY+items[i].font_size+yScroll > h))
+                continue;
+
             if (items[i].textbgcolor.a > 10)
             {
                 for (int y = itY+yScroll; y < itY+items[i].font_size+yScroll; y++)
@@ -227,6 +237,8 @@ void HTMLRenderer::renderRenderList(const std::vector<RItem> &items, fte::freety
             int itY = getGlobY(&items[i]);
             itX *= scale;
             itY *= scale;
+            if ((itY+yScroll < 0 && itY+items[i].h+yScroll < 0) || (itY+yScroll > h && itY+items[i].h+yScroll > h))
+                continue;
             if (items[i].textcolor.a > 20)
             {
                 for (int y = itY+yScroll; y < itY+items[i].h+yScroll; y++)
