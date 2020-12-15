@@ -132,12 +132,12 @@ RenderDOMItem RenderDOM::parseGumboTree(GumboNode *node, CSS *css, RenderDOMStyl
             //css_unit width_unit;
             int width_type = css_computed_width(style->styles[CSS_PSEUDO_ELEMENT_NONE], &item.style.width, &item.style.width_unit);
             item.style.width_type_raw = width_type;
-            if (item.style.width_type_raw == CSS_WIDTH_INHERIT)
+            /*if (item.style.width_type_raw == CSS_WIDTH_INHERIT)
             {
                 item.style.width_type_raw = prev.width_type_raw;
                 item.style.width_unit = prev.width_unit;
                 item.style.width = prev.width;
-            }
+            }*/
             /*if (width_type == CSS_WIDTH_INHERIT)
             {
                 item.style.width_type = prev.width_type;

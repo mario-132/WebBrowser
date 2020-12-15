@@ -37,7 +37,7 @@ void HTMLRenderer::assembleRenderList(std::vector<RItem> *items, RDocumentBox *a
             int width = activeDocBox->w - activeDocBox->renderlines.back()->lineX;
             int height = 0;
 
-            if (item.style.display == CSS_DISPLAY_INLINE_BLOCK)
+            if (item.style.display != CSS_DISPLAY_BLOCK && item.style.display != CSS_DISPLAY_TABLE_CELL)
             {
                 width = 0;
                 wLock = false;
